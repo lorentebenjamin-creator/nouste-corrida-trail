@@ -166,7 +166,8 @@ chute, un humain peut passer.
 1. `git pull`. Ouvrir `levels.js`, aller tout en bas (après le dernier `LEVELS.push`).
 2. Copier un bloc existant comme modèle et le coller à la fin : niveau 4 (`breche`) pour un niveau
    classique, niveau 5 (`estive`) ou 6 (`couloir`) pour un niveau avec mécaniques v2. Changer :
-   * `id` : nouveau, unique, minuscules (ex. `"lac-gaube"`), utilisé aussi dans `v(id)` et `y(id, …)` ;
+   * `id` : nouveau, unique, minuscules (ex. `"lac-gaube"`), utilisé aussi dans `v(id)` et `y(id, …)`.
+     Format imposé par le classement en ligne : `^[a-z0-9][a-z0-9-]{0,39}$` (vérifié par check-levels) ;
    * `name`, `blurb` (≈ 1 phrase, français), `difficulty`, `theme` (existant de préférence) ;
    * la géométrie. Méthode : enchaîner des sections de gauche à droite en notant l'`x` de fin de
      chaque sol ; démarrer par `p(0, ≥600, floor)` ; finir par un sol à `floor` qui couvre
@@ -190,7 +191,12 @@ chute, un humain peut passer.
    Attendu : `PLAYTEST OK` (le pilote auto finit sans chute, aucun rival en boucle, aucune erreur
    console) et `E2E OK`. Si le pilote auto échoue, la ligne indique où il est tombé (`chutes à x,y`) :
    élargir la plateforme, réduire l'écart, ralentir la passerelle ou décaler la phase.
-6. Mettre à jour la liste des niveaux du `README.md`, puis
+6. Classement en ligne (Supabase) : **rien à faire**. Aucun SQL, aucune ligne `level_limits` à
+   ajouter : un nouvel `id` est accepté automatiquement avec la borne générale (temps ≥ 8 s).
+   `level_limits` (temps minimum par niveau) est un réglage facultatif fait à la main dans le SQL
+   Editor ; le job ne doit pas y toucher. Ne pas modifier `leaderboard-config.js`.
+   Les tests locaux (playtest/e2e) gardent le nom « Toi » et n'envoient donc aucun temps.
+7. Mettre à jour la liste des niveaux du `README.md`, puis
    `git commit -am "Niveau N : <nom>" && git push`. GitHub Pages redéploie en 1–2 min
    (cache ~10 min côté navigateur).
 

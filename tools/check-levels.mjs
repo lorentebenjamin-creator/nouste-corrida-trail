@@ -26,7 +26,7 @@ LEVELS.forEach((L, idx) => {
   for (const k of ["id", "name", "blurb", "difficulty", "theme"]) if (typeof L[k] !== "string" || !L[k].trim()) err(tag, `champ texte manquant: ${k}`);
   for (const k of ["width", "floor", "spawnX", "finishX"]) if (typeof L[k] !== "number" || !isFinite(L[k])) err(tag, `champ numérique manquant: ${k}`);
   if (ids.has(L.id)) err(tag, `id déjà utilisé`); ids.add(L.id);
-  if (!/^[a-z0-9-]+$/.test(L.id || "")) err(tag, `id doit être en minuscules [a-z0-9-]`);
+  if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(L.id || "")) err(tag, `id doit être en minuscules [a-z0-9-], 40 caractères max, sans tiret au début (sinon le classement en ligne refuse les temps)`);
   if (!BUILTIN_THEMES.includes(L.theme)) {
     const t = THEMES[L.theme];
     if (!t) err(tag, `thème inconnu "${L.theme}" (intégrés: ${BUILTIN_THEMES.join(", ")}; ou ajouter dans THEMES)`);
