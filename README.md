@@ -37,3 +37,30 @@ Les niveaux sont dans **`levels.js`** ; le format et la recette pour ajouter un 
 décrits dans **[LEVELS.md](LEVELS.md)**. Vérification : `node tools/check-levels.mjs`,
 puis `tools/playtest.mjs` (pilote automatique sur chaque niveau) et `tools/e2e.mjs` (commandes,
 fanions, record, menu) avec Playwright.
+
+## Classement en ligne (branche `classement`)
+
+Classement partagé par niveau : le meilleur temps de chaque « Nom sur le dossard ».
+Affiché à l'arrivée (top 10 + ton rang) et dans le menu (top 3 sous chaque sentier).
+Le site reste 100 % statique : le navigateur parle directement à l'API REST de Supabase.
+
+- `leaderboard-config.js` : configuration. `LEADERBOARD_CONFIG = null` → classement désactivé
+  (aucun appel réseau, rien d'affiché). Providers : `supabase` (url + clé publique
+  *publishable*/anon) ou `local` (localStorage, démo). `?classement=0` dans l'URL le coupe aussi.
+- `leaderboard.js` : client (fetch, sans dépendance), backend interchangeable ; toute erreur
+  réseau est silencieuse, le jeu continue normalement.
+- `supabase/schema.sql` : table `scores` (level_id, name, time_ms, balises, created_at), RLS
+  (lecture + insertion anonymes uniquement, ni modification ni suppression), contraintes
+  (nom 1–20 caractères, temps 8 s – 1 h, id de niveau valide), trigger anti-abus (date forcée,
+  temps minimum par niveau via `level_limits`, 1 envoi / 5 s par nom et niveau, 120 envois / min
+  au total) et vues `leaderboard` (meilleur temps par nom) et `level_top` (top 3 par niveau).
+- Un temps n'est envoyé que si le joueur a mis son nom (le nom par défaut « Toi » n'est pas envoyé).
+
+Mise en route : exécuter `supabase/schema.sql` dans Supabase → SQL Editor, puis
+`node tools/test-supabase.mjs` (tests réels), `node tools/e2e-classement.mjs` (faux backend).
+Modération : `delete from public.scores where lower(name) = lower('…');` dans le SQL Editor.
+Nouveau niveau : optionnellement `insert into public.level_limits values ('mon-id', 20000);`
+(sinon seule la borne générale de 8 s s'applique).
+
+Limite connue : comme tout classement d'un jeu 100 % client, un tricheur motivé peut envoyer un
+faux temps plausible via l'API ; les contraintes ne bloquent que l'absurde et les rafales.

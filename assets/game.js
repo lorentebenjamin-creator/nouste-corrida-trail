@@ -1,5 +1,6 @@
 import { LEVELS, THEMES as EXTRA_THEMES } from "../levels.js";
 import { i as e, n as t, r as n, t as r } from "./index-wVumaOia.js";
+import { lbEnabled, lbCanSubmit, lbSubmit, lbTop, lbRank, lbMenuTops, lbInvalidate } from "../leaderboard.js";
 var i = r(`chevron-left`, [[`path`, { d: `m15 18-6-6 6-6`, key: `1wnfg3` }]]),
   a = r(`chevron-right`, [[`path`, { d: `m9 18 6-6-6-6`, key: `mthhwq` }]]),
   o = r(`pause`, [
@@ -1687,8 +1688,41 @@ function K() {
     E = (0, d.useRef)(null),
     D = (0, d.useRef)(null),
     O = (0, d.useRef)(null),
-    [k, te] = (0, d.useState)(!1);
+    [k, te] = (0, d.useState)(!1),
+    // Classement en ligne (leaderboard.js) : écran d'arrivée + top 3 par niveau dans le menu
+    [lbData, setLbData] = (0, d.useState)(null),
+    [menuTops, setMenuTops] = (0, d.useState)(null),
+    lbSent = (0, d.useRef)(``);
   (0, d.useEffect)(() => te(!0), []);
+  (0, d.useEffect)(() => {
+    if (m !== `menu` || !lbEnabled()) return;
+    let alive = !0;
+    lbMenuTops().then((r) => alive && r && setMenuTops(r));
+    return () => { alive = !1; };
+  }, [m]);
+  // Nouveau départ (menu, Rejouer, R, niveau suivant) → nouvelle course à envoyer
+  (0, d.useEffect)(() => {
+    m === `count` && ((lbSent.current = ``), setLbData(null));
+  }, [m]);
+  function lbOnFinish(e) {
+    if (!lbEnabled()) return;
+    let key = `${e.levelId}:${e.time}`;
+    if (lbSent.current === key) return;
+    lbSent.current = key;
+    let name = A.current, levelId = e.levelId;
+    setLbData({ levelId, status: `loading`, top: null, me: null });
+    (async () => {
+      let can = lbCanSubmit(name),
+        sent = can ? await lbSubmit({ levelId, name, timeMs: e.time * 1000, balises: e.coins }) : !1;
+      sent && lbInvalidate();
+      let [top, me] = await Promise.all([lbTop(levelId, 10), can ? lbRank(levelId, name) : null]);
+      setLbData((o) =>
+        o && o.levelId === levelId && lbSent.current === key
+          ? { levelId, status: top ? (can ? (sent ? `ok` : `rejected`) : `noname`) : `err`, top, me, name }
+          : o,
+      );
+    })();
+  }
   let A = (0, d.useRef)(f),
     ne = (0, d.useRef)(n);
   ((A.current = f),
@@ -1709,6 +1743,7 @@ function K() {
         },
         onRank: x,
         onFinish: (e) => {
+          lbOnFinish(e);
           r((t) => {
             let n = t.levels[e.levelId],
               r = {
@@ -1943,6 +1978,12 @@ function K() {
                                   : ``,
                               ],
                             }),
+                            menuTops && menuTops[e.id]?.length
+                              ? (0, U.jsx)(`span`, {
+                                  className: `lb-top`,
+                                  children: `🏆 ` + menuTops[e.id].map((x, i) => `${i + 1}. ${x.name} ${W(x.timeMs / 1000)}`).join(` · `),
+                                })
+                              : null,
                           ],
                         },
                         e.id,
@@ -2059,6 +2100,7 @@ function K() {
                     }),
                   ],
                 }),
+                lbEnabled() && lbData && lbData.levelId === M.id ? lbView(lbData) : null,
                 nextLvl
                   ? (0, U.jsxs)(`button`, {
                       className: `btn next-level`,
@@ -2139,6 +2181,62 @@ function K() {
         : null,
     ],
   });
+  function lbView(L) {
+    let mine = L.me && L.name ? L.name.toLowerCase() : null,
+      inTop = mine && L.top?.some((x) => x.name.toLowerCase() === mine),
+      msg =
+        L.status === `loading` ? `Envoi de ton temps…`
+        : L.status === `err` ? `Classement indisponible pour le moment.`
+        : L.status === `noname` ? `Mets ton nom sur le dossard (menu) pour entrer au classement.`
+        : L.status === `rejected` ? `Temps non enregistré (réessaie dans quelques secondes).`
+        : L.me ? `Ton meilleur : ${G(L.me.rank)} sur ${L.me.total}.`
+        : null;
+    return (0, U.jsxs)(`div`, {
+      className: `lb`,
+      "aria-live": `polite`,
+      children: [
+        (0, U.jsx)(`p`, { className: `lb-title`, children: `Classement en ligne · top 10` }),
+        L.top && L.top.length
+          ? (0, U.jsx)(`ol`, {
+              className: `lb-list`,
+              children: [
+                ...L.top.map((x, i) =>
+                  (0, U.jsxs)(
+                    `li`,
+                    {
+                      className: mine && x.name.toLowerCase() === mine ? `you` : void 0,
+                      children: [
+                        (0, U.jsx)(`span`, { children: G(L.top.filter((y) => y.timeMs < x.timeMs).length + 1) }),
+                        (0, U.jsx)(`span`, { children: x.name }),
+                        (0, U.jsx)(`span`, { children: W(x.timeMs / 1000) }),
+                      ],
+                    },
+                    i,
+                  ),
+                ),
+                L.me && !inTop
+                  ? (0, U.jsxs)(
+                      `li`,
+                      {
+                        className: `you far`,
+                        children: [
+                          (0, U.jsx)(`span`, { children: G(L.me.rank) }),
+                          (0, U.jsx)(`span`, { children: L.name }),
+                          (0, U.jsx)(`span`, { children: W(L.me.timeMs / 1000) }),
+                        ],
+                      },
+                      `me`,
+                    )
+                  : null,
+              ],
+            })
+          : L.status !== `loading` && L.status !== `err`
+            ? (0, U.jsx)(`p`, { className: `lb-msg`, children: `Personne encore : sois le premier !` })
+            : null,
+        msg ? (0, U.jsx)(`p`, { className: `lb-msg`, children: msg }) : null,
+      ],
+    });
+  }
   function N(e) {
     return {
       onPointerDown: (n) => {
