@@ -1757,7 +1757,19 @@ function K() {
       t.current?.start(e));
   }
   let M = C.find((e) => e.id === S) ?? C[0],
-    ae = b.find((e) => e.you);
+    ae = b.find((e) => e.you),
+    nextLvl = C[C.indexOf(M) + 1] ?? null;
+  // Écran d'arrivée : Entrée ou N = niveau suivant (sauf si un autre bouton a le focus)
+  (0, d.useEffect)(() => {
+    if (m !== `finish` || !nextLvl) return;
+    let h = (ev) => {
+      if (ev.repeat) return;
+      let onBtn = document.activeElement?.tagName === `BUTTON`; // Entrée sur un bouton = clic natif
+      (ev.code === `KeyN` || ((ev.code === `Enter` || ev.code === `NumpadEnter`) && !onBtn)) &&
+        (ev.preventDefault(), ie(nextLvl.id, nextLvl.theme));
+    };
+    return (window.addEventListener(`keydown`, h), () => window.removeEventListener(`keydown`, h));
+  }, [m, nextLvl?.id]);
   return (0, U.jsxs)(`div`, {
     className: `shell`,
     children: [
@@ -2047,11 +2059,30 @@ function K() {
                     }),
                   ],
                 }),
+                nextLvl
+                  ? (0, U.jsxs)(`button`, {
+                      className: `btn next-level`,
+                      type: `button`,
+                      autoFocus: !0,
+                      onClick: () => ie(nextLvl.id, nextLvl.theme),
+                      children: [
+                        (0, U.jsx)(`span`, { className: `next-label`, children: `Niveau suivant` }),
+                        (0, U.jsx)(`span`, {
+                          className: `next-name`,
+                          children: `N°${C.indexOf(nextLvl) + 1} · ${nextLvl.name} · ${nextLvl.difficulty}`,
+                        }),
+                        (0, U.jsx)(`kbd`, { children: `Entrée` }),
+                      ],
+                    })
+                  : (0, U.jsx)(`p`, {
+                      className: `last-level`,
+                      children: `Dernier niveau — reviens demain pour le niveau du jour.`,
+                    }),
                 (0, U.jsxs)(`div`, {
                   className: `actions`,
                   children: [
                     (0, U.jsx)(`button`, {
-                      className: `btn`,
+                      className: nextLvl ? `btn ghost` : `btn`,
                       type: `button`,
                       onClick: () => t.current?.restart(),
                       children: `Rejouer`,

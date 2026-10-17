@@ -88,7 +88,38 @@ ok(saved && saved.bestTime > 0 && saved.bestPlace >= 1, `record enregistré à l
 await pg.evaluate(() => __controlsTest.setAutopilot(false));
 await pg.locator('.btn', { hasText: 'Autre sentier' }).click();
 ok(/Record/.test(await pg.locator('.level', { hasText: 'Sous-bois' }).innerText()), 'record affiché dans le menu');
-await pg.close();
+
+// 7b. Écran d'arrivée : « Niveau suivant » (clic, Entrée, N) et dernier niveau
+{
+  const lv = await pg.evaluate(async () => (await import(new URL('levels.js', location.href).href)).LEVELS.map((l) => ({ id: l.id, name: l.name })));
+  await pg.close(); pg = await page();
+  const finishWithAuto = async () => { await pg.evaluate(() => __controlsTest.setAutopilot(true)); await waitMode(pg, 'finish', 90000); await pg.evaluate(() => __controlsTest.setAutopilot(false)); };
+  await open(pg, lv[0].name); await finishWithAuto();
+  const btn = pg.locator('.sheet .next-level');
+  ok(await btn.isVisible() && (await btn.innerText()).includes(lv[1].name), `arrivée N°1 : bouton « Niveau suivant » → ${lv[1].name}`);
+  await pg.screenshot({ path: '/workspace/corrida-next-level.png' });
+  await btn.click(); await pg.waitForTimeout(150);
+  let s = await st(pg); ok(s.level === lv[1].id && s.mode === 'count', 'clic « Niveau suivant » : N°2 démarre (compte à rebours)');
+  await finishWithAuto(); await pg.evaluate(() => document.activeElement?.blur());
+  await pg.keyboard.press('Enter'); await pg.waitForTimeout(150);
+  s = await st(pg); ok(s.level === lv[2].id && s.mode === 'count', 'Entrée : N°3 démarre');
+  await finishWithAuto(); await pg.keyboard.press('KeyN'); await pg.waitForTimeout(150);
+  s = await st(pg); ok(s.level === lv[3].id, 'N : N°4 démarre');
+  await open(pg, lv.at(-1).name); await finishWithAuto();
+  ok(!(await pg.locator('.sheet .next-level').count()) && /Dernier niveau/.test(await pg.locator('.sheet').innerText()), 'dernier niveau : pas de bouton, message « Dernier niveau »');
+  await pg.keyboard.press('KeyN'); await pg.waitForTimeout(150);
+  ok((await st(pg)).mode === 'finish', 'dernier niveau : N ne fait rien');
+  ok((await pg.locator('.sheet .btn', { hasText: 'Rejouer' }).count()) === 1 && (await pg.locator('.sheet .btn', { hasText: 'Autre sentier' }).count()) === 1, 'Rejouer et Autre sentier toujours présents');
+  await pg.close();
+  // tactile : écran étroit, tap sur le bouton
+  pg = await page({ width: 800, height: 600 });
+  await open(pg, lv[0].name); await finishWithAuto();
+  const bb = await pg.locator('.sheet .next-level').boundingBox();
+  ok(bb && bb.height >= 44 && bb.width >= 200, `bouton tactile assez grand (${bb && Math.round(bb.width)}×${bb && Math.round(bb.height)})`);
+  await pg.mouse.click(bb.x + bb.width / 2, bb.y + bb.height / 2); await pg.waitForTimeout(150);
+  ok((await st(pg)).level === lv[1].id, 'tap « Niveau suivant » sur écran étroit');
+  await pg.close();
+}
 
 // 8. Menu avec 40 niveaux de plus (job quotidien)
 pg = await page();

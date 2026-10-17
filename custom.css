@@ -6,3 +6,10 @@
 .level .diff .today{display:inline-block;margin-left:.5rem;padding:.05rem .45rem;border-radius:999px;background:var(--color-signal,#f26522);color:#142018;letter-spacing:.06em;font-size:.62rem;vertical-align:1px}
 @media (width<=720px){.menu .levels{max-height:none;overflow:visible}}
 .touch button.down{font-size:1.4rem}
+/* Écran d'arrivée : bouton « Niveau suivant » */
+.sheet .next-level{display:grid;grid-template-columns:1fr auto;align-items:center;gap:.1rem .75rem;width:100%;min-height:3.6rem;margin:0 0 .6rem;padding:.7rem 1.1rem;border-radius:1rem;text-align:left;font-size:1.1rem;box-shadow:0 8px 24px #f2652240}
+.sheet .next-level .next-label{font-weight:800;letter-spacing:.02em}
+.sheet .next-level .next-name{grid-column:1;font-size:.82rem;font-weight:600;opacity:.8}
+.sheet .next-level kbd{grid-column:2;grid-row:1/span 2;font:inherit;font-size:.72rem;font-weight:700;padding:.2rem .45rem;border-radius:.4rem;border:1px solid #142018;opacity:.7}
+.sheet .last-level{margin:0 0 .7rem;padding:.6rem .8rem;border:1px dashed var(--color-line);border-radius:.8rem;color:var(--color-muted);font-size:.92rem}
+@media (pointer:coarse){.sheet .next-level kbd{display:none}}
