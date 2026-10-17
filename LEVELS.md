@@ -1,7 +1,7 @@
 # Format des niveaux — NOUSTE CORRIDA TRAIL (copie statique)
 
 Tous les niveaux vivent dans **`levels.js`** (module ES, lisible, non minifié).
-Le bundle du jeu (`assets/routes-DUFPCL9U.js`) fait simplement
+Le moteur du jeu (`assets/game.js`, code lisible) fait simplement
 `import { LEVELS, THEMES } from "../levels.js"` : **ajouter un niveau = ajouter un bloc
 `LEVELS.push(...)` à la fin de `levels.js`**, rien d'autre à toucher (ni build, ni HTML).
 
@@ -16,7 +16,8 @@ Le menu affiche les niveaux du plus récent au plus ancien (liste défilante), n
 * Unités en pixels « monde ». `x` va vers la droite, **`y` vers le BAS** (0 = haut).
 * Le monde fait 780 px de haut (`WORLD_BOTTOM`). Tomber sous `y = 700` = chute (mort).
 * La caméra montre 540 px de haut ; elle suit le joueur verticalement entre −24 et +150 :
-  garder les sols entre `y ≈ 250` et `y ≈ 450` (les niveaux d'origine : 260–440).
+  garder les sols entre `y ≈ 150` et `y ≈ 450` (niveaux d'origine : 260–440 ; la cheminée du
+  niveau 6 monte jusqu'à 170). Au-delà de ~640 on ne voit plus les pieds.
 * Coureur : boîte de **30 × 56 px**. Position `(x, y)` = coin haut-gauche.
 * 1 m affiché = 10 px.
 
@@ -38,6 +39,8 @@ Le menu affiche les niveaux du plus récent au plus ancien (liste défilante), n
   checkpoints: [ ... ],    // fanions (points de contrôle), triés par x
   finishX: 10900,          // ligne d'arrivée ; l'arche est dessinée à finishX-86
   rivals: [{speed:1.0},{speed:0.92},{speed:0.85}], // EXACTEMENT 3 : Léa Morel (12), Karim El Yazidi (7), Inès Rocha (23)
+  rockfalls: [ ... ],      // OPTIONNEL (v2) : chutes de pierres, helper chute()
+  patrols: [ ... ],        // OPTIONNEL (v2) : patous, helper patou()
 }
 ```
 
@@ -66,6 +69,44 @@ se ramasse en courant ; entre `sol − 100` et `sol − 190` il faut sauter.
 Départ (`DÉPART`) et arrivée (`ARRIVÉE`) sont dessinés automatiquement à `x=16` et `finishX−86`
 sur `floor`. On franchit l'arrivée quand `x > finishX` avec les pieds à `y ≤ floor + 28`.
 
+## 3b. Mécaniques v2 (passerelles mobiles, chutes de pierres, patous)
+
+Toutes sont des **fonctions déterministes du temps** (horloge du monde, remise à 0 au départ) :
+pas d'aléatoire, donc l'IA (rivaux et pilote auto) les prédit exactement et un niveau validé par
+`tools/playtest.mjs` le reste.
+
+| Helper | Signature | Où | Effet |
+|---|---|---|---|
+| `mp` | `mp(x, y, w, dx, dy, period, phase=0)` | `solids` | **Passerelle mobile** (planche 18 px, traversable par-dessous, ↓ pour descendre). Va-et-vient sinusoïdal entre `(x, y)` et `(x+dx, y+dy)`, un aller-retour en `period` s ; `phase` ∈ [0,1[ décale le cycle (0.5 = commence à l'autre bout). Elle **porte** les coureurs. `dx` = bac horizontal, `dy<0` = ascenseur. |
+| `chute` | `chute(x, yDuSol, period=2.6, phase=0)` | `rockfalls` | **Chute de pierres** sur la colonne `[x, x+34]`. 55 % du cycle = alerte (ombre qui grossit, graviers, panneau « ! » en haut de l'écran), puis un bloc 34×34 tombe (mortel) et éclate au sol. |
+| `patou` | `patou(x1, x2, yDuSol, period=4, phase=0)` | `patrols` | **Patou** (chien de berger 54×34) qui fait la ronde entre `x1` et `x2` sur un sol ; un aller-retour en `period` s. Contact = retour au fanion ; on lui saute par-dessus. |
+
+Exemples (voir niveaux 5 et 6 dans `levels.js`) :
+
+```js
+solids: [ p(1100, 380, 440), mp(1560, 420, 140, 220, 0, 4.2), p(2060, 640, 440) ], // bac sur un gave
+solids: [ p(3920, 440, 380), mp(4440, 380, 120, 0, -200, 4.2), p(4640, 340, 200) ], // ascenseur
+rockfalls: [ chute(1180, 380, 2.2, 0.5) ],
+patrols:   [ patou(620, 940, 440, 4.2) ],
+```
+
+Règles (vérifiées par `tools/check-levels.mjs`) :
+
+* passerelle mobile : `period ≥ 2.4 s`, vitesse max `π·max(|dx|,|dy|)/period` ≤ 170 px/s (erreur > 220),
+  trajet vertical dans [120, 660], largeur ≥ 110 ; à au moins une extrémité de son trajet, l'écart
+  avec le sol précédent/suivant doit respecter les limites de saut (≤ 200 px, montée ≤ 110) ;
+* chute de pierres : posée au-dessus d'un sol de dessus `yDuSol`, `period` assez longue pour que
+  le bloc touche le sol (≈ 2,15 s mini pour un sol à 440), **jamais sur la zone de réapparition
+  d'un fanion** (`[cp.x−10, cp.x+90]`) ni sur le départ ;
+* patou : toute la ronde sur UN sol, vitesse `2·(x2−x1−54)/period` ≤ 220 px/s, ronde ≥ 114 px,
+  jamais sur la zone d'un fanion ni à moins de 300 px du départ ;
+* les sections franchies par passerelles mobiles sont signalées en `info` : **les valider avec
+  `tools/playtest.mjs`** (obligatoire).
+
+Idées de mise en page : chemin double (passerelles fixes au-dessus d'un sol gardé par un patou, voir
+niveau 5 x≈2840–3800), montée en « cheminée » (passerelles en escalier + ascenseur, niveau 6
+x≈1620–2300), descente en terrasses sous les pierres.
+
 ## 4. Thèmes
 
 Le décor est **100 % procédural** (dégradé de ciel, crêtes, sapins, sol, ronces) : un thème
@@ -73,9 +114,10 @@ est juste une palette. Intégrés : `forest` (Sous-bois), `ridge` (Crête), `col
 On peut en ajouter dans `THEMES` de `levels.js` (fusionnés dans le bundle) avec **toutes** ces
 clés : `skyTop skyMid skyBot ridge ridge2 pine pine2 dirt dirtDark grass grassDark wood woodDark
 rock rockDark thorn leaf berry fog`. Exemple : `breche` (neige au crépuscule) du niveau 4.
-Réutiliser un thème existant est toujours sûr.
+Réutiliser un thème existant est toujours sûr. Palettes ajoutées : `breche` (niv. 4, neige au
+crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier sous l'orage).
 
-## 5. Physique (extraite du code, `assets/routes-*.js`)
+## 5. Physique (extraite du code, `assets/game.js`)
 
 | Constante | Valeur |
 |---|---|
@@ -109,47 +151,81 @@ d'appel. **Règles de conception sûres** (respectées par le niveau 4, vérifi�
 * éviter « petite chute + obstacle juste après » : l'IA des rivaux saute toujours vers la
   plateforme suivante si l'écart < 205×speed, et retombe trop loin.
 
-IA des rivaux : ils courent toujours à droite et sautent si une ronce est à < 58 px, si le bord
-approche avec une plateforme à < 205×speed px, ou si un rocher/tronc est devant. Au bout de
-8 morts un rival est déclaré arrivé (temps + 22 s). Si les rivaux meurent souvent, la course
-perd son intérêt : viser 0 mort pour les rivaux (`tools/playtest.mjs` l'affiche).
+IA des rivaux (v2, `aiDecide` dans `assets/game.js`) : à chaque image, chaque rival **simule
+la même physique** sur ~1,2 s pour plusieurs plans (avancer ; sauter maintenant ou dans 3/6 images ;
+attendre ; reculer ; en l'air : continuer, lâcher, contre-braquer) en tenant compte des ronces, des
+passerelles mobiles, des pierres et des patous, et choisit le premier plan sûr (sauter le plus tard
+possible, attendre qu'un bac revienne, laisser passer un patou…). Après une chute, un rival reste
+immobile 0,85 s au fanion (il ne repart plus droit dans les ronces). Au bout de 8 chutes il est
+déclaré arrivé (temps + 22 s) — `tools/playtest.mjs` échoue si cela arrive. Le **pilote auto** du
+playtest utilise exactement cette IA pour le joueur (vitesse 1, sauts complets) : s'il passe sans
+chute, un humain peut passer.
 
 ## 6. Recette : ajouter UN niveau (job quotidien)
 
 1. `git pull`. Ouvrir `levels.js`, aller tout en bas (après le dernier `LEVELS.push`).
-2. Copier le bloc du niveau 4 comme modèle et le coller à la fin. Changer :
+2. Copier un bloc existant comme modèle et le coller à la fin : niveau 4 (`breche`) pour un niveau
+   classique, niveau 5 (`estive`) ou 6 (`couloir`) pour un niveau avec mécaniques v2. Changer :
    * `id` : nouveau, unique, minuscules (ex. `"lac-gaube"`), utilisé aussi dans `v(id)` et `y(id, …)` ;
    * `name`, `blurb` (≈ 1 phrase, français), `difficulty`, `theme` (existant de préférence) ;
    * la géométrie. Méthode : enchaîner des sections de gauche à droite en notant l'`x` de fin de
      chaque sol ; démarrer par `p(0, ≥600, floor)` ; finir par un sol à `floor` qui couvre
      `finishX` à `finishX + 300` ; `width` ≈ fin du dernier sol + 100.
-   * 3 à 5 fanions répartis, chacun en début de plateforme sûre ;
+   * 3 à 6 fanions répartis, chacun en début de plateforme sûre (≥ 360 px sans danger après) ;
    * balises : quelques `line` à sol−70 et des `arc(…, 40)` au-dessus des sauts ;
-   * `rivals` : vitesses ~1.0 / 0.92 / 0.85 (baisser pour un niveau plus facile).
+   * `rivals` : vitesses ~1.0 / 0.92 / 0.85 (baisser pour un niveau plus facile) ;
+   * optionnel : `rockfalls`, `patrols`, passerelles `mp(...)` (§3b) — 1 à 2 types par niveau suffisent.
 3. Ne jamais modifier ni supprimer un niveau existant, ni changer d'`id`.
 4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement pour le nouveau niveau**
-   (les niveaux d'origine ont des avertissements connus, c'est normal).
-5. Tester en vrai (recommandé) :
+   (les niveaux 1–3 d'origine ont des avertissements connus, c'est normal ; les lignes `info`
+   sur les passerelles mobiles imposent l'étape 5).
+5. Tester en vrai (recommandé, obligatoire avec des mécaniques v2) :
    ```bash
    tools/serve.sh &                       # http://localhost:8765/nouste-corrida-trail/
    # dans un dossier où playwright est installé (npm i playwright && npx playwright install chromium) :
    node /chemin/vers/tools/playtest.mjs http://localhost:8765/nouste-corrida-trail/ last /tmp/niveau.png
+   node /chemin/vers/tools/playtest.mjs http://localhost:8765/nouste-corrida-trail/ all   # tous les niveaux
+   node /chemin/vers/tools/e2e.mjs http://localhost:8765/nouste-corrida-trail/            # commandes, fanions, record, menu
    ```
-   Attendu : `PLAYTEST OK` (pilote auto arrivé sans chute, aucune erreur console) et idéalement
-   0 mort pour les rivaux dans la ligne JSON. Sinon élargir les plateformes / réduire les écarts.
+   Attendu : `PLAYTEST OK` (le pilote auto finit sans chute, aucun rival en boucle, aucune erreur
+   console) et `E2E OK`. Si le pilote auto échoue, la ligne indique où il est tombé (`chutes à x,y`) :
+   élargir la plateforme, réduire l'écart, ralentir la passerelle ou décaler la phase.
 6. Mettre à jour la liste des niveaux du `README.md`, puis
    `git commit -am "Niveau N : <nom>" && git push`. GitHub Pages redéploie en 1–2 min
    (cache ~10 min côté navigateur).
 
-## 7. Ce qui a été modifié dans le bundle d'origine
+## 7. Ce qui a été modifié par rapport au bundle d'origine
 
-* `assets/index-wVumaOia.js` : l'hydratation TanStack Router/SSR (`hydrateRoot(document, …)`)
-  est remplacée par un rendu client du composant du jeu dans `#root` (le routeur cassait sous
-  un sous-chemin et sans HTML SSR). Le reste du fichier est inchangé.
-* `assets/routes-DUFPCL9U.js` : données de niveaux retirées et remplacées par
-  `import { LEVELS, THEMES } from "../levels.js"` ; `Object.assign(T, THEMES)` pour les palettes ;
-  menu trié du plus récent au plus ancien avec `N°k` et badge « Niveau du jour » ; chemins des
-  sprites rendus relatifs (`game/*.png`).
+* `assets/index-wVumaOia.js` : l'hydratation TanStack Router/SSR est remplacée par un rendu client
+  du jeu dans `#root` (le routeur cassait sous un sous-chemin et sans HTML SSR), qui charge
+  `./game.js`. Le reste (React, etc.) est inchangé.
+* `assets/game.js` (ex-`routes-DUFPCL9U.js`, dé-minifié et maintenu à la main) :
+  niveaux importés de `../levels.js` + palettes `THEMES` ; menu du plus récent au plus ancien
+  (`N°k`, badge « Niveau du jour ») ; sprites en chemins relatifs ; **v2** : passerelles mobiles,
+  chutes de pierres, patous ; IA par simulation (rivaux + pilote auto) ; rivaux immobiles 0,85 s
+  après une chute ; record enregistré dès l'arrivée du joueur ; bouton tactile ↓ (descendre d'une
+  passerelle) ; bouton pause masqué pendant une chute (il n'y faisait rien) ; brouillard des
+  ravins corrigé au pied des falaises ; API de test `window.__controlsTest` (`setAutopilot`,
+  `teleport`, `getState`, …).
 * `assets/routes-x3PbsDEU.css` : URLs des polices relatives. `custom.css` : liste de niveaux
-  défilante + badge.
+  défilante, badge, bouton ↓.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
+
+## 8. Courbe de difficulté (niveaux 1–6)
+
+| N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Sous-bois des cèdres | Balade | 498 m | 4 | 4 | — | 0.93 / 0.84 / 0.74 | 14,2 s |
+| 2 | La crête | Rythme | 646 m | 10 | 7 | — | 0.97 / 0.88 / 0.78 | 18,2 s |
+| 3 | Col du vent | Hors-piste | 762 m | 12 | 11 | — | 0.99 / 0.9 / 0.82 | 21,8 s |
+| 4 | La Brèche aux Isards | Haute route | 1090 m | 20 | 8 | — | 1 / 0.92 / 0.85 | 30,9 s |
+| 5 | L'Estive des Patous | Technique | 940 m | 10 | 3 | 5 passerelles mobiles, 4 patous | 1 / 0.93 / 0.86 | 29,1 s |
+| 6 | Le Couloir des Pierres | Extrême | 1030 m | 13 | 2 | 4 passerelles mobiles, 11 chutes de pierres, 2 patous | 1 / 0.94 / 0.88 | 29,4 s |
+
+Progression voulue : 1–3 apprennent sauts, ronces, passerelles ; 4 = endurance (le plus long,
+aucune mécanique, rivaux à 1,00) ; 5 = découverte des mécaniques v2 avec du temps pour lire
+(bacs lents, patous, chemin double, ascenseur) ; 6 = tout combiné en cadence (pierres
+rapprochées, cheminée, bacs au-dessus du vide, rivaux les plus rapides). « Pilote auto » = temps
+du pilote parfait de `tools/playtest.mjs` (un humain met nettement plus). Pour un nouveau niveau
+quotidien, viser entre 4 et 6 et varier : un niveau « classique » (modèle 4) puis un niveau à
+mécaniques (modèle 5/6).
