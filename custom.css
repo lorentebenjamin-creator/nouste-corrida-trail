@@ -1,0 +1,7 @@
+/* Ajouts pour la copie statique : menu qui supporte beaucoup de niveaux. */
+.menu .levels{max-height:min(48vh,27rem);overflow-y:auto;overscroll-behavior:contain;padding-right:.35rem;scrollbar-width:thin;scrollbar-color:var(--color-signal,#f26522) transparent}
+.menu .levels::-webkit-scrollbar{width:6px}
+.menu .levels::-webkit-scrollbar-thumb{background:var(--color-signal,#f26522);border-radius:3px}
+.menu .level{flex:0 0 auto}
+.level .diff .today{display:inline-block;margin-left:.5rem;padding:.05rem .45rem;border-radius:999px;background:var(--color-signal,#f26522);color:#142018;letter-spacing:.06em;font-size:.62rem;vertical-align:1px}
+@media (width<=720px){.menu .levels{max-height:none;overflow:visible}}
