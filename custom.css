@@ -5,3 +5,4 @@
 .menu .level{flex:0 0 auto}
 .level .diff .today{display:inline-block;margin-left:.5rem;padding:.05rem .45rem;border-radius:999px;background:var(--color-signal,#f26522);color:#142018;letter-spacing:.06em;font-size:.62rem;vertical-align:1px}
 @media (width<=720px){.menu .levels{max-height:none;overflow:visible}}
+.touch button.down{font-size:1.4rem}

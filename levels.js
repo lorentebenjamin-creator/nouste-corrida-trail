@@ -48,11 +48,55 @@ export function v(levelId) {
 // y(levelId, x, groundY, index) : point de contrôle (fanion). index commence à 1.
 export const y = (levelId, x, groundY, index) => ({ id: `${levelId}-cp${index}`, x, y: groundY });
 
+// ---- Mécaniques v2 (moteur assets/game.js, voir LEVELS.md §3b) --------
+// mp(x, y, w, dx, dy, period, phase=0) : PASSERELLE MOBILE (planche 18 px qui porte les coureurs).
+//   Va-et-vient en douceur entre (x, y) et (x+dx, y+dy) ; un aller-retour dure `period` s.
+//   phase ∈ [0,1[ décale le cycle (0 = départ en (x, y), 0.5 = départ en (x+dx, y+dy)).
+//   dx ≠ 0 : bac horizontal au-dessus d'un torrent ; dy < 0 : ascenseur qui monte.
+export const mp = (x, y, w, dx, dy, period, phase = 0) => ({
+  x, y, w, h: 18, oneWay: true, kind: "plank", move: { x0: x, y0: y, dx, dy, period, phase },
+});
+// chute(x, yDuSol, period=2.6, phase=0) : CHUTE DE PIERRES — un bloc 34×34 tombe du ciel sur la
+//   colonne [x, x+34] jusqu'au sol de dessus yDuSol, toutes les `period` s. Pendant 55 % du cycle
+//   une ombre grossit et des graviers tombent (avertissement), puis le bloc tombe (mortel) et éclate.
+//   À mettre dans le tableau `rockfalls` du niveau.
+export const chute = (x, yDuSol, period = 2.6, phase = 0) => ({
+  x, groundY: yDuSol, period, phase, size: 34, top: -60, g: 1800, warn: 0.55,
+});
+// patou(x1, x2, yDuSol, period=4, phase=0) : PATOU (chien de berger) qui fait la ronde entre x1 et
+//   x2 sur un sol de dessus yDuSol ; un aller-retour dure `period` s. Le toucher = retour au fanion :
+//   on lui saute par-dessus (54×34). À mettre dans le tableau `patrols` du niveau.
+export const patou = (x1, x2, yDuSol, period = 4, phase = 0) => ({
+  x1, x2, groundY: yDuSol, period, phase, w: 54, h: 34,
+});
+
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
 // On peut en ajouter ici (toutes les clés sont obligatoires) : le décor est
 // entièrement procédural, une palette suffit.
 export const THEMES = {
+  estive: {
+    skyTop: "#1f4a6b", skyMid: "#7fb2c9", skyBot: "#f6dfa4",
+    ridge: "#2f5a46", ridge2: "#5f8a5a",
+    pine: "#1d3b2c", pine2: "#3f6f45",
+    dirt: "#6e5238", dirtDark: "#4a3726",
+    grass: "#7fb04f", grassDark: "#5a8a3a",
+    wood: "#93633a", woodDark: "#5e3f25",
+    rock: "#a49a8c", rockDark: "#6c645a",
+    thorn: "#2f2a20", leaf: "#4f7a36", berry: "#c0483c",
+    fog: "#12241c",
+  },
+  pierrier: {
+    skyTop: "#1c1a2b", skyMid: "#5b5470", skyBot: "#c9a98a",
+    ridge: "#2c2b38", ridge2: "#4b4a5a",
+    pine: "#22232c", pine2: "#3d4150",
+    dirt: "#5d5853", dirtDark: "#3b3733",
+    grass: "#8c877c", grassDark: "#64605a",
+    wood: "#6f5440", woodDark: "#45342a",
+    rock: "#a7a2a0", rockDark: "#6a6564",
+    thorn: "#2a2628", leaf: "#535a48", berry: "#a8473b",
+    fog: "#15141c",
+  },
   breche: {
     skyTop: "#0f1c33", skyMid: "#5f7fa8", skyBot: "#e9d7c0",
     ridge: "#2b3a52", ridge2: "#8ea2bb",
@@ -217,5 +261,155 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2650, 440, 1), y(id, 4230, 440, 2), y(id, 6020, 260, 3), y(id, 8370, 440, 4)],
     finishX: 10900,
     rivals: [{ speed: 1.0 }, { speed: 0.92 }, { speed: 0.85 }],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 5 — L'Estive des Patous (ajouté le 2026-10-17, branche ameliorations)
+// Découverte des mécaniques v2 : patous qui gardent l'estive, bacs mobiles
+// au-dessus du gave, un ascenseur de berger et un chemin double (haut/bas).
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "estive", c = v(id);
+  c.line(160, 300, 370, 3); c.arc(400, 500, 330, 3, 40); c.arc(700, 860, 320, 4, 50);
+  c.arc(960, 1100, 320, 3, 40); c.arc(1180, 1260, 340, 3, 40);
+  c.arc(1520, 1980, 320, 5, 50);
+  c.line(2120, 2300, 370, 3); c.arc(2420, 2500, 330, 3, 40); c.arc(2700, 2840, 300, 3, 40);
+  c.line(2930, 3020, 290, 2); c.line(3150, 3240, 230, 2); c.line(3390, 3500, 210, 3); c.line(3620, 3700, 260, 2);
+  c.arc(3800, 3940, 300, 3, 40); c.line(4000, 4300, 310, 3);
+  c.line(4460, 4520, 150, 2); c.line(4700, 4900, 130, 3);
+  c.arc(4980, 5120, 160, 3, 40); c.arc(5420, 5560, 250, 3, 40); c.arc(5600, 5860, 290, 4, 50);
+  c.arc(5880, 6020, 330, 3, 40); c.line(6100, 6500, 370, 4);
+  c.line(6720, 6800, 250, 2); c.line(6960, 7060, 260, 2);
+  c.line(7360, 7460, 370, 2); c.arc(7520, 7780, 320, 4, 50); c.arc(8100, 8400, 310, 4, 40);
+  c.arc(8960, 9050, 330, 3, 40); c.arc(9240, 9340, 330, 3, 40); c.line(9380, 9500, 370, 3);
+  return {
+    id, name: "L'Estive des Patous",
+    blurb: "Les patous gardent le troupeau, les bacs traversent le gave. Choisis ton passage.",
+    difficulty: "Technique", theme: "estive",
+    width: 9800, floor: 440, spawnX: 60,
+    solids: [
+      // Estive : premier patou
+      p(0, 960, 440),
+      p(1100, 380, 440), h(1200, 440),
+      // Le gave : un bac mobile (attendre qu'il revienne)
+      mp(1560, 420, 140, 220, 0, 4.2),
+      p(2060, 640, 440),
+      // Chemin double : en bas un patou et des ronces, en haut des passerelles
+      p(2840, 960, 440),
+      m(2900, 350, 150), m(3120, 290, 150), m(3360, 270, 170), m(3600, 320, 150),
+      p(3920, 440, 380),
+      // L'ascenseur du berger jusqu'à la cabane
+      mp(4440, 380, 120, 0, -200, 4.2),
+      p(4640, 340, 200),
+      // Descente en terrasses
+      p(5120, 300, 290),
+      p(5560, 320, 380),
+      p(6020, 600, 440),
+      // Second gave : un bac qui monte et descend, un bac qui va et vient
+      mp(6700, 400, 130, 0, -120, 3.2),
+      mp(6920, 330, 130, 160, 0, 3.0, 0.5),
+      p(7300, 700, 440),
+      // Dernier bac, puis le sprint vers la cabane
+      mp(8080, 420, 140, 200, 0, 4.0, 0.25),
+      p(8560, 1240, 440), g(9240, 440),
+    ],
+    hazards: [
+      _(420, 70, 440),
+      _(3500, 70, 440),
+      _(8960, 72, 440),
+    ],
+    rockfalls: [],
+    patrols: [
+      patou(620, 940, 440, 4.2),
+      patou(2980, 3380, 440, 3.4),
+      patou(5600, 5860, 380, 2.8),
+      patou(7500, 7900, 440, 3.6, 0.3),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2080, 440, 1), y(id, 3960, 380, 2), y(id, 6040, 440, 3), y(id, 7320, 440, 4), y(id, 8580, 440, 5)],
+    finishX: 9400,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 6 — Le Couloir des Pierres (ajouté le 2026-10-17, branche ameliorations)
+// Le plus dur : pierrier sous l'orage (chutes de pierres à lire à l'ombre),
+// montée en cheminée jusqu'à y=170, bacs et ascenseur au-dessus du vide,
+// patous, et un dernier couloir où les pierres tombent en cadence.
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "couloir", c = v(id);
+  c.line(150, 290, 370, 3); c.arc(360, 460, 330, 3, 40); c.arc(540, 640, 330, 3, 40);
+  c.arc(900, 1020, 300, 3, 40); c.line(1080, 1180, 310, 2); c.arc(1280, 1380, 270, 3, 40);
+  c.arc(1540, 1620, 280, 3, 40); c.line(1650, 1740, 230, 2); c.line(1880, 1960, 150, 2);
+  c.line(2110, 2170, 100, 2); c.line(2340, 2600, 100, 4);
+  c.arc(2660, 2800, 140, 3, 40); c.line(2840, 3080, 190, 3); c.arc(3120, 3260, 230, 3, 40);
+  c.line(3300, 3580, 280, 3); c.arc(3620, 3760, 320, 3, 40); c.line(3800, 3980, 370, 3);
+  c.arc(4120, 4400, 320, 4, 50);
+  c.line(4640, 4720, 330, 2); c.line(5110, 5190, 290, 2); c.line(5350, 5420, 230, 2);
+  c.line(5600, 5900, 160, 4); c.arc(5960, 6100, 200, 3, 40); c.line(6140, 6360, 250, 3);
+  c.arc(6400, 6540, 280, 3, 40); c.line(6580, 6800, 340, 3); c.arc(6840, 6980, 330, 3, 40);
+  c.line(7040, 7160, 370, 2); c.arc(7180, 7300, 320, 3, 50);
+  c.arc(7620, 7960, 320, 5, 50); c.arc(8120, 8230, 330, 3, 40); c.arc(8460, 8560, 330, 3, 40);
+  c.arc(8700, 8820, 330, 3, 40); c.arc(9000, 9300, 320, 4, 40);
+  c.arc(9700, 9760, 330, 3, 40); c.arc(9900, 9990, 330, 3, 40); c.line(10100, 10250, 370, 3);
+  return {
+    id, name: "Le Couloir des Pierres",
+    blurb: "L'orage gronde, le pierrier se réveille. Lis les ombres, ne t'arrête jamais sous la falaise.",
+    difficulty: "Extrême", theme: "pierrier",
+    width: 10800, floor: 440, spawnX: 60,
+    solids: [
+      // Pied du pierrier : premières pierres
+      p(0, 900, 440),
+      p(1020, 520, 380),
+      // La cheminée : passerelles en escalier puis ascenseur
+      m(1620, 300, 150), m(1850, 220, 150),
+      mp(2080, 220, 130, 0, -80, 3.0),
+      p(2300, 380, 170),
+      // Descente sous les pierres
+      p(2800, 320, 260),
+      p(3260, 360, 350),
+      p(3760, 760, 440),
+      // Au-dessus du vide : bac, passerelle, ascenseur
+      mp(4600, 400, 140, 200, 0, 3.8),
+      m(5080, 360, 140),
+      mp(5320, 360, 130, 0, -140, 3.6),
+      p(5560, 400, 230),
+      // Dernières terrasses
+      p(6100, 300, 320),
+      p(6540, 300, 410),
+      // Le couloir final
+      p(6980, 1900, 440), g(8600, 440),
+      // Le dernier ravin : un bac, puis l'arche
+      mp(8980, 400, 140, 180, 0, 3.8),
+      p(9440, 1300, 440),
+    ],
+    hazards: [
+      _(8150, 72, 440),
+      _(9900, 72, 440),
+    ],
+    rockfalls: [
+      chute(400, 440, 2.4),
+      chute(580, 440, 2.4, 0.5),
+      chute(1180, 380, 2.2, 0.5),
+      chute(2480, 170, 2.0),
+      chute(3420, 350, 2.4, 0.3),
+      chute(5800, 230, 2.0, 0.6),
+      chute(7200, 440, 2.2),
+      chute(7280, 440, 2.2, 0.5),
+      chute(8480, 440, 2.2, 0.25),
+      chute(8780, 440, 2.2, 0.7),
+      chute(9700, 440, 2.4, 0.4),
+    ],
+    patrols: [
+      patou(4080, 4440, 440, 3.2),
+      patou(7600, 7980, 440, 3.4),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 1040, 380, 1), y(id, 2320, 170, 2), y(id, 3780, 440, 3), y(id, 5580, 230, 4), y(id, 7000, 440, 5), y(id, 9460, 440, 6)],
+    finishX: 10300,
+    rivals: [{ speed: 1.0 }, { speed: 0.94 }, { speed: 0.88 }],
   };
 })());

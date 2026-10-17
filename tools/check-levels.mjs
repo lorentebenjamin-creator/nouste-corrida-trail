@@ -36,10 +36,41 @@ LEVELS.forEach((L, idx) => {
   else L.rivals.forEach((r, i) => { if (!(r.speed > 0.5 && r.speed <= 1.05)) err(tag, `rivals[${i}].speed hors bornes (0.5–1.05)`); });
   if (L.width > LIMITS.maxWidth) err(tag, `width ${L.width} > ${LIMITS.maxWidth}`);
   for (const k of ["solids", "hazards", "coins", "checkpoints"]) if (!Array.isArray(L[k])) err(tag, `${k} doit être un tableau`);
+  for (const k of ["rockfalls", "patrols"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
   if (errors > errorsBefore) return;
 
-  const walk = L.solids.filter(s => s.kind === "ground" || s.kind === "plank").sort((a, b) => a.x - b.x);
+  const movers = L.solids.filter(s => s.move);
+  const walk = L.solids.filter(s => !s.move && (s.kind === "ground" || s.kind === "plank")).sort((a, b) => a.x - b.x);
   const grounds = L.solids.filter(s => s.kind === "ground");
+  // Passerelles mobiles : enveloppe de leur trajet
+  const env = (m) => ({ x1: m.move.x0 + Math.min(0, m.move.dx), x2: m.move.x0 + Math.max(0, m.move.dx) + m.w,
+    y1: m.move.y0 + Math.min(0, m.move.dy), y2: m.move.y0 + Math.max(0, m.move.dy), m });
+  for (const m of movers) {
+    const mv = m.move, e = env(m), tagm = `passerelle mobile @${mv.x0}`;
+    if (m.kind !== "plank") err(tag, `${tagm}: seules les passerelles (mp) peuvent bouger`);
+    if (!(mv.period >= 2.4)) err(tag, `${tagm}: period ${mv.period} < 2.4 s`);
+    const vmax = Math.PI * Math.max(Math.abs(mv.dx), Math.abs(mv.dy)) / mv.period;
+    if (vmax > 220) err(tag, `${tagm}: trop rapide (${vmax.toFixed(0)} px/s > 220)`);
+    else if (vmax > 170) warn(tag, `${tagm}: rapide (${vmax.toFixed(0)} px/s)`);
+    if (e.y1 < 120 || e.y2 > 660) err(tag, `${tagm}: trajet vertical hors [120, 660]`);
+    if (m.w < 110) warn(tag, `${tagm}: largeur ${m.w} < 110`);
+    if (e.x2 > L.width) err(tag, `${tagm}: sort du monde`);
+  }
+  // Pour un trou franchi grâce à des passerelles mobiles : chaîne a → mobiles → b, au mieux de leur trajet.
+  const bridged = (a, b) => {
+    const ms = movers.map(env).filter(e => e.x2 > a.x + a.w - 20 && e.x1 < b.x + 20).sort((p, q) => p.x1 - q.x1);
+    if (!ms.length) return null;
+    const nodes = [{ x1: a.x, x2: a.x + a.w, y1: a.y, y2: a.y }, ...ms, { x1: b.x, x2: b.x + b.w, y1: b.y, y2: b.y }];
+    const probs = [];
+    for (let i = 1; i < nodes.length; i++) {
+      const P = nodes[i - 1], Q = nodes[i];
+      const gapBest = Math.max(0, Q.x1 - P.x2); // au plus près
+      const upBest = Math.max(0, Math.min(P.y2 - Q.y2, P.y2 - Q.y1) > 0 ? Math.min(...[Q.y1, Q.y2].map(q => P.y2 - q).filter(d => d >= 0).concat([P.y1 - Q.y2])) : 0);
+      if (gapBest > LIMITS.maxGap) probs.push(`écart minimal ${gapBest} px vers x=${Q.x1}`);
+      if (upBest > LIMITS.maxUp) probs.push(`montée minimale ${upBest} px vers x=${Q.x1}`);
+    }
+    return probs;
+  };
   const end = Math.max(...L.solids.map(s => s.x + s.w));
   if (end > L.width) err(tag, `un élément dépasse width (${end} > ${L.width})`);
   const under = (x, yTop) => grounds.find(g => x >= g.x && x <= g.x + g.w && (yTop == null || g.y === yTop));
@@ -58,6 +89,8 @@ LEVELS.forEach((L, idx) => {
     if (b.x + b.w > a.x + a.w) reach = b;
     if (gap < 0) continue; // chevauchement (passerelle au-dessus d'un sol) : pas un saut obligatoire
     const w = `${a.kind}@${a.x}→${b.kind}@${b.x}`;
+    const br = bridged(a, b);
+    if (br) { br.forEach(pb => err(tag, `${w} (via passerelles mobiles): ${pb}`)); if (!br.length) console.log(`info    [${tag}] ${w}: franchi par passerelle(s) mobile(s) — à valider avec tools/playtest.mjs`); continue; }
     if (up > LIMITS.maxUp) err(tag, `${w}: montée ${up} px > ${LIMITS.maxUp}`);
     if (gap > LIMITS.maxGap) err(tag, `${w}: écart ${gap} px > ${LIMITS.maxGap}`);
     else if (gap > LIMITS.softGap) warn(tag, `${w}: écart ${gap} px (rivaux lents en difficulté)`);
@@ -83,10 +116,33 @@ LEVELS.forEach((L, idx) => {
     if (!g) err(tag, `fanion @${cp.x}: pas de sol dont le dessus est y=${cp.y}`);
     else if (g.x + g.w - cp.x < 360) warn(tag, `fanion @${cp.x}: moins de 360 px de sol après (rivaux verrouillés à la réapparition)`);
   });
+  // Chutes de pierres
+  for (const fl of L.rockfalls || []) {
+    const tagf = `chute de pierres @${fl.x}`;
+    const g = L.solids.find(s => !s.move && s.y === fl.groundY && fl.x >= s.x && fl.x + fl.size <= s.x + s.w);
+    if (!g) err(tag, `${tagf}: pas de sol de dessus y=${fl.groundY} sous la colonne [${fl.x}, ${fl.x + fl.size}]`);
+    const tFall = Math.sqrt((2 * (fl.groundY - fl.size - fl.top)) / fl.g);
+    if (!(fl.period * (1 - fl.warn) >= tFall + 0.25)) err(tag, `${tagf}: period trop courte (min ${((tFall + 0.25) / (1 - fl.warn)).toFixed(2)} s)`);
+    if (fl.period < 1.8) warn(tag, `${tagf}: cadence très rapide (${fl.period} s)`);
+    for (const cp of L.checkpoints) if (fl.x + fl.size > cp.x - 10 && fl.x < cp.x + 90) err(tag, `${tagf}: tombe sur la zone de réapparition du fanion @${cp.x}`);
+    if (fl.x < L.spawnX + 160) err(tag, `${tagf}: tombe sur le départ`);
+  }
+  // Patous
+  for (const dg of L.patrols || []) {
+    const tagp = `patou ${dg.x1}–${dg.x2}`;
+    const g = L.solids.find(s => !s.move && s.y === dg.groundY && dg.x1 >= s.x && dg.x2 <= s.x + s.w);
+    if (!g) err(tag, `${tagp}: la ronde doit tenir sur UN sol de dessus y=${dg.groundY}`);
+    if (dg.x2 - dg.x1 < dg.w + 60) warn(tag, `${tagp}: ronde très courte`);
+    const sp = (2 * (dg.x2 - dg.x1 - dg.w)) / dg.period;
+    if (sp > 260) err(tag, `${tagp}: trop rapide (${sp.toFixed(0)} px/s)`); else if (sp > 220) warn(tag, `${tagp}: rapide (${sp.toFixed(0)} px/s)`);
+    for (const cp of L.checkpoints) if (cp.x + 60 > dg.x1 - 40 && cp.x < dg.x2) err(tag, `${tagp}: passe sur la zone de réapparition du fanion @${cp.x}`);
+    if (dg.x1 < L.spawnX + 300) err(tag, `${tagp}: trop près du départ`);
+  }
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions`);
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`].filter(Boolean).join(", ");
+  console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);
 });
 console.log(`\n${LEVELS.length} niveaux, ${errors} erreur(s), ${warnings} avertissement(s)`);
 process.exit(errors ? 1 : 0);
