@@ -352,7 +352,8 @@ function R(e, t) {
         o = i.x + i.w,
         s = a.x - o;
       if (s < 8) continue;
-      let c = Math.min(i.y, a.y) + 8;
+      // v2 : face à une falaise (> 100 px), le brouillard part du bord le plus bas
+      let c = (Math.abs(i.y - a.y) > 100 ? Math.max(i.y, a.y) : Math.min(i.y, a.y)) + 8;
       ((n.fillStyle = e.fog),
         (n.globalAlpha = 0.72),
         n.fillRect(o, c, s, 780 - c),
@@ -1002,13 +1003,29 @@ function R(e, t) {
           let py = ((st.warn * 2.2 + q / 3) % 1) * (fl.groundY - 30);
           n.fillRect(fl.x + 6 + q * 9, py, 4, 4);
         }
+        // panneau « ! » en haut de l'écran, qui clignote de plus en plus vite
+        if (st.warn > 0.35 && Math.sin(_ * (10 + st.warn * 20)) > -0.2) {
+          let ty = y + 70;
+          ((n.fillStyle = `#f0c14a`),
+            n.beginPath(),
+            n.moveTo(cx, ty - 14),
+            n.lineTo(cx + 13, ty + 9),
+            n.lineTo(cx - 13, ty + 9),
+            n.fill(),
+            (n.fillStyle = `#142018`),
+            n.fillRect(cx - 1.5, ty - 6, 3, 8),
+            n.fillRect(cx - 1.5, ty + 4, 3, 3));
+        }
       } else if (st.rock) {
         let hgt = (fl.groundY - st.rock.y) / (fl.groundY - fl.top);
         ((n.fillStyle = `rgba(0,0,0,${0.45 - hgt * 0.25})`),
           n.beginPath(),
           n.ellipse(cx, fl.groundY, 22 - hgt * 8, 5, 0, 0, Math.PI * 2),
           n.fill(),
-          me(n, st.rock, th));
+          me(n, { x: st.rock.x - 3, y: st.rock.y - 3, w: st.rock.w + 6, h: st.rock.h + 4 }, { rock: `#141018`, rockDark: `#141018` }),
+          me(n, st.rock, th),
+          (n.fillStyle = `#f0c14a`),
+          n.fillRect(st.rock.x + 12, st.rock.y + 14, 4, 4));
       } else if (st.impact < 0.35) {
         let k2 = st.impact / 0.35;
         n.fillStyle = th.rock;
