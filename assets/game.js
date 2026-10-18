@@ -1024,7 +1024,7 @@ function R(e, t) {
   }
   function humanInput(e) {
     let H = hum, D = H.D, f = ++H.f;
-    if (e.deaths !== H.deaths) ((H.deaths = e.deaths), H.q.clear(), (H.jumpAt = -1), (H.holdEnd = -1), (H.plan = null), (H.dir = 1));
+    if (e.deaths !== H.deaths) ((H.deaths = e.deaths), H.q.clear(), (H.jumpAt = -1), (H.holdEnd = -1), (H.plan = null), (H.dir = e.deaths > 0 ? 0 : 1)); // après une chute : on repart après le délai de réaction
     // 1) cerveau : extrapole D images avec les commandes déjà en file, décide pour l'image f + D
     let dirs = [];
     for (let i = 0; i < D; i++) dirs.push(H.q.get(f + i) ?? H.dir);
@@ -1059,6 +1059,13 @@ function R(e, t) {
         let sg = H.opt.jitter * 60, j2 = Math.round(Math.max(-2 * sg, Math.min(2 * sg, gauss(H.rnd) * sg)));
         H.jumpAt = Math.max(f + 1, f + D + aim + j2);
       }
+    } else {
+      // l'extrapolation finit mal (on n'a pas vu venir) : réflexe sur l'état présent, exécuté à l'image suivante
+      let c = { ...e, plan: H.plan },
+        dc = aiDecide(c);
+      H.plan = c.plan;
+      for (let i = 1; i <= D; i++) H.q.set(f + i, dc.dir);
+      dc.jump && H.jumpAt < f && (H.jumpAt = f + 1);
     }
     // 2) mains : exécutent la file
     H.q.has(f) && ((H.dir = H.q.get(f)), H.q.delete(f));
