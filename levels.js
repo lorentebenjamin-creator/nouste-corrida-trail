@@ -108,6 +108,17 @@ export const THEMES = {
     thorn: "#2e2a2c", leaf: "#4c5a44", berry: "#b8433a",
     fog: "#121a26",
   },
+  cascade: {
+    skyTop: "#123b45", skyMid: "#6fa9a8", skyBot: "#e4efe0",
+    ridge: "#24483f", ridge2: "#4f7d6c",
+    pine: "#16302a", pine2: "#2f5a49",
+    dirt: "#5b4a3a", dirtDark: "#3a2f25",
+    grass: "#5f9a5a", grassDark: "#3f7344",
+    wood: "#7a5434", woodDark: "#4c3420",
+    rock: "#8fa3a0", rockDark: "#5a6b69",
+    thorn: "#24302a", leaf: "#3f7a4c", berry: "#c2503f",
+    fog: "#0f2a2e",
+  },
 };
 
 // =====================================================================
@@ -411,5 +422,66 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1040, 380, 1), y(id, 2320, 170, 2), y(id, 3780, 440, 3), y(id, 5580, 230, 4), y(id, 7000, 440, 5), y(id, 9460, 440, 6)],
     finishX: 10300,
     rivals: [{ speed: 1.0 }, { speed: 0.94 }, { speed: 0.88 }],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 7 — La Cascade des Desmans (niveau du jour, 2026-10-18)
+// Gorges humides : passerelles au-dessus de la cascade, deux radeaux lents
+// sur la vasque, terrasses moussues et un patou au bord de l'eau.
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "cascade-desmans", c = v(id);
+  c.line(160, 420, 370, 4); c.arc(820, 960, 360, 3, 40); c.line(1180, 1340, 330, 3);
+  c.arc(1380, 1510, 330, 3, 40); c.arc(1570, 1720, 270, 3, 50); c.line(1760, 1940, 270, 3);
+  c.arc(1990, 2140, 300, 3, 40); c.arc(2300, 2440, 260, 3, 40); c.arc(2590, 2730, 250, 3, 40);
+  c.arc(2890, 3030, 290, 3, 40); c.line(3100, 3400, 370, 4); c.arc(3460, 3540, 330, 3, 40);
+  c.arc(3830, 3980, 350, 3, 40); c.line(4000, 4300, 350, 4); c.arc(4320, 4470, 350, 3, 40);
+  c.line(4520, 5000, 370, 5); c.arc(5110, 5240, 330, 3, 40); c.arc(5320, 5400, 260, 3, 40);
+  c.arc(5660, 5790, 260, 3, 40); c.line(5830, 6150, 230, 4); c.arc(6190, 6340, 260, 3, 40);
+  c.line(6380, 6680, 310, 4); c.arc(6720, 6870, 330, 3, 40); c.line(6920, 7240, 370, 4);
+  c.arc(7770, 7920, 350, 3, 40); c.line(7940, 8220, 350, 4); c.arc(8240, 8390, 350, 3, 40);
+  c.line(8440, 8740, 370, 4); c.arc(8780, 8880, 330, 3, 40); c.arc(9180, 9320, 330, 3, 40);
+  c.line(9340, 9450, 370, 2);
+  return {
+    id, name: "La Cascade des Desmans",
+    blurb: "Passerelles trempées, radeaux sur la vasque et un patou au bord de l'eau. Le desman te regarde passer.",
+    difficulty: "Engagé", theme: "cascade",
+    width: 9900, floor: 440, spawnX: 60,
+    solids: [
+      // Le sentier des gorges
+      p(0, 820, 440),
+      p(950, 430, 400), h(1060, 400),
+      p(1510, 480, 340), g(1600, 340),
+      // Les passerelles de la cascade
+      m(2140, 340, 160), m(2430, 290, 160), m(2730, 330, 160),
+      p(3030, 800, 440),
+      // La vasque : un radeau lent
+      mp(3980, 420, 140, 200, 0, 4.4),
+      p(4470, 640, 440),
+      // Terrasses moussues
+      p(5240, 420, 370),
+      p(5790, 400, 300),
+      p(6340, 380, 380),
+      // Le bord de l'eau : un patou
+      p(6870, 900, 440),
+      // Second radeau, puis le sprint vers l'arche
+      mp(7920, 420, 140, 180, 0, 4.0, 0.5),
+      p(8390, 1400, 440), g(9200, 440),
+    ],
+    hazards: [
+      _(500, 70, 440),
+      _(3460, 72, 440),
+      _(5330, 64, 370),
+      _(8800, 74, 440),
+    ],
+    rockfalls: [],
+    patrols: [
+      patou(7300, 7640, 440, 3.6),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 3060, 440, 1), y(id, 4490, 440, 2), y(id, 5810, 300, 3), y(id, 6890, 440, 4), y(id, 8410, 440, 5)],
+    finishX: 9500,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
   };
 })());

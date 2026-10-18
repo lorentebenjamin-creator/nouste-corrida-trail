@@ -19,6 +19,7 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 4 | La Brèche aux Isards | Haute route | 1090 m |
 | 5 | L'Estive des Patous *(nouveau)* | Technique | 940 m |
 | 6 | Le Couloir des Pierres *(nouveau)* | Extrême | 1030 m |
+| 7 | La Cascade des Desmans *(niveau du jour)* | Engagé | 950 m |
 
 Nouveautés : passerelles mobiles (bacs, ascenseurs), chutes de pierres annoncées par leur ombre,
 patous qui gardent l'estive, rivaux plus malins (ils ne se jettent plus dans les ronces).

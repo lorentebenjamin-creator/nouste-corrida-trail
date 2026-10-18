@@ -115,7 +115,7 @@ On peut en ajouter dans `THEMES` de `levels.js` (fusionnés dans le bundle) avec
 clés : `skyTop skyMid skyBot ridge ridge2 pine pine2 dirt dirtDark grass grassDark wood woodDark
 rock rockDark thorn leaf berry fog`. Exemple : `breche` (neige au crépuscule) du niveau 4.
 Réutiliser un thème existant est toujours sûr. Palettes ajoutées : `breche` (niv. 4, neige au
-crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier sous l'orage).
+crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier sous l'orage), `cascade` (niv. 7, gorges moussues).
 
 ## 5. Physique (extraite du code, `assets/game.js`)
 
@@ -227,6 +227,7 @@ chute, un humain peut passer.
 | 4 | La Brèche aux Isards | Haute route | 1090 m | 20 | 8 | — | 1 / 0.92 / 0.85 | 30,9 s |
 | 5 | L'Estive des Patous | Technique | 940 m | 10 | 3 | 5 passerelles mobiles, 4 patous | 1 / 0.93 / 0.86 | 29,1 s |
 | 6 | Le Couloir des Pierres | Extrême | 1030 m | 13 | 2 | 4 passerelles mobiles, 11 chutes de pierres, 2 patous | 1 / 0.94 / 0.88 | 29,4 s |
+| 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou | 1 / 0.93 / 0.86 | 27,7 s |
 
 Progression voulue : 1–3 apprennent sauts, ronces, passerelles ; 4 = endurance (le plus long,
 aucune mécanique, rivaux à 1,00) ; 5 = découverte des mécaniques v2 avec du temps pour lire
