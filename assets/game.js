@@ -942,6 +942,14 @@ function R(e, t) {
   }
   function aiDecide(e) {
     if ((e.stun || 0) > 0) return ((e.plan = null), { dir: 0, jump: !1 });
+    // Arrêté au bord d'un trou qui demande de l'élan : on recule un peu, puis on repart.
+    let wt = e.waitT || 0;
+    e.waitT = 0;
+    if ((e.backT || 0) > 0) {
+      e.backT -= 1 / 60;
+      if (simRunner(e, -1, -1, 60, !0).safe) return ((e.plan = null), { dir: -1, jump: !1 });
+      e.backT = 0;
+    }
     let can = e.lock <= 0 && (e.grounded || e.coyote > 0);
     // Saut déjà planifié (cibles mobiles) : on s'y tient tant qu'il reste sûr.
     if (can && e.plan != null) {
@@ -982,7 +990,12 @@ function R(e, t) {
     let commit = Math.min(walk.dead < 0 ? 99 : walk.dead, walk.air < 0 ? 99 : walk.air);
     if (!walk.safe && commit > 8) return { dir: 1, jump: !1 };
     let wait = simRunner(e, 0, -1, 40, !1);
-    if (wait.safe) return { dir: 0, jump: !1 };
+    if (wait.safe) {
+      e.grounded && Math.abs(e.vx) < 20 && (wt += 1 / 60);
+      wt > 0.7 ? ((e.backT = 0.35), (wt = 0)) : 0;
+      e.waitT = wt;
+      return { dir: 0, jump: !1 };
+    }
     let back = simRunner(e, -1, -1, 30, !1);
     if (back.safe) return { dir: -1, jump: !1 };
     let jmp = simRunner(e, 1, 0, 85, !0),
@@ -1032,7 +1045,7 @@ function R(e, t) {
     ex.invalid && (ex = simRunner(e, dirs, -1, D, !1)); // saut en file impossible (en l'air) : tampon moteur
     if (ex.dead < 0 && !ex.invalid) {
       let c = ex.st, t0 = _, sv = movers.map((m) => [m.x, m.y]);
-      ((c.plan = H.plan), (_ = t0 + D / 60), setMovers(_));
+      ((c.plan = H.plan), (c.waitT = H.waitT), (c.backT = H.backT), (_ = t0 + D / 60), setMovers(_));
       let dc = aiDecide(c),
         aim = dc.jump ? 0 : -1;
       // Un humain ne saute pas « au dernier moment » : devant un trou ou une ronce, il vise le milieu
@@ -1051,19 +1064,19 @@ function R(e, t) {
           k0 >= 0 && (aim = Math.round((k0 + k1) / 2));
         }
       }
-      ((H.plan = c.plan), (_ = t0), movers.forEach((m, ix) => ((m.x = sv[ix][0]), (m.y = sv[ix][1]))));
+      ((H.plan = c.plan), (H.waitT = c.waitT), (H.backT = c.backT), (_ = t0), movers.forEach((m, ix) => ((m.x = sv[ix][0]), (m.y = sv[ix][1]))));
       // saut prévu : on garde l'élan jusqu'à l'appel (pas de freinage de dernière seconde)
       H.q.set(f + D, H.jumpAt >= f + D || aim > 0 ? 1 : dc.dir);
-      window.__humDebug && (window.__humLog ||= []).push([f, Math.round(e.x), Math.round(e.vx), e.grounded, Math.round(c.x), dc.dir, dc.jump, aim, H.jumpAt].join(' '));
+      window.__humDebug && (window.__humLog ||= []).push([f, Math.round(e.x), Math.round(e.vx), e.grounded, Math.round(c.x), dc.dir, dc.jump, aim, H.jumpAt, (H.waitT||0).toFixed(2), (H.backT||0).toFixed(2), c.grounded, Math.round(c.vx)].join(' '));
       if (aim >= 0 && H.jumpAt < f) {
         let sg = H.opt.jitter * 60, j2 = Math.round(Math.max(-2 * sg, Math.min(2 * sg, gauss(H.rnd) * sg)));
         H.jumpAt = Math.max(f + 1, f + D + aim + j2);
       }
     } else {
       // l'extrapolation finit mal (on n'a pas vu venir) : réflexe sur l'état présent, exécuté à l'image suivante
-      let c = { ...e, plan: H.plan },
+      let c = { ...e, plan: H.plan, waitT: H.waitT, backT: H.backT },
         dc = aiDecide(c);
-      H.plan = c.plan;
+      ((H.plan = c.plan), (H.waitT = c.waitT), (H.backT = c.backT));
       for (let i = 1; i <= D; i++) H.q.set(f + i, dc.dir);
       dc.jump && H.jumpAt < f && (H.jumpAt = f + 1);
     }
