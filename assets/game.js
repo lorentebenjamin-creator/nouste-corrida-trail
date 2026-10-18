@@ -1794,9 +1794,24 @@ function ve(e, t, n, r, i) {
     (e.textBaseline = `middle`),
     e.fillText(r, t + o / 2 + 8, n - a + 38));
 }
+// Balise = logo NOUSTE CORRIDA BARLEST (assets/balise-logo.webp, 96×69), ajusté dans la boîte de
+// l'ancienne balise (cercle de rayon 11 → 22×22) sans déformation. Repli sur l'ancien dessin tant
+// que l'image n'est pas chargée (ou si elle manque).
+var baliseImg = typeof Image < `u` ? new Image() : null,
+  baliseOk = !1;
+baliseImg &&
+  ((baliseImg.onload = () => (baliseOk = baliseImg.naturalWidth > 0)),
+  (baliseImg.src = new URL(`./balise-logo.webp`, import.meta.url).href));
 function ye(e, t, n, r) {
   let i = Math.sin(r * 3 + t * 0.05) * 4,
     a = 0.35 + Math.abs(Math.sin(r * 2.2 + n)) * 0.65;
+  if (baliseOk) {
+    let k = Math.min(22 / baliseImg.naturalWidth, 22 / baliseImg.naturalHeight),
+      w = baliseImg.naturalWidth * k,
+      h = baliseImg.naturalHeight * k;
+    (e.save(), e.translate(t, n + i), e.scale(a, 1), e.drawImage(baliseImg, -w / 2, -h / 2, w, h), e.restore());
+    return;
+  }
   (e.save(),
     e.translate(t, n + i),
     e.scale(a, 1),
