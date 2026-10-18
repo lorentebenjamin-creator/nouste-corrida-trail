@@ -494,7 +494,7 @@ LEVELS.push((() => {
     // Passage clé : le Jet des Desmans tombe sur le ravin entre les passerelles 2 et 3.
     // 1,2 s d'eau puis 1,8 s de pause : attendre sur la passerelle, sauter dans la pause.
     jets: [
-      jet(2632, 64, -400, 720, 3.0, 0.4, 0.1),
+      jet(2632, 64, -400, 720, 3.0, 0.4, 0.7),
     ],
     coins: c.list,
     checkpoints: [y(id, 3060, 440, 1), y(id, 4490, 440, 2), y(id, 5810, 300, 3), y(id, 6890, 440, 4), y(id, 8410, 440, 5)],

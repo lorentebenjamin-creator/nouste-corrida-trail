@@ -895,6 +895,7 @@ function R(e, t) {
       saved = movers.length ? movers.map((m) => [m.x, m.y]) : null,
       dead = -1,
       invalid = !1,
+      jetted = !1,
       left = !c.grounded,
       landed = -1,
       air = -1,
@@ -923,7 +924,7 @@ function R(e, t) {
         ((c.vy = j), (c.grounded = !1), (c.coyote = 0), (c.lock = c.you ? 0 : 0.28), (left = !0));
       }
       let gr = c.vy < 0 ? te : A;
-      (Math.abs(c.vy) < re && (gr = ne), (c.vy = Math.min(ie, c.vy + gr * dt)), jetPush(c, _ + fr * dt), Re(c, dt));
+      (Math.abs(c.vy) < re && (gr = ne), (c.vy = Math.min(ie, c.vy + gr * dt)), jetPush(c, _ + fr * dt) && (jetted = !0), Re(c, dt));
       if (c.y > se || s.hazards.some((hz) => fe(c, hz)) || dynHit(c, _ + fr * dt)) {
         dead = fr;
         break;
@@ -935,7 +936,7 @@ function R(e, t) {
     }
     if (saved) movers.forEach((m, ix) => ((m.x = saved[ix][0]), (m.y = saved[ix][1])));
     // « sûr » = ni mort ni saut impossible, et on finit posé (pas en pleine chute à l'horizon)
-    return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, safe: dead < 0 && !invalid && (c.grounded || landed >= 0) };
+    return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, jetted, safe: dead < 0 && !invalid && !jetted && (c.grounded || landed >= 0) };
   }
   function aiDecide(e) {
     if ((e.stun || 0) > 0) return ((e.plan = null), { dir: 0, jump: !1 });
@@ -1160,7 +1161,7 @@ function R(e, t) {
       cx = jt.x + jt.w / 2;
     if (bot <= top) return;
     // lèvre rocheuse d'où sort l'eau (en haut de l'écran si la source est hors champ)
-    let lip = Math.max(jt.top, y - 10);
+    let lip = Math.max(jt.top, y) + 14;
     ((n.fillStyle = `#2b3a3f`), n.fillRect(jt.x - 14, lip - 16, jt.w + 28, 16));
     if (st.on) {
       // rideau plein : blanc-bleu, stries qui descendent vite
@@ -1191,7 +1192,7 @@ function R(e, t) {
           n.fillRect(cx - wv / 2 + ((q * 13) % Math.max(4, wv)), py, 3, 9);
         }
         if (Math.sin(_ * (8 + st.warn * 18)) > -0.3) {
-          let ty = y + 70;
+          let ty = y + 74;
           ((n.fillStyle = `#7fd3f0`),
             n.beginPath(),
             n.moveTo(cx, ty + 14),
@@ -1199,8 +1200,8 @@ function R(e, t) {
             n.lineTo(cx - 14, ty - 8),
             n.fill(),
             (n.fillStyle = `#0f2330`),
-            n.fillRect(cx - 1.5, ty - 4, 3, 8),
-            n.fillRect(cx - 6, ty + 1, 12, 3));
+            n.fillRect(cx - 1.5, ty - 5, 3, 7),
+            n.fillRect(cx - 1.5, ty + 4, 3, 3));
         }
       }
     }
