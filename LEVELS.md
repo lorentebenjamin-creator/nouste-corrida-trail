@@ -306,6 +306,6 @@ Profil « attentif » (défaut) et profil « pressé » (`--delay 180-250 --jitt
 
 Lecture : la pente est régulière jusqu'à 4, puis marche nette à 5 (mécaniques). 5, 6 et 7 sont
 du même ordre pour un joueur pressé ; l'Estive (5, « Technique ») est même la plus dure dans ce
-profil (13 chutes sur 20 essais vers x≈4600 : bac mobile du niveau). Aucun niveau n'est
+profil (13 chutes vers x≈4600 sur 20 essais : sortie de « l’ascenseur du berger », passerelle mobile x=4440 qui monte de 200 px vers la cabane à x=4640). Aucun niveau n'est
 déraisonnable (< 30 % de réussite). Le modèle reste plus régulier qu'un vrai débutant : ces
 chiffres comparent les niveaux entre eux, ce ne sont pas des taux réels.
