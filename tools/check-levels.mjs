@@ -18,6 +18,7 @@ const LIMITS = {
 let errors = 0, warnings = 0;
 const err = (l, m) => { errors++; console.log(`ERREUR  [${l}] ${m}`); };
 const warn = (l, m) => { warnings++; console.log(`avert.  [${l}] ${m}`); };
+const info = (l, m) => console.log(`info    [${l}] ${m}`);
 
 const ids = new Set();
 LEVELS.forEach((L, idx) => {
@@ -36,7 +37,7 @@ LEVELS.forEach((L, idx) => {
   else L.rivals.forEach((r, i) => { if (!(r.speed > 0.5 && r.speed <= 1.05)) err(tag, `rivals[${i}].speed hors bornes (0.5–1.05)`); });
   if (L.width > LIMITS.maxWidth) err(tag, `width ${L.width} > ${LIMITS.maxWidth}`);
   for (const k of ["solids", "hazards", "coins", "checkpoints"]) if (!Array.isArray(L[k])) err(tag, `${k} doit être un tableau`);
-  for (const k of ["rockfalls", "patrols"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
+  for (const k of ["rockfalls", "patrols", "jets"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
   if (errors > errorsBefore) return;
 
   const movers = L.solids.filter(s => s.move);
@@ -138,10 +139,27 @@ LEVELS.forEach((L, idx) => {
     for (const cp of L.checkpoints) if (cp.x + 60 > dg.x1 - 40 && cp.x < dg.x2) err(tag, `${tagp}: passe sur la zone de réapparition du fanion @${cp.x}`);
     if (dg.x1 < L.spawnX + 300) err(tag, `${tagp}: trop près du départ`);
   }
+  // Jets de cascade (v3)
+  for (const jt of L.jets || []) {
+    const tagj = `jet @${jt.x}`, off = jt.period * (1 - jt.on);
+    if (!(jt.w >= 30 && jt.w <= 120)) err(tag, `${tagj}: largeur ${jt.w} hors 30–120`);
+    if (!(jt.bottom > jt.top)) err(tag, `${tagj}: bottom doit être > top`);
+    if (!(jt.period >= 2 && jt.period <= 6)) err(tag, `${tagj}: period ${jt.period} hors 2–6 s`);
+    if (!(jt.on >= 0.2 && jt.on <= 0.6)) err(tag, `${tagj}: on ${jt.on} hors 0.2–0.6`);
+    if (off < 1.2) err(tag, `${tagj}: pause ${off.toFixed(2)} s < 1,2 s (passage trop serré)`);
+    if (!(jt.warn >= 0.4 && jt.warn <= off - 0.3)) err(tag, `${tagj}: warn ${jt.warn} s hors [0,4 ; pause − 0,3]`);
+    // un endroit sûr pour attendre juste avant le jet (sol ou passerelle fixe qui finit ≤ 120 px avant)
+    const wait = L.solids.some(sd => !sd.move && sd.x + sd.w <= jt.x + 2 && sd.x + sd.w >= jt.x - 120 && sd.y >= jt.top && sd.y <= jt.bottom);
+    const under = L.solids.some(sd => !sd.move && sd.x < jt.x + jt.w && sd.x + sd.w > jt.x && sd.y >= jt.top && sd.y <= jt.bottom);
+    if (!wait && !under) warn(tag, `${tagj}: aucun sol pour attendre dans les 120 px avant le jet`);
+    if (!under) info(tag, `${tagj}: au-dessus d'un ravin (passage chronométré, à valider avec tools/playtest.mjs --human)`);
+    for (const cp of L.checkpoints) if (cp.x + 60 > jt.x - 60 && cp.x < jt.x + jt.w + 60) err(tag, `${tagj}: trop près du fanion @${cp.x}`);
+    if (jt.x < L.spawnX + 300) err(tag, `${tagj}: trop près du départ`);
+  }
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`].filter(Boolean).join(", ");
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`].filter(Boolean).join(", ");
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);
 });
 console.log(`\n${LEVELS.length} niveaux, ${errors} erreur(s), ${warnings} avertissement(s)`);
