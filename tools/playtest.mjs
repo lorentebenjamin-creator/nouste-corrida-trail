@@ -20,7 +20,7 @@ import { chromium } from 'playwright';
 const pos = [], flags = {};
 for (let i = 2; i < process.argv.length; i++) {
   const a = process.argv[i];
-  if (a.startsWith('--')) { const k = a.slice(2); const nx = process.argv[i + 1]; if (nx != null && !nx.startsWith('--') && !['human', 'md'].includes(k)) { flags[k] = nx; i++; } else flags[k] = true; }
+  if (a.startsWith('--')) { const k = a.slice(2); const nx = process.argv[i + 1]; if (nx != null && !nx.startsWith('--') && !['human', 'md', 'verbose'].includes(k)) { flags[k] = nx; i++; } else flags[k] = true; }
   else pos.push(a);
 }
 const url = pos[0] || 'http://localhost:8765/nouste-corrida-trail/';
@@ -89,16 +89,16 @@ if (!human) {
       const c = window.__controlsTest;
       c.start(id); c.setAutopilot(true, { human: { ...hopt, seed: sd } }); c.setTurbo(turbo);
     }, { id: L.id, sd, turbo, hopt });
-    let st, deathsAt = [], last = -1, t0 = Date.now();
+    let st, t0 = Date.now();
     for (;;) {
       await p.waitForTimeout(100);
       st = await p.evaluate(() => ({ ...__controlsTest.getState(), x: __controlsTest.getX(), y: __controlsTest.getY(), r: __controlsTest.getRunners(), H: __controlsTest.getHuman() }));
-      if (st.deaths !== last) { st.deaths > 0 && last >= 0 && deathsAt.push(Math.round(st.x)); last = st.deaths; }
       if (st.mode === 'finish' || st.deaths > maxDeaths || st.time > 240 || Date.now() - t0 > 180000) break;
     }
     await p.evaluate(() => { const c = window.__controlsTest; c.setTurbo(0); c.setAutopilot(false); c.pause?.(); });
     const ok = st.mode === 'finish' && st.deaths <= maxDeaths;
-    return { ok, time: st.time, deaths: st.deaths, D: st.H?.D, rivalMax: Math.max(...st.r.slice(1).map((x) => x.deaths)), deathsAt };
+    const why = ok ? '' : st.deaths > maxDeaths ? `>${maxDeaths} chutes` : st.time > 240 ? `bloqué x=${Math.round(st.x)}` : `délai réel dépassé x=${Math.round(st.x)} t=${st.time.toFixed(0)}`;
+    return { ok, why, time: st.time, deaths: st.deaths, D: st.H?.D, rivalMax: Math.max(...st.r.slice(1).map((x) => x.deaths)), deathsAt: st.deathXs || [] };
   }
   const rows = [];
   for (const L of list) {
@@ -114,6 +114,7 @@ if (!human) {
     rows.push({ L, okN, meanDeaths, meanTime, hot, loops });
     console.log(`${okN / trials >= 0.3 ? 'OK   ' : 'DUR  '} [${L.id}] ${L.name} (${L.difficulty}) — réussite ${okN}/${trials} (${Math.round((100 * okN) / trials)} %) — chutes moy. ${meanDeaths.toFixed(2)} — temps moy. ${isNaN(meanTime) ? '—' : meanTime.toFixed(1) + ' s'}${hot ? ' — chutes surtout à ' + hot : ''}${loops ? ' — RIVAL EN BOUCLE dans ' + loops + ' essai(s)' : ''}`);
     if (loops) allOk = false;
+    if (flags.verbose) for (const r of res) if (!r.ok) console.log(`      graine ${r.sd} : ${r.why} (chutes ${r.deaths}${r.deathsAt.length ? ' à ' + r.deathsAt.join(',') : ''})`);
   }
   if (flags.md) {
     console.log(`\n| N° | Niveau | Difficulté | Réussite (≤ ${maxDeaths} chutes) | Chutes moy. | Temps moy. (réussis) |\n|---|---|---|---|---|---|`);

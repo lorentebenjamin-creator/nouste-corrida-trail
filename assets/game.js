@@ -478,6 +478,7 @@ function R(e, t) {
     e.alive &&
       !e.finished &&
       ((e.deaths += 1),
+      e.you && (e.deathXs ||= []).push(Math.round(e.x)),
       e.you
         ? ((e.alive = !1),
           (e.vx = 0),
@@ -899,6 +900,7 @@ function R(e, t) {
       left = !c.grounded,
       landed = -1,
       air = -1,
+      airX = 0,
       fr = 0;
     for (; fr < maxF; fr++) {
       fr > 0 &&
@@ -929,14 +931,14 @@ function R(e, t) {
         dead = fr;
         break;
       }
-      if (!c.grounded) ((left = !0), air < 0 && (air = fr));
+      if (!c.grounded) ((left = !0), air < 0 && ((air = fr), (airX = c.x)));
       else if (left && landed < 0) landed = fr;
       // après la réception, encore 6 images : se poser juste devant une ronce n'est pas « sûr »
       if (stopOnLand && landed >= 0 && fr - landed >= 6) break;
     }
     if (saved) movers.forEach((m, ix) => ((m.x = saved[ix][0]), (m.y = saved[ix][1])));
     // « sûr » = ni mort ni saut impossible, et on finit posé (pas en pleine chute à l'horizon)
-    return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, jetted, safe: dead < 0 && !invalid && !jetted && (c.grounded || landed >= 0) };
+    return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, jetted, dangerX: dead >= 0 && (air < 0 || dead < air) ? c.x : air >= 0 ? airX : c.x, safe: dead < 0 && !invalid && !jetted && (c.grounded || landed >= 0) };
   }
   function aiDecide(e) {
     if ((e.stun || 0) > 0) return ((e.plan = null), { dir: 0, jump: !1 });
@@ -971,7 +973,8 @@ function R(e, t) {
     for (let dl of !e.grounded || (walk.safe && Math.abs(e.vx) < 30) ? [0] : [6, 3, 0]) {
       if (dl > 0 && walk.air >= 0 && walk.air <= dl) continue;
       let rs = simRunner(e, 1, dl, 85, !0);
-      if (rs.safe) return (dl > 0 && (e.plan = _ + dl / 60), { dir: 1, jump: dl === 0 });
+      // un saut « sûr » qui retombe avant l'endroit où la marche échoue ne règle rien (petit saut inutile)
+      if (rs.safe && (walk.safe || rs.x > walk.dangerX + e.w)) return (dl > 0 && (e.plan = _ + dl / 60), { dir: 1, jump: dl === 0 });
     }
     // Bloqué sans danger (contre un rocher) : on continue d'avancer, la situation change.
     if (walk.safe) return { dir: 1, jump: !1 };
@@ -1040,7 +1043,8 @@ function R(e, t) {
           let lim = Math.min(45, Math.max(0, Math.min(walk.air >= 0 ? walk.air : 99, walk.dead >= 0 ? walk.dead : 99))),
             k0 = -1, k1 = -1;
           for (let k2 = 0; k2 <= lim; k2++) {
-            let ok2 = simRunner(c, 1, k2, 85, !0).safe;
+            let r2 = simRunner(c, 1, k2, 85, !0),
+              ok2 = r2.safe && r2.x > walk.dangerX + c.w; // un saut qui retombe avant le danger ne compte pas
             if (ok2) (k0 < 0 && (k0 = k2), (k1 = k2));
             else if (k0 >= 0) break;
           }
@@ -1048,7 +1052,9 @@ function R(e, t) {
         }
       }
       ((H.plan = c.plan), (_ = t0), movers.forEach((m, ix) => ((m.x = sv[ix][0]), (m.y = sv[ix][1]))));
-      H.q.set(f + D, dc.dir);
+      // saut prévu : on garde l'élan jusqu'à l'appel (pas de freinage de dernière seconde)
+      H.q.set(f + D, H.jumpAt >= f + D || aim > 0 ? 1 : dc.dir);
+      window.__humDebug && (window.__humLog ||= []).push([f, Math.round(e.x), Math.round(e.vx), e.grounded, Math.round(c.x), dc.dir, dc.jump, aim, H.jumpAt].join(' '));
       if (aim >= 0 && H.jumpAt < f) {
         let sg = H.opt.jitter * 60, j2 = Math.round(Math.max(-2 * sg, Math.min(2 * sg, gauss(H.rnd) * sg)));
         H.jumpAt = Math.max(f + 1, f + D + aim + j2);
@@ -1656,6 +1662,7 @@ function R(e, t) {
         grounded: !!d?.grounded,
         deaths: d?.deaths ?? 0,
         jetHits: d?.jetHits ?? 0,
+        deathXs: d?.deathXs ?? [],
       }),
       getRunners: () =>
         u.map((e) => ({
