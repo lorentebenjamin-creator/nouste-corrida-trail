@@ -9,7 +9,7 @@ Le moteur du jeu (`assets/game.js`, code lisible) fait simplement
 `import { LEVELS, THEMES } from "../levels.js"` : **ajouter un niveau = ajouter un bloc
 `LEVELS.push(...)` à la fin de `levels.js`**, rien d'autre à toucher (ni build, ni HTML).
 
-Le menu affiche les niveaux du plus récent au plus ancien (liste défilante), numérotés
+Le menu affiche les niveaux du N°1 (en haut) au plus récent (en bas) (liste défilante), numérotés
 `N°1…N°n`, et le dernier niveau de `LEVELS` reçoit le badge **« Niveau du jour »**
 (dès qu'il y a plus de 3 niveaux). Les mètres affichés = `Math.round(finishX / 10)`.
 
@@ -247,7 +247,7 @@ chute, un humain peut passer.
   du jeu dans `#root` (le routeur cassait sous un sous-chemin et sans HTML SSR), qui charge
   `./game.js`. Le reste (React, etc.) est inchangé.
 * `assets/game.js` (ex-`routes-DUFPCL9U.js`, dé-minifié et maintenu à la main) :
-  niveaux importés de `../levels.js` + palettes `THEMES` ; menu du plus récent au plus ancien
+  niveaux importés de `../levels.js` + palettes `THEMES` ; menu du N°1 en haut au plus récent en bas
   (`N°k`, badge « Niveau du jour ») ; sprites en chemins relatifs ; **v2** : passerelles mobiles,
   chutes de pierres, patous ; IA par simulation (rivaux + pilote auto) ; rivaux immobiles 0,85 s
   après une chute ; record enregistré dès l'arrivée du joueur ; bouton tactile ↓ (descendre d'une

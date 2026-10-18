@@ -129,12 +129,12 @@ await pg.route('**/levels.js', async (route) => {
   route.fulfill({ response: res, body, headers: { ...res.headers(), 'content-type': 'text/javascript' } });
 });
 await pg.goto(url, { waitUntil: 'networkidle' }); await pg.waitForSelector('.level');
-const info = await pg.evaluate(() => { const l = document.querySelector('.levels'); return { n: l.children.length, scroll: l.scrollHeight > l.clientHeight + 50, first: l.children[0].innerText, today: document.querySelectorAll('.today').length }; });
-ok(info.n >= 46 && info.scroll && /Niveau du jour/i.test(info.first) && info.today === 1, `menu : ${info.n} niveaux, liste défilante, badge unique sur le plus récent`);
+const info = await pg.evaluate(() => { const l = document.querySelector('.levels'); return { n: l.children.length, scroll: l.scrollHeight > l.clientHeight + 50, first: l.children[0].innerText, last: l.children[l.children.length - 1].innerText, today: document.querySelectorAll('.today').length }; });
+ok(info.n >= 46 && info.scroll && /N°\s*1\b/.test(info.first) && /Niveau du jour/i.test(info.last) && info.today === 1, `menu : ${info.n} niveaux, N°1 en haut, badge unique sur le plus récent en bas`);
 await pg.screenshot({ path: '/workspace/corrida-v2-menu-46-niveaux.png' });
 const last = pg.locator('.level', { hasText: 'Sous-bois' }); await last.scrollIntoViewIfNeeded(); await last.click();
 await waitMode(pg, 'count', 3000).catch(() => {});
-ok((await st(pg)).level === 'sousbois', 'menu : le plus ancien (en bas de liste) se lance');
+ok((await st(pg)).level === 'sousbois', 'menu : le dernier bouton de la liste se lance');
 await pg.close();
 
 ok(errs.length === 0, 'aucune erreur console' + (errs.length ? ' : ' + JSON.stringify(errs) : ''));

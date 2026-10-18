@@ -2122,7 +2122,6 @@ function K() {
                 (0, U.jsx)(`div`, {
                   className: `levels`,
                   children: C.map((e, i) => [e, i])
-                    .reverse()
                     .map(([e, lvlIdx]) => {
                       let r = n.levels[e.id];
                       return (0, U.jsxs)(
