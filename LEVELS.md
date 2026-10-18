@@ -1,5 +1,9 @@
 # Format des niveaux — NOUSTE CORRIDA TRAIL (copie statique)
 
+> **Source de vérité :** le dépôt GitHub (`main`) et sa copie de travail `/workspace/corrida-site`.
+> Les autres dossiers (`/workspace/corrida-classement`, …) ne sont que des copies alignées sur
+> `main` : ne jamais y travailler. Toujours commencer par `git pull` dans `/workspace/corrida-site`.
+
 Tous les niveaux vivent dans **`levels.js`** (module ES, lisible, non minifié).
 Le moteur du jeu (`assets/game.js`, code lisible) fait simplement
 `import { LEVELS, THEMES } from "../levels.js"` : **ajouter un niveau = ajouter un bloc
@@ -107,6 +111,33 @@ Idées de mise en page : chemin double (passerelles fixes au-dessus d'un sol gar
 niveau 5 x≈2840–3800), montée en « cheminée » (passerelles en escalier + ascenseur, niveau 6
 x≈1620–2300), descente en terrasses sous les pierres.
 
+## 3c. Mécanique v3 : jet de cascade (`jets`)
+
+```js
+jet(x, w, top, bottom, period = 3, on = 0.4, phase = 0, warn = 0.6)
+// → { x, w, top, bottom, period, on, phase, warn, push: 260, down: 520 }
+jets: [ jet(2632, 64, -400, 720, 3.0, 0.4, 0.7) ],   // niveau 7, entre deux passerelles
+```
+
+Rideau d'eau vertical sur la colonne `[x, x+w]`, de `y = top` à `y = bottom`. Cycle déterministe
+de `period` s (fonction du temps du monde, comme les autres mécaniques) : **actif** pendant la
+fraction `on` du cycle, puis **pause** (un simple filet d'eau). Pendant les `warn` s qui précèdent
+l'activation, le filet s'élargit, des gouttes tombent et un panneau bleu « ! » clignote en haut de
+l'écran ; un grondement sonore marque le début du jet. `phase` ∈ [0,1[ décale le cycle.
+
+Effet quand il est actif et qu'on le touche : **il ne tue pas**, il repousse (`vx ← −push`) et
+plaque vers le bas (`vy ≥ down`). Sur un sol, on recule simplement ; **au-dessus d'un ravin, on
+tombe** : c'est un passage chronométré (attendre sur la plateforme d'avant, sauter dans la pause).
+
+IA : la simulation des rivaux et de l'autopilote applique exactement le même jet ; une trajectoire
+qui touche un jet actif n'est pas « sûre », donc les rivaux attendent la pause au lieu de rebondir.
+
+Validation (`tools/check-levels.mjs`) : `w` 30–120, `period` 2–6 s, `on` 0,2–0,6, pause
+`period·(1−on)` ≥ 1,2 s, `warn` entre 0,4 s et pause − 0,3 s, `bottom > top`, un sol pour attendre
+dans les 120 px avant le jet (sinon avertissement), jamais à moins de 60 px d'un fanion ni à moins
+de 300 px du départ. Un jet au-dessus d'un ravin est signalé en `info` : le valider avec
+`tools/playtest.mjs --human`.
+
 ## 4. Thèmes
 
 Le décor est **100 % procédural** (dégradé de ciel, crêtes, sapins, sol, ronces) : un thème
@@ -176,7 +207,14 @@ chute, un humain peut passer.
    * balises : quelques `line` à sol−70 et des `arc(…, 40)` au-dessus des sauts ;
    * `rivals` : vitesses ~1.0 / 0.92 / 0.85 (baisser pour un niveau plus facile) ;
    * optionnel : `rockfalls`, `patrols`, passerelles `mp(...)` (§3b) — 1 à 2 types par niveau suffisent.
-3. Ne jamais modifier ni supprimer un niveau existant, ni changer d'`id`.
+3. **Règle « 1 nouveauté par niveau »** : chaque nouveau niveau doit introduire **au moins une
+   mécanique inédite** (§3b/§3c, ou une nouvelle à coder) **ou au moins un passage clé jamais
+   vu** (une combinaison ou une mise en page qui n'existe dans aucun niveau précédent : ex. jet
+   au-dessus d'un bac mobile, patou sur une passerelle haute, cheminée sous les pierres…).
+   Le dire dans un commentaire `// Passage clé : …` au-dessus de l'élément concerné **et** dans la
+   colonne « Nouveauté du sentier » du tableau du `README.md`. Un niveau qui ne fait que
+   réassembler des passages déjà vus n'est pas accepté.
+   Ne jamais modifier ni supprimer un niveau existant, ni changer d'`id`.
 4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement pour le nouveau niveau**
    (les niveaux 1–3 d'origine ont des avertissements connus, c'est normal ; les lignes `info`
    sur les passerelles mobiles imposent l'étape 5).
@@ -187,7 +225,10 @@ chute, un humain peut passer.
    node /chemin/vers/tools/playtest.mjs http://localhost:8765/nouste-corrida-trail/ last /tmp/niveau.png
    node /chemin/vers/tools/playtest.mjs http://localhost:8765/nouste-corrida-trail/ all   # tous les niveaux
    node /chemin/vers/tools/e2e.mjs http://localhost:8765/nouste-corrida-trail/            # commandes, fanions, record, menu
+   node /chemin/vers/tools/playtest.mjs http://localhost:8765/nouste-corrida-trail/ last --human --trials 20 --verbose
    ```
+   Pilote humain : viser **≥ 60 % de réussite** (≤ 5 chutes) pour un niveau « Engagé »/« Extrême »,
+   ≥ 90 % en dessous ; `--verbose` liste les essais ratés et l'endroit des chutes.
    Attendu : `PLAYTEST OK` (le pilote auto finit sans chute, aucun rival en boucle, aucune erreur
    console) et `E2E OK`. Si le pilote auto échoue, la ligne indique où il est tombé (`chutes à x,y`) :
    élargir la plateforme, réduire l'écart, ralentir la passerelle ou décaler la phase.
@@ -217,7 +258,7 @@ chute, un humain peut passer.
   défilante, badge, bouton ↓.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–6)
+## 8. Courbe de difficulté (niveaux 1–7)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -227,7 +268,7 @@ chute, un humain peut passer.
 | 4 | La Brèche aux Isards | Haute route | 1090 m | 20 | 8 | — | 1 / 0.92 / 0.85 | 30,9 s |
 | 5 | L'Estive des Patous | Technique | 940 m | 10 | 3 | 5 passerelles mobiles, 4 patous | 1 / 0.93 / 0.86 | 29,1 s |
 | 6 | Le Couloir des Pierres | Extrême | 1030 m | 13 | 2 | 4 passerelles mobiles, 11 chutes de pierres, 2 patous | 1 / 0.94 / 0.88 | 29,4 s |
-| 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou | 1 / 0.93 / 0.86 | 27,7 s |
+| 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou, **1 jet de cascade** | 1 / 0.93 / 0.86 | 31,9 s |
 
 Progression voulue : 1–3 apprennent sauts, ronces, passerelles ; 4 = endurance (le plus long,
 aucune mécanique, rivaux à 1,00) ; 5 = découverte des mécaniques v2 avec du temps pour lire
@@ -236,3 +277,35 @@ rapprochées, cheminée, bacs au-dessus du vide, rivaux les plus rapides). « Pi
 du pilote parfait de `tools/playtest.mjs` (un humain met nettement plus). Pour un nouveau niveau
 quotidien, viser entre 4 et 6 et varier : un niveau « classique » (modèle 4) puis un niveau à
 mécaniques (modèle 5/6).
+
+### Pilote « humain » (`tools/playtest.mjs --human`)
+
+Même cerveau que l'autopilote (simulation exacte de la physique), rendu imprécis :
+
+* **délai de réaction** 150–200 ms (tiré par essai) : les décisions sont prises sur l'état
+  extrapolé à +délai et exécutées après ce délai ; si l'anticipation se termine mal (danger pas
+  vu), réflexe sur l'état présent ; après une chute, il repart après le délai ;
+* **sauts imprécis** : il vise le milieu de la fenêtre de sauts sûrs (pas le dernier moment), puis
+  un **jitter gaussien** σ = 45 ms (borné ±2σ) décale l'appel ; **durée d'appui** aléatoire
+  0,28–0,55 s (relâcher tôt = saut plus bas) ;
+* **graines déterministes** (essai i → graine 1 + i) : résultats reproductibles ;
+* réussite = arche franchie avec **≤ 5 chutes** (essai arrêté au-delà), sur 20 essais.
+
+Profil « attentif » (défaut) et profil « pressé » (`--delay 180-250 --jitter 80 --hold 0.18-0.5`),
+20 essais par niveau, le 18/10/2026 :
+
+| N° | Niveau | Étiquette | Attentif : réussite | chutes moy. | temps moy. | Pressé : réussite | chutes moy. | temps moy. |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Sous-bois des cèdres | Balade | 100 % | 0,15 | 15,4 s | 95 % | 0,80 | 17,3 s |
+| 2 | La crête | Rythme | 100 % | 0,10 | 19,8 s | 100 % | 0,70 | 22,0 s |
+| 3 | Col du vent | Hors-piste | 100 % | 0,10 | 22,8 s | 100 % | 0,95 | 28,1 s |
+| 4 | La Brèche aux Isards | Haute route | 100 % | 0,25 | 33,3 s | 95 % | 1,95 | 38,6 s |
+| 5 | L'Estive des Patous | Technique | 100 % | 0,65 | 34,3 s | 70 % | 3,55 | 44,3 s |
+| 6 | Le Couloir des Pierres | Extrême | 95 % | 1,85 | 41,7 s | 75 % | 3,55 | 46,8 s |
+| 7 | La Cascade des Desmans | Engagé | 95 % | 1,55 | 41,3 s | 80 % | 3,45 | 48,1 s |
+
+Lecture : la pente est régulière jusqu'à 4, puis marche nette à 5 (mécaniques). 5, 6 et 7 sont
+du même ordre pour un joueur pressé ; l'Estive (5, « Technique ») est même la plus dure dans ce
+profil (13 chutes sur 20 essais vers x≈4600 : bac mobile du niveau). Aucun niveau n'est
+déraisonnable (< 30 % de réussite). Le modèle reste plus régulier qu'un vrai débutant : ces
+chiffres comparent les niveaux entre eux, ce ne sont pas des taux réels.

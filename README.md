@@ -11,18 +11,25 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 
 ## Sentiers
 
-| N° | Sentier | Difficulté | Longueur |
-|---|---|---|---|
-| 1 | Sous-bois des cèdres | Balade | 498 m |
-| 2 | La crête | Rythme | 646 m |
-| 3 | Col du vent | Hors-piste | 762 m |
-| 4 | La Brèche aux Isards | Haute route | 1090 m |
-| 5 | L'Estive des Patous *(nouveau)* | Technique | 940 m |
-| 6 | Le Couloir des Pierres *(nouveau)* | Extrême | 1030 m |
-| 7 | La Cascade des Desmans *(niveau du jour)* | Engagé | 950 m |
+| N° | Sentier | Difficulté | Longueur | Nouveauté du sentier |
+|---|---|---|---|---|
+| 1 | Sous-bois des cèdres | Balade | 498 m | apprentissage : sauts, ronces, rocher, tronc, passerelles |
+| 2 | La crête | Rythme | 646 m | le rythme : 10 ravins enchaînés, deux rochers à gravir |
+| 3 | Col du vent | Hors-piste | 762 m | hors-piste : 11 ronces, petites descentes qui finissent dans les ronces |
+| 4 | La Brèche aux Isards | Haute route | 1090 m | endurance : le plus long, enchaînement de 20 ravins |
+| 5 | L'Estive des Patous | Technique | 940 m | passerelles mobiles (bacs, ascenseur) et patous |
+| 6 | Le Couloir des Pierres | Extrême | 1030 m | chutes de pierres annoncées par leur ombre, cheminée |
+| 7 | La Cascade des Desmans *(niveau du jour)* | Engagé | 950 m | **jet de cascade** : rideau d'eau intermittent au-dessus d'un ravin |
 
-Nouveautés : passerelles mobiles (bacs, ascenseurs), chutes de pierres annoncées par leur ombre,
-patous qui gardent l'estive, rivaux plus malins (ils ne se jettent plus dans les ronces).
+Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
+passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
+
+## Source de référence
+
+**Le dépôt GitHub (`main`) et sa copie de travail `/workspace/corrida-site` sont la seule source
+de vérité.** Tout autre dossier (par ex. `/workspace/corrida-classement`, ancien worktree de la
+branche `classement`, désormais aligné sur `main`) n'est qu'une copie : ne rien y modifier, toujours
+partir d'un `git pull` sur `/workspace/corrida-site`.
 
 ## Commandes
 
@@ -36,10 +43,11 @@ Site 100 % statique : servir le dossier tel quel (fonctionne à la racine ou sou
 
 Les niveaux sont dans **`levels.js`** ; le format et la recette pour ajouter un niveau sont
 décrits dans **[LEVELS.md](LEVELS.md)**. Vérification : `node tools/check-levels.mjs`,
-puis `tools/playtest.mjs` (pilote automatique sur chaque niveau) et `tools/e2e.mjs` (commandes,
-fanions, record, menu) avec Playwright.
+puis `tools/playtest.mjs` (pilote automatique sur chaque niveau ; `--human --trials 20` pour un
+pilote « humain » imprécis et des taux de réussite), `tools/e2e.mjs` (commandes, fanions, record,
+menu) et `tools/e2e-classement.mjs` (classement, faux backend) avec Playwright.
 
-## Classement en ligne (branche `classement`)
+## Classement en ligne
 
 Classement partagé par niveau : le meilleur temps de chaque « Nom sur le dossard ».
 Affiché à l'arrivée (top 10 + ton rang) et dans le menu (top 3 sous chaque sentier).
