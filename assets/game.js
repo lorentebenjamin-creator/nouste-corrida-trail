@@ -699,6 +699,7 @@ function R(e, t) {
     if (
       (Math.abs(e.vy) < re && (o = ne),
       (e.vy = Math.min(ie, e.vy + o * t)),
+      jetTouch(e, _),
       Re(e, t),
       e.grounded
         ? Math.abs(e.vx) < 28
@@ -786,7 +787,10 @@ function R(e, t) {
     movers = [],
     falls = [],
     dogs = [],
-    autopilot = !1;
+    jets = [],
+    autopilot = !1,
+    hum = null,
+    turbo = 0;
   function moverPos(m, time) {
     let mv = m.move,
       q = 0.5 - 0.5 * Math.cos(2 * Math.PI * (time / mv.period + (mv.phase || 0)));
@@ -828,6 +832,25 @@ function R(e, t) {
       dir: ph < 0.5 ? 1 : -1,
     };
   }
+  // Jet de cascade : actif pendant la fraction `on` du cycle, avertissement `warn` s avant.
+  function jetState(jt, time) {
+    let t = ((((time / jt.period + (jt.phase || 0)) % 1) + 1) % 1) * jt.period,
+      onT = jt.on * jt.period;
+    if (t < onT) return { on: !0, k: t / onT, warn: 0 };
+    let toOn = jt.period - t;
+    return { on: !1, k: 0, warn: toOn < jt.warn ? 1 - toOn / jt.warn : 0 };
+  }
+  function jetPush(e, time) {
+    for (let jt of jets)
+      if (e.x + e.w > jt.x && e.x < jt.x + jt.w && e.y + e.h > jt.top && e.y < jt.bottom && jetState(jt, time).on)
+        return ((e.vx = Math.min(e.vx, -jt.push)), (e.vy = Math.max(e.vy, jt.down)), !0);
+    return !1;
+  }
+  function jetTouch(e, time) {
+    let hit = jets.length > 0 && jetPush(e, time);
+    hit && !e.inJet && ((e.jetHits = (e.jetHits || 0) + 1), e.you && ((z = Math.max(z, 0.1)), r.burst(0.18, 0.05, 1.6)));
+    e.inJet = hit;
+  }
   function dynHit(e, time) {
     for (let fl of falls) {
       let st = fallState(fl, time);
@@ -844,7 +867,9 @@ function R(e, t) {
     for (let m of movers) [m.x, m.y] = moverPos(m, 0);
     falls = s.rockfalls || [];
     dogs = s.patrols || [];
+    jets = s.jets || [];
     for (let fl of falls) fl.wasFalling = !1;
+    for (let jt of jets) jt.wasOn = !1;
   }
   function tickDynamicSounds() {
     for (let fl of falls) {
@@ -856,6 +881,11 @@ function R(e, t) {
         Math.abs(fl.x - (v + b / 2)) < b * 0.7 &&
         (r.burst(0.2, 0.07, 0.7), (z = Math.max(z, 0.12))),
         (fl.wasFalling = falling));
+    }
+    for (let jt of jets) {
+      let on = jetState(jt, _).on;
+      (on && !jt.wasOn && o !== `count` && Math.abs(jt.x - (v + b / 2)) < b * 0.6 && r.burst(0.5, 0.035, 0.5),
+        (jt.wasOn = on));
     }
   }
   // --- IA : simulation exacte de la même physique ---------------------
@@ -875,7 +905,7 @@ function R(e, t) {
         (c.stun = Math.max(0, (c.stun || 0) - dt)),
         saved && setMovers(_ + fr * dt, [c]));
       c.drop = Math.max(0, c.drop - dt);
-      let dd = (c.stun || 0) > 0 ? 0 : dir,
+      let dd = (c.stun || 0) > 0 ? 0 : Array.isArray(dir) ? dir[Math.min(fr, dir.length - 1)] : dir,
         acc = c.grounded ? M : ae;
       if (dd !== 0) {
         let dv = dd * k * c.speed - c.vx;
@@ -893,7 +923,7 @@ function R(e, t) {
         ((c.vy = j), (c.grounded = !1), (c.coyote = 0), (c.lock = c.you ? 0 : 0.28), (left = !0));
       }
       let gr = c.vy < 0 ? te : A;
-      (Math.abs(c.vy) < re && (gr = ne), (c.vy = Math.min(ie, c.vy + gr * dt)), Re(c, dt));
+      (Math.abs(c.vy) < re && (gr = ne), (c.vy = Math.min(ie, c.vy + gr * dt)), jetPush(c, _ + fr * dt), Re(c, dt));
       if (c.y > se || s.hazards.some((hz) => fe(c, hz)) || dynHit(c, _ + fr * dt)) {
         dead = fr;
         break;
@@ -905,7 +935,7 @@ function R(e, t) {
     }
     if (saved) movers.forEach((m, ix) => ((m.x = saved[ix][0]), (m.y = saved[ix][1])));
     // « sûr » = ni mort ni saut impossible, et on finit posé (pas en pleine chute à l'horizon)
-    return { dead, invalid, landed, air, frames: fr + 1, x: c.x, safe: dead < 0 && !invalid && (c.grounded || landed >= 0) };
+    return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, safe: dead < 0 && !invalid && (c.grounded || landed >= 0) };
   }
   function aiDecide(e) {
     if ((e.stun || 0) > 0) return ((e.plan = null), { dir: 0, jump: !1 });
@@ -967,6 +997,51 @@ function R(e, t) {
   function autoInput(e) {
     let jmp = aiStep(e);
     return { left: e.aiDir < 0, right: e.aiDir > 0, jump: !0, down: !1, edge: jmp };
+  }
+  // --- Pilote « humain » (tools/playtest.mjs --human) -------------------
+  // Même cerveau que l'autopilote, mais : décisions prises avec un délai de réaction D (150–200 ms,
+  // tiré par essai) sur l'état extrapolé à +D (le joueur anticipe avec ce qu'il a déjà « commandé »),
+  // exécution décalée de D ; sauts décalés d'un jitter gaussien (σ, borné ±2σ) ; durée d'appui sur
+  // saut aléatoire (relâcher tôt = saut plus bas). Graine fixe → essais reproductibles.
+  function rng32(a) {
+    return () => ((a = (a + 0x6d2b79f5) | 0), (a = Math.imul(a ^ (a >>> 15), 1 | a)), (a = (a + Math.imul(a ^ (a >>> 7), 61 | a)) ^ a), ((a ^ (a >>> 14)) >>> 0) / 4294967296);
+  }
+  function humanReset(opt) {
+    let rnd = rng32((opt.seed ?? 1) * 2654435761);
+    hum = {
+      opt, rnd,
+      D: Math.round((opt.delayMin + (opt.delayMax - opt.delayMin) * rnd()) * 60),
+      f: 0, q: new Map(), jumpAt: -1, holdEnd: -1, dir: 1, plan: null, deaths: -1, jumps: 0,
+    };
+  }
+  function gauss(rnd) {
+    let u = Math.max(1e-9, rnd()), w = rnd();
+    return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * w);
+  }
+  function humanInput(e) {
+    let H = hum, D = H.D, f = ++H.f;
+    if (e.deaths !== H.deaths) ((H.deaths = e.deaths), H.q.clear(), (H.jumpAt = -1), (H.holdEnd = -1), (H.plan = null), (H.dir = 1));
+    // 1) cerveau : extrapole D images avec les commandes déjà en file, décide pour l'image f + D
+    let dirs = [];
+    for (let i = 0; i < D; i++) dirs.push(H.q.get(f + i) ?? H.dir);
+    let ex = simRunner(e, dirs, H.jumpAt >= f && H.jumpAt < f + D ? H.jumpAt - f : -1, D, !1);
+    ex.invalid && (ex = simRunner(e, dirs, -1, D, !1)); // saut en file impossible (en l'air) : tampon moteur
+    if (ex.dead < 0 && !ex.invalid) {
+      let c = ex.st, t0 = _, sv = movers.map((m) => [m.x, m.y]);
+      ((c.plan = H.plan), (_ = t0 + D / 60), setMovers(_));
+      let dc = aiDecide(c);
+      ((H.plan = c.plan), (_ = t0), movers.forEach((m, ix) => ((m.x = sv[ix][0]), (m.y = sv[ix][1]))));
+      H.q.set(f + D, dc.dir);
+      if (dc.jump && H.jumpAt < f) {
+        let sg = H.opt.jitter * 60, j2 = Math.round(Math.max(-2 * sg, Math.min(2 * sg, gauss(H.rnd) * sg)));
+        H.jumpAt = Math.max(f + 1, f + D + j2);
+      }
+    }
+    // 2) mains : exécutent la file
+    H.q.has(f) && ((H.dir = H.q.get(f)), H.q.delete(f));
+    let edge = f === H.jumpAt;
+    edge && ((H.jumps += 1), (H.holdEnd = f + Math.round((H.opt.holdMin + (H.opt.holdMax - H.opt.holdMin) * H.rnd()) * 60)));
+    return { left: H.dir < 0, right: H.dir > 0, jump: f <= H.holdEnd, down: !1, edge };
   }
   function saveFinish(e) {
     let place =
@@ -1036,6 +1111,7 @@ function R(e, t) {
         n.globalAlpha = 1;
       }
     }
+    for (let jt of jets) drawJet(jt);
     for (let dg of dogs) {
       let rc = dogRect(dg, _),
         st = Math.sin(_ * 16) * 4;
@@ -1075,6 +1151,58 @@ function R(e, t) {
         n.fillRect(31, -29, 4, 3),
         n.fillRect(24, -32, 2, 2),
         n.restore());
+    }
+  }
+  function drawJet(jt) {
+    let st = jetState(jt, _),
+      top = Math.max(jt.top, y - 60),
+      bot = Math.min(jt.bottom, y + E + 60),
+      cx = jt.x + jt.w / 2;
+    if (bot <= top) return;
+    // lèvre rocheuse d'où sort l'eau (en haut de l'écran si la source est hors champ)
+    let lip = Math.max(jt.top, y - 10);
+    ((n.fillStyle = `#2b3a3f`), n.fillRect(jt.x - 14, lip - 16, jt.w + 28, 16));
+    if (st.on) {
+      // rideau plein : blanc-bleu, stries qui descendent vite
+      let a = Math.min(1, st.k * 8);
+      ((n.fillStyle = `rgba(214,236,246,${0.78 * a})`), n.fillRect(jt.x, top, jt.w, bot - top));
+      n.fillStyle = `rgba(255,255,255,${0.85 * a})`;
+      for (let q = 0; q < 5; q++) {
+        let sx = jt.x + 5 + q * ((jt.w - 12) / 4),
+          off = (_ * 900 + q * 137) % 120;
+        for (let yy = top - 120 + off; yy < bot; yy += 120) n.fillRect(sx, yy, 3, 54);
+      }
+      // écume et embruns sur les bords
+      n.fillStyle = `rgba(255,255,255,0.55)`;
+      for (let q = 0; q < 8; q++) {
+        let ph = (_ * 3 + q * 0.37) % 1;
+        (n.beginPath(),
+          n.arc(q % 2 ? jt.x - 4 - ph * 16 : jt.x + jt.w + 4 + ph * 16, top + ((q * 97 + _ * 300) % (bot - top)), 3 + ph * 4, 0, Math.PI * 2),
+          n.fill());
+      }
+    } else {
+      // pause : simple filet ; avertissement : le filet s'élargit, gouttes, panneau qui clignote
+      let wv = 4 + st.warn * (jt.w - 10);
+      ((n.fillStyle = `rgba(190,224,240,${0.35 + st.warn * 0.35})`), n.fillRect(cx - wv / 2, top, wv, bot - top));
+      if (st.warn > 0) {
+        n.fillStyle = `rgba(230,246,255,0.9)`;
+        for (let q = 0; q < 6; q++) {
+          let py = top + ((_ * 1.6 + q / 6) % 1) * (bot - top);
+          n.fillRect(cx - wv / 2 + ((q * 13) % Math.max(4, wv)), py, 3, 9);
+        }
+        if (Math.sin(_ * (8 + st.warn * 18)) > -0.3) {
+          let ty = y + 70;
+          ((n.fillStyle = `#7fd3f0`),
+            n.beginPath(),
+            n.moveTo(cx, ty + 14),
+            n.lineTo(cx + 14, ty - 8),
+            n.lineTo(cx - 14, ty - 8),
+            n.fill(),
+            (n.fillStyle = `#0f2330`),
+            n.fillRect(cx - 1.5, ty - 4, 3, 8),
+            n.fillRect(cx - 6, ty + 1, 12, 3));
+        }
+      }
     }
   }
   function ze(e, t, n) {
@@ -1125,7 +1253,7 @@ function R(e, t) {
         if (o === `down`) continue;
         !a || t.finished
           ? $(t, e, { left: !1, right: !1, jump: !1, down: !1, edge: !1 })
-          : $(t, e, autopilot ? autoInput(t) : n);
+          : $(t, e, autopilot ? (hum ? humanInput(t) : autoInput(t)) : n);
       } else
         t.finished
           ? $(t, e, { left: !1, right: !1, jump: !1, down: !1, edge: !1 })
@@ -1358,7 +1486,8 @@ function R(e, t) {
     let t = Math.min(0.05, (e - Se) / 1e3);
     ((Se = e), (Ce += t));
     let n = 0;
-    for (; Ce >= 1 / 60 && n < 5;) (Ve(1 / 60), (Ce -= 1 / 60), (n += 1));
+    if (turbo > 0) for (Ce = 0; n < turbo; n++) Ve(1 / 60);
+    else for (; Ce >= 1 / 60 && n < 5;) (Ve(1 / 60), (Ce -= 1 / 60), (n += 1));
     (Ue(), (xe = requestAnimationFrame($e)));
   }
   function et(e) {
@@ -1487,9 +1616,17 @@ function R(e, t) {
       getYaw: () => 0,
       getVy: () => d?.vy ?? 0,
       getMode: () => o,
-      setAutopilot: (e) => {
+      setAutopilot: (e, opt) => {
         autopilot = !!e;
+        opt?.human
+          ? humanReset({ delayMin: 0.15, delayMax: 0.2, jitter: 0.045, holdMin: 0.22, holdMax: 0.55, ...opt.human })
+          : (hum = null);
       },
+      // N pas de simulation par image affichée (0 = temps réel) : pour les essais en masse
+      setTurbo: (e) => {
+        turbo = Math.max(0, Math.min(60, e | 0));
+      },
+      getHuman: () => (hum ? { D: hum.D, jumps: hum.jumps } : null),
       teleport: (e, t) => {
         d && ((d.x = e), (d.y = t), (d.vx = 0), (d.vy = 0));
       },
@@ -1501,6 +1638,7 @@ function R(e, t) {
         checkpoint: d?.checkpoint ?? -1,
         grounded: !!d?.grounded,
         deaths: d?.deaths ?? 0,
+        jetHits: d?.jetHits ?? 0,
       }),
       getRunners: () =>
         u.map((e) => ({

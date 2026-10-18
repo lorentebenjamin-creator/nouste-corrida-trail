@@ -70,6 +70,18 @@ export const patou = (x1, x2, yDuSol, period = 4, phase = 0) => ({
   x1, x2, groundY: yDuSol, period, phase, w: 54, h: 34,
 });
 
+// ---- Mécaniques v3 --------------------------------------------------------
+// jet(x, w, top, bottom, period=3, on=0.4, phase=0, warn=0.6) : JET DE CASCADE — un rideau d'eau
+//   vertical sur la colonne [x, x+w], de y=top à y=bottom. Cycle de `period` s : actif pendant la
+//   fraction `on` du cycle (au début du cycle, décalé par `phase` ∈ [0,1[), puis un filet d'eau ;
+//   pendant les `warn` s qui précèdent, le filet grossit et l'écume monte (avertissement).
+//   Actif, il ne tue pas : il REPOUSSE le coureur en arrière (vx ← −push) et vers le bas
+//   (vy ≥ down). Au-dessus d'un ravin, il faut donc passer pendant la pause.
+//   À mettre dans le tableau `jets` du niveau.
+export const jet = (x, w, top, bottom, period = 3, on = 0.4, phase = 0, warn = 0.6) => ({
+  x, w, top, bottom, period, on, phase, warn, push: 260, down: 520,
+});
+
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
 // On peut en ajouter ici (toutes les clés sont obligatoires) : le décor est
@@ -454,7 +466,7 @@ LEVELS.push((() => {
       p(950, 430, 400), h(1060, 400),
       p(1510, 480, 340), g(1600, 340),
       // Les passerelles de la cascade
-      m(2140, 340, 160), m(2430, 290, 160), m(2730, 330, 160),
+      m(2140, 340, 160), m(2430, 290, 160), m(2730, 330, 160), // entre les 2 dernières : le jet
       p(3030, 800, 440),
       // La vasque : un radeau lent
       mp(3980, 420, 140, 200, 0, 4.4),
@@ -478,6 +490,11 @@ LEVELS.push((() => {
     rockfalls: [],
     patrols: [
       patou(7300, 7640, 440, 3.6),
+    ],
+    // Passage clé : le Jet des Desmans tombe sur le ravin entre les passerelles 2 et 3.
+    // 1,2 s d'eau puis 1,8 s de pause : attendre sur la passerelle, sauter dans la pause.
+    jets: [
+      jet(2632, 64, -400, 720, 3.0, 0.4, 0.1),
     ],
     coins: c.list,
     checkpoints: [y(id, 3060, 440, 1), y(id, 4490, 440, 2), y(id, 5810, 300, 3), y(id, 6890, 440, 4), y(id, 8410, 440, 5)],
