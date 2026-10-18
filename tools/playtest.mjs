@@ -29,6 +29,11 @@ const shot = pos[2];
 const human = !!flags.human;
 const trials = Number(flags.trials || 20), seed0 = Number(flags.seed || 1), maxDeaths = Number(flags['max-deaths'] ?? 5);
 const jobs = Number(flags.jobs || 4), turbo = Number(flags.turbo || 24);
+// réglages du pilote humain (défauts dans assets/game.js) : --delay 150-200 (ms) --jitter 45 (ms) --hold 0.22-0.55 (s)
+const hopt = {};
+if (flags.delay) { const [a, c] = String(flags.delay).split('-').map(Number); hopt.delayMin = a / 1000; hopt.delayMax = (c ?? a) / 1000; }
+if (flags.jitter != null) hopt.jitter = Number(flags.jitter) / 1000;
+if (flags.hold) { const [a, c] = String(flags.hold).split('-').map(Number); hopt.holdMin = a; hopt.holdMax = c ?? a; }
 
 const b = await chromium.launch();
 const errs = [];
@@ -80,10 +85,10 @@ if (!human) {
   const pages = [pg];
   for (let i = 1; i < jobs; i++) pages.push(await newPage());
   async function trial(p, L, sd) {
-    await p.evaluate(({ id, sd, turbo }) => {
+    await p.evaluate(({ id, sd, turbo, hopt }) => {
       const c = window.__controlsTest;
-      c.start(id); c.setAutopilot(true, { human: { seed: sd } }); c.setTurbo(turbo);
-    }, { id: L.id, sd, turbo });
+      c.start(id); c.setAutopilot(true, { human: { ...hopt, seed: sd } }); c.setTurbo(turbo);
+    }, { id: L.id, sd, turbo, hopt });
     let st, deathsAt = [], last = -1, t0 = Date.now();
     for (;;) {
       await p.waitForTimeout(100);

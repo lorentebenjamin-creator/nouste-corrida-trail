@@ -1030,12 +1030,28 @@ function R(e, t) {
     if (ex.dead < 0 && !ex.invalid) {
       let c = ex.st, t0 = _, sv = movers.map((m) => [m.x, m.y]);
       ((c.plan = H.plan), (_ = t0 + D / 60), setMovers(_));
-      let dc = aiDecide(c);
+      let dc = aiDecide(c),
+        aim = dc.jump ? 0 : -1;
+      // Un humain ne saute pas « au dernier moment » : devant un trou ou une ronce, il vise le milieu
+      // de la fenêtre de sauts sûrs (calculée une fois, à l'approche), puis s'y tient.
+      if (aim < 0 && dc.dir === 1 && H.jumpAt < f && c.grounded && c.lock <= 0) {
+        let walk = simRunner(c, 1, -1, 70, !0);
+        if (!walk.safe) {
+          let lim = Math.min(45, Math.max(0, Math.min(walk.air >= 0 ? walk.air : 99, walk.dead >= 0 ? walk.dead : 99))),
+            k0 = -1, k1 = -1;
+          for (let k2 = 0; k2 <= lim; k2++) {
+            let ok2 = simRunner(c, 1, k2, 85, !0).safe;
+            if (ok2) (k0 < 0 && (k0 = k2), (k1 = k2));
+            else if (k0 >= 0) break;
+          }
+          k0 >= 0 && (aim = Math.round((k0 + k1) / 2));
+        }
+      }
       ((H.plan = c.plan), (_ = t0), movers.forEach((m, ix) => ((m.x = sv[ix][0]), (m.y = sv[ix][1]))));
       H.q.set(f + D, dc.dir);
-      if (dc.jump && H.jumpAt < f) {
+      if (aim >= 0 && H.jumpAt < f) {
         let sg = H.opt.jitter * 60, j2 = Math.round(Math.max(-2 * sg, Math.min(2 * sg, gauss(H.rnd) * sg)));
-        H.jumpAt = Math.max(f + 1, f + D + j2);
+        H.jumpAt = Math.max(f + 1, f + D + aim + j2);
       }
     }
     // 2) mains : exécutent la file
@@ -1620,7 +1636,7 @@ function R(e, t) {
       setAutopilot: (e, opt) => {
         autopilot = !!e;
         opt?.human
-          ? humanReset({ delayMin: 0.15, delayMax: 0.2, jitter: 0.045, holdMin: 0.22, holdMax: 0.55, ...opt.human })
+          ? humanReset({ delayMin: 0.15, delayMax: 0.2, jitter: 0.045, holdMin: 0.28, holdMax: 0.55, ...opt.human })
           : (hum = null);
       },
       // N pas de simulation par image affichée (0 = temps réel) : pour les essais en masse
