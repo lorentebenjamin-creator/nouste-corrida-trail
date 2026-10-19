@@ -269,7 +269,7 @@ chute, un humain peut passer.
 | 5 | L'Estive des Patous | Technique | 940 m | 10 | 3 | 5 passerelles mobiles, 4 patous | 1 / 0.93 / 0.86 | 29,1 s |
 | 6 | Le Couloir des Pierres | Extrême | 1030 m | 13 | 2 | 4 passerelles mobiles, 11 chutes de pierres, 2 patous | 1 / 0.94 / 0.88 | 29,4 s |
 | 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou, **1 jet de cascade** | 1 / 0.93 / 0.86 | 31,9 s |
-| 8 | Le Gué des Lucioles | Très engagé | 956 m | 8 | 4 | 2 radeaux, 2 patous, 2 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 27,2 s |
+| 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 4 | 2 radeaux, 2 patous, 2 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 27,2 s |
 
 Progression voulue : 1–3 apprennent sauts, ronces, passerelles ; 4 = endurance (le plus long,
 aucune mécanique, rivaux à 1,00) ; 5 = découverte des mécaniques v2 avec du temps pour lire
