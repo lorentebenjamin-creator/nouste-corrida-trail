@@ -545,40 +545,43 @@ LEVELS.push((() => {
       // Descente vers le gave
       p(2130, 760, 440),
       // Passage clé : le radeau du gué, dont l'embarcadère est sous la cascade
-      mp(2920, 420, 140, 240, 0, 4.6),
+      mp(2920, 420, 125, 240, 0, 4.4), // 140→125 et 4,6→4,4 s (revue 19/10)
       p(3440, 700, 440),
       // Terrasses de la rive droite
       p(4270, 430, 370),
       p(4830, 420, 300),
       // Passerelles dans la nuit
-      m(5400, 300, 125), m(5680, 260, 125),
+      m(5410, 300, 115), m(5680, 260, 125), // 150→115/125 (revue 19/10)
       p(5980, 560, 340),
       // Le second radeau
       p(6680, 900, 440),
-      mp(7610, 420, 140, 200, 0, 4.0, 0.5),
+      mp(7610, 420, 120, 200, 0, 3.6, 0.5), // 140→120 et 4,0→3,6 s (revue 19/10)
       // Le sprint final, gardé par un patou
       p(8090, 1800, 440), g(9200, 440),
     ],
     hazards: [
       _(500, 70, 440),
-      _(2580, 72, 440),
+      _(2580, 64, 440), // 72→64 (revue 19/10) : ce n'est pas la ronce qui doit faire le niveau
       _(6220, 64, 340),
       // Rive gauche : deux ronces en rythme avant le second radeau
-      _(7060, 64, 440), _(7300, 64, 440),
+      _(7080, 64, 440), _(7320, 64, 440),
       _(9380, 70, 440),
     ],
     rockfalls: [],
     patrols: [
       patou(3860, 4100, 440, 3.4),
-      patou(8600, 8900, 440, 3.4, 0.3),
+      patou(4300, 4640, 370, 2.6, 0.5), // revue 19/10 : un patou sur la terrasse
+      patou(8600, 8900, 440, 2.8, 0.3), // 3,4→2,8 s (revue 19/10)
     ],
     // Passage clé : la cascade du gué tombe sur l'embarcadère du radeau (jamais vu : jet + bac).
     // 1,44 s d'eau puis 1,76 s de pause, sur un cycle (3,2 s) différent de celui du radeau (4,6 s) :
     // attendre au bord que le radeau soit là ET que l'eau s'arrête, puis embarquer.
     jets: [
-      jet(2960, 56, -400, 720, 3.2, 0.45, 0.2),
+      jet(2960, 56, -400, 720, 3.2, 0.5, 0.2),
       // Un second filet entre les deux passerelles de la nuit (attendre sur la première).
-      jet(5590, 56, -400, 720, 3.0, 0.45, 0.25),
+      jet(5590, 56, -400, 720, 2.7, 0.55, 0.25),
+      // Revue 19/10 : un troisième filet sur le saut qui redescend vers le second radeau.
+      jet(6580, 56, -400, 720, 3.0, 0.5, 0.6),
     ],
     coins: c.list,
     checkpoints: [y(id, 2160, 440, 1), y(id, 3470, 440, 2), y(id, 4860, 300, 3), y(id, 6710, 440, 4), y(id, 8110, 440, 5)],
