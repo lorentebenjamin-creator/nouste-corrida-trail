@@ -89,7 +89,7 @@ Exemples (voir niveaux 5 et 6 dans `levels.js`) :
 
 ```js
 solids: [ p(1100, 380, 440), mp(1560, 420, 140, 220, 0, 4.2), p(2060, 640, 440) ], // bac sur un gave
-solids: [ p(3920, 440, 380), mp(4440, 380, 120, 0, -200, 4.2), p(4640, 340, 200) ], // ascenseur
+solids: [ p(3920, 500, 380), mp(4440, 380, 150, 0, -200, 4.8), { ...p(4420, 195, 470), net: true }, p(4615, 365, 200) ], // ascenseur + filet
 rockfalls: [ chute(1180, 380, 2.2, 0.5) ],
 patrols:   [ patou(620, 940, 440, 4.2) ],
 ```
@@ -105,7 +105,15 @@ Règles (vérifiées par `tools/check-levels.mjs`) :
 * patou : toute la ronde sur UN sol, vitesse `2·(x2−x1−54)/period` ≤ 220 px/s, ronde ≥ 114 px,
   jamais sur la zone d'un fanion ni à moins de 300 px du départ ;
 * les sections franchies par passerelles mobiles sont signalées en `info` : **les valider avec
-  `tools/playtest.mjs`** (obligatoire).
+  `tools/playtest.mjs`** (obligatoire) ;
+* **filet** (`{ ...p(x, w, y), net: true }`) : sol de rattrapage placé sous une passerelle mobile
+  (ex. niveau 5 sous l'ascenseur) ; un embarquement raté coûte du temps au lieu d'une chute. Il est
+  ignoré par le contrôle du parcours, doit être un sol fixe et laisser **≥ 60 px** sous le bas de la
+  passerelle à son point le plus bas (sinon elle écraserait le coureur) — vérifié par check-levels.
+
+Moteur : une passerelle qui **monte** rattrape un coureur qui retombe (ou qui est à l'apex de son
+saut) au lieu de le traverser entre deux images (corrigé le 19/10, c'était la cause des chutes
+« dans » l'ascenseur de l'Estive).
 
 Idées de mise en page : chemin double (passerelles fixes au-dessus d'un sol gardé par un patou, voir
 niveau 5 x≈2840–3800), montée en « cheminée » (passerelles en escalier + ascenseur, niveau 6
@@ -147,6 +155,12 @@ clés : `skyTop skyMid skyBot ridge ridge2 pine pine2 dirt dirtDark grass grassD
 rock rockDark thorn leaf berry fog`. Exemple : `breche` (neige au crépuscule) du niveau 4.
 Réutiliser un thème existant est toujours sûr. Palettes ajoutées : `breche` (niv. 4, neige au
 crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier sous l'orage), `cascade` (niv. 7, gorges moussues), `nuit` (niv. 8, trail de nuit au clair de lune).
+
+Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
+palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
+mobiles comprises), `water` + `waterHi` (gave visible au fond des ravins, avec reflets animés ; la
+chute reste mortelle sous y = 700), `fireflies: true` (lucioles à positions déterministes au-dessus
+des trous, des points d'appel et des trajets des bacs). **Un niveau de nuit doit avoir `rim`.**
 
 ## 5. Physique (extraite du code, `assets/game.js`)
 
@@ -215,6 +229,14 @@ chute, un humain peut passer.
    colonne « Nouveauté du sentier » du tableau du `README.md`. Un niveau qui ne fait que
    réassembler des passages déjà vus n'est pas accepté.
    Ne jamais modifier ni supprimer un niveau existant, ni changer d'`id`.
+3b. **Règle d'alternance** (ajoutée le 19/10) : après une série de niveaux à mécaniques (5, 6, 7, 8
+   sont tous à mécaniques), le niveau du jour suivant doit être un niveau **« classique »** de
+   rythme/endurance **sur le modèle du niveau 4** (`breche`) : sols, ravins, ronces, rochers,
+   troncs, passerelles fixes, fanions — **avec une seule nouveauté** (une seule mécanique de
+   §3b/§3c, utilisée avec parcimonie, ou un seul passage clé inédit), pas de combinaison de
+   mécaniques. Ensuite on peut alterner : 1 niveau à mécaniques, 1 niveau classique.
+   **Le N°9 (prochain job quotidien) DOIT être classique.** Le dire dans le commentaire d'en-tête
+   du niveau (`// Niveau classique (règle d'alternance) — nouveauté : …`).
 4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement pour le nouveau niveau**
    (les niveaux 1–3 d'origine ont des avertissements connus, c'est normal ; les lignes `info`
    sur les passerelles mobiles imposent l'étape 5).
@@ -227,8 +249,19 @@ chute, un humain peut passer.
    node /chemin/vers/tools/e2e.mjs http://localhost:8765/nouste-corrida-trail/            # commandes, fanions, record, menu
    node /chemin/vers/tools/playtest.mjs http://localhost:8765/nouste-corrida-trail/ last --human --trials 20 --verbose
    ```
-   Pilote humain : viser **≥ 60 % de réussite** (≤ 5 chutes) pour un niveau « Engagé »/« Extrême »,
+   **Pilote humain obligatoire** (job quotidien compris), dans les deux profils :
+   ```bash
+   node /chemin/vers/tools/playtest.mjs $URL last --human --trials 20 --verbose                                         # attentif
+   node /chemin/vers/tools/playtest.mjs $URL last --human --trials 20 --jitter 80 --hold 0.18-0.5 --delay 180-250 --verbose   # pressé
+   ```
+   Viser **≥ 60 % de réussite** (≤ 5 chutes) en profil pressé pour un niveau « Engagé » et au-delà,
    ≥ 90 % en dessous ; `--verbose` liste les essais ratés et l'endroit des chutes.
+   **Courbe monotone** : comparer aux chiffres du niveau précédent (§8). Si l'étiquette dit « plus
+   dur » que le précédent, le nouveau niveau doit l'être dans **les deux profils** (plus de chutes
+   moyennes, réussite égale ou plus basse) ; sinon, **ajuster la géométrie ou changer l'étiquette**
+   (un niveau classique après une série à mécaniques peut légitimement être plus facile : lui donner
+   une étiquette cohérente, ex. « Haute route », « Rythme »). Ajouter la ligne du niveau dans les
+   deux tableaux du §8.
    Attendu : `PLAYTEST OK` (le pilote auto finit sans chute, aucun rival en boucle, aucune erreur
    console) et `E2E OK`. Si le pilote auto échoue, la ligne indique où il est tombé (`chutes à x,y`) :
    élargir la plateforme, réduire l'écart, ralentir la passerelle ou décaler la phase.
