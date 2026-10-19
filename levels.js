@@ -332,20 +332,21 @@ LEVELS.push((() => {
       // Chemin double : en bas un patou et des ronces, en haut des passerelles
       p(2840, 960, 440),
       m(2900, 350, 150), m(3120, 290, 150), m(3360, 270, 170), m(3600, 320, 150),
-      p(3920, 440, 380),
+      p(3920, 500, 380), // quai de l'ascenseur allongé de 60 px (revue 19/10) : on embarque sans grand saut
       // L'ascenseur du berger jusqu'à la cabane
-      mp(4440, 380, 120, 0, -200, 4.2),
-      p(4640, 340, 200),
+      mp(4440, 380, 150, 0, -200, 4.8), // élargi 120→150 et ralenti 4,2→4,8 s (revue 19/10)
+      { ...p(4420, 195, 470), net: true }, // prairie basse (filet, net:true) sous l'ascenseur (revue 19/10) : un embarquement raté coûte du temps, plus une chute
+      p(4615, 365, 200), // seuil de la cabane avancé de 25 px (revue 19/10) : plus de fente où tomber
       // Descente en terrasses
       p(5120, 300, 290),
       p(5560, 320, 380),
       p(6020, 600, 440),
       // Second gave : un bac qui monte et descend, un bac qui va et vient
-      mp(6700, 400, 130, 0, -120, 3.2),
-      mp(6920, 330, 130, 160, 0, 3.0, 0.5),
+      mp(6700, 400, 150, 0, -120, 3.2), // 130→150 (revue 19/10)
+      mp(6920, 330, 150, 160, 0, 3.0, 0.5), // 130→150 (revue 19/10)
       p(7300, 700, 440),
       // Dernier bac, puis le sprint vers la cabane
-      mp(8080, 420, 140, 200, 0, 4.0, 0.25),
+      mp(8080, 420, 160, 200, 0, 4.0, 0.25), // 140→160 (revue 19/10)
       p(8560, 1240, 440), g(9240, 440),
     ],
     hazards: [
@@ -550,7 +551,7 @@ LEVELS.push((() => {
       p(4270, 430, 370),
       p(4830, 420, 300),
       // Passerelles dans la nuit
-      m(5400, 300, 150), m(5680, 260, 150),
+      m(5400, 300, 125), m(5680, 260, 125),
       p(5980, 560, 340),
       // Le second radeau
       p(6680, 900, 440),
@@ -562,6 +563,8 @@ LEVELS.push((() => {
       _(500, 70, 440),
       _(2580, 72, 440),
       _(6220, 64, 340),
+      // Rive gauche : deux ronces en rythme avant le second radeau
+      _(7060, 64, 440), _(7300, 64, 440),
       _(9380, 70, 440),
     ],
     rockfalls: [],

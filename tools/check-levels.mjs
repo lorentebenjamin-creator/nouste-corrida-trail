@@ -41,7 +41,7 @@ LEVELS.forEach((L, idx) => {
   if (errors > errorsBefore) return;
 
   const movers = L.solids.filter(s => s.move);
-  const walk = L.solids.filter(s => !s.move && (s.kind === "ground" || s.kind === "plank")).sort((a, b) => a.x - b.x);
+  const walk = L.solids.filter(s => !s.move && !s.net && (s.kind === "ground" || s.kind === "plank")).sort((a, b) => a.x - b.x);
   const grounds = L.solids.filter(s => s.kind === "ground");
   // Passerelles mobiles : enveloppe de leur trajet
   const env = (m) => ({ x1: m.move.x0 + Math.min(0, m.move.dx), x2: m.move.x0 + Math.max(0, m.move.dx) + m.w,
@@ -56,6 +56,13 @@ LEVELS.forEach((L, idx) => {
     if (e.y1 < 120 || e.y2 > 660) err(tag, `${tagm}: trajet vertical hors [120, 660]`);
     if (m.w < 110) warn(tag, `${tagm}: largeur ${m.w} < 110`);
     if (e.x2 > L.width) err(tag, `${tagm}: sort du monde`);
+  }
+  // Filets (net: true) : sol de rattrapage sous une passerelle mobile, hors du parcours obligatoire.
+  // Il doit laisser passer un coureur (56 px) sous la passerelle à son point le plus bas.
+  for (const n of L.solids.filter(s => s.net)) {
+    if (n.move || n.kind !== "ground") err(tag, `filet @${n.x}: doit être un sol fixe`);
+    for (const m of movers.map(env)) if (m.x2 > n.x && m.x1 < n.x + n.w && n.y - (m.y2 + 18) < 60)
+      err(tag, `filet @${n.x}: trop près de la passerelle mobile @${m.m.move.x0} (${n.y - m.y2 - 18} px < 60, écrasement)`);
   }
   // Pour un trou franchi grâce à des passerelles mobiles : chaîne a → mobiles → b, au mieux de leur trajet.
   const bridged = (a, b) => {

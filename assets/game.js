@@ -810,6 +810,21 @@ function R(e, t) {
             rr.x + rr.w > m.x &&
             rr.x < m.x + m.w &&
             ((rr.x += dx), (rr.y += dy));
+      // Passerelle qui MONTE dans un coureur qui retombe : on le pose dessus (sinon elle le
+      // traverse entre deux images et il tombe à travers — bug de l'ascenseur de l'Estive).
+      if (riders && dy < 0)
+        for (let rr of riders) {
+          let feet = rr.y + rr.h;
+          rr.alive &&
+            !rr.grounded &&
+            rr.vy / 60 >= dy && // y compris au sommet d'un saut (vy un peu négatif) : la passerelle monte plus vite
+            !(rr.drop > 0) &&
+            feet >= ny - 0.5 &&
+            feet <= m.y + 3 &&
+            rr.x + rr.w > nx &&
+            rr.x < nx + m.w &&
+            ((rr.y = ny - rr.h), (rr.vy = 0), (rr.grounded = !0));
+        }
       ((m.x = nx), (m.y = ny));
     }
   }
@@ -1067,7 +1082,7 @@ function R(e, t) {
       ((H.plan = c.plan), (H.waitT = c.waitT), (H.backT = c.backT), (_ = t0), movers.forEach((m, ix) => ((m.x = sv[ix][0]), (m.y = sv[ix][1]))));
       // saut prévu : on garde l'élan jusqu'à l'appel (pas de freinage de dernière seconde)
       H.q.set(f + D, H.jumpAt >= f + D || aim > 0 ? 1 : dc.dir);
-      window.__humDebug && (window.__humLog ||= []).push([f, Math.round(e.x), Math.round(e.vx), e.grounded, Math.round(c.x), dc.dir, dc.jump, aim, H.jumpAt, (H.waitT||0).toFixed(2), (H.backT||0).toFixed(2), c.grounded, Math.round(c.vx)].join(' '));
+      window.__humDebug && (window.__humLog ||= []).push([f, Math.round(e.x) + "," + Math.round(e.y), Math.round(e.vx), e.grounded, Math.round(c.x), dc.dir, dc.jump, aim, H.jumpAt, (H.waitT||0).toFixed(2), (H.backT||0).toFixed(2), c.grounded, Math.round(c.vx)].join(' '));
       if (aim >= 0 && H.jumpAt < f) {
         let sg = H.opt.jitter * 60, j2 = Math.round(Math.max(-2 * sg, Math.min(2 * sg, gauss(H.rnd) * sg)));
         H.jumpAt = Math.max(f + 1, f + D + aim + j2);
