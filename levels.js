@@ -131,6 +131,17 @@ export const THEMES = {
     thorn: "#24302a", leaf: "#3f7a4c", berry: "#c2503f",
     fog: "#0f2a2e",
   },
+  nuit: {
+    skyTop: "#070b1f", skyMid: "#1d2b55", skyBot: "#56588a",
+    ridge: "#121a33", ridge2: "#2a3558",
+    pine: "#0c1424", pine2: "#1d2e40",
+    dirt: "#4d4239", dirtDark: "#2f2923",
+    grass: "#5a8463", grassDark: "#3b6047",
+    wood: "#7d5c3b", woodDark: "#4b3725",
+    rock: "#9196a8", rockDark: "#5a5f70",
+    thorn: "#1b1519", leaf: "#3d5e45", berry: "#e8c14a",
+    fog: "#05070f",
+  },
 };
 
 // =====================================================================
@@ -500,5 +511,75 @@ LEVELS.push((() => {
     checkpoints: [y(id, 3060, 440, 1), y(id, 4490, 440, 2), y(id, 5810, 300, 3), y(id, 6890, 440, 4), y(id, 8410, 440, 5)],
     finishX: 9500,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 8 — Le Gué des Lucioles (niveau du jour, 2026-10-19)
+// Trail de nuit (palette "nuit") : ressauts, descente vers le gave, le radeau
+// du gué qui passe sous une cascade, terrasses, passerelles et deux patous.
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "gue-lucioles", c = v(id);
+  c.line(160, 420, 370, 4); c.arc(820, 940, 360, 3, 40); c.line(1170, 1360, 330, 3);
+  c.arc(1380, 1500, 320, 3, 40); c.line(1730, 1940, 270, 3); c.arc(1990, 2130, 290, 3, 40);
+  c.line(2200, 2500, 370, 4); c.arc(2560, 2680, 330, 3, 40); c.line(2720, 2860, 370, 2);
+  c.arc(3000, 3300, 330, 4, 40); c.line(3500, 3800, 370, 4); c.arc(3860, 4100, 330, 3, 40);
+  c.arc(4140, 4280, 320, 3, 40); c.line(4320, 4660, 300, 4); c.arc(4700, 4830, 270, 3, 40);
+  c.line(4900, 5200, 230, 4); c.arc(5250, 5400, 240, 3, 40); c.arc(5550, 5690, 210, 3, 40);
+  c.arc(5840, 5980, 240, 3, 40); c.line(6000, 6180, 270, 3); c.arc(6200, 6300, 230, 3, 40);
+  c.arc(6540, 6680, 310, 3, 40); c.line(6760, 7500, 370, 6); c.arc(7640, 7980, 330, 4, 40);
+  c.line(8120, 8500, 370, 4); c.arc(8600, 8960, 330, 4, 50); c.arc(9180, 9320, 330, 3, 40);
+  c.line(9450, 9540, 370, 2);
+  return {
+    id, name: "Le Gué des Lucioles",
+    blurb: "Trail de nuit à la frontale : le radeau du gué passe sous la cascade. Attends la pause, les lucioles t'éclairent.",
+    difficulty: "Très engagé", theme: "nuit",
+    width: 10000, floor: 440, spawnX: 60,
+    solids: [
+      // Le départ dans le noir : ressauts
+      p(0, 820, 440),
+      p(950, 430, 400), h(1060, 400),
+      p(1510, 480, 340), g(1600, 340),
+      // Descente vers le gave
+      p(2130, 760, 440),
+      // Passage clé : le radeau du gué, dont l'embarcadère est sous la cascade
+      mp(2920, 420, 140, 240, 0, 4.6),
+      p(3440, 700, 440),
+      // Terrasses de la rive droite
+      p(4270, 430, 370),
+      p(4830, 420, 300),
+      // Passerelles dans la nuit
+      m(5400, 300, 150), m(5680, 260, 150),
+      p(5980, 560, 340),
+      // Le second radeau
+      p(6680, 900, 440),
+      mp(7610, 420, 140, 200, 0, 4.0, 0.5),
+      // Le sprint final, gardé par un patou
+      p(8090, 1800, 440), g(9200, 440),
+    ],
+    hazards: [
+      _(500, 70, 440),
+      _(2580, 72, 440),
+      _(6220, 64, 340),
+      _(9380, 70, 440),
+    ],
+    rockfalls: [],
+    patrols: [
+      patou(3860, 4100, 440, 3.4),
+      patou(8600, 8900, 440, 3.4, 0.3),
+    ],
+    // Passage clé : la cascade du gué tombe sur l'embarcadère du radeau (jamais vu : jet + bac).
+    // 1,44 s d'eau puis 1,76 s de pause, sur un cycle (3,2 s) différent de celui du radeau (4,6 s) :
+    // attendre au bord que le radeau soit là ET que l'eau s'arrête, puis embarquer.
+    jets: [
+      jet(2960, 56, -400, 720, 3.2, 0.45, 0.2),
+      // Un second filet entre les deux passerelles de la nuit (attendre sur la première).
+      jet(5590, 56, -400, 720, 3.0, 0.45, 0.25),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2160, 440, 1), y(id, 3470, 440, 2), y(id, 4860, 300, 3), y(id, 6710, 440, 4), y(id, 8110, 440, 5)],
+    finishX: 9560,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.87 }],
   };
 })());

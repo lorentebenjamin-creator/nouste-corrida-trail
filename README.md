@@ -19,7 +19,8 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 4 | La Brèche aux Isards | Haute route | 1090 m | endurance : le plus long, enchaînement de 20 ravins |
 | 5 | L'Estive des Patous | Technique | 940 m | passerelles mobiles (bacs, ascenseur) et patous |
 | 6 | Le Couloir des Pierres | Extrême | 1030 m | chutes de pierres annoncées par leur ombre, cheminée |
-| 7 | La Cascade des Desmans *(niveau du jour)* | Engagé | 950 m | **jet de cascade** : rideau d'eau intermittent au-dessus d'un ravin |
+| 7 | La Cascade des Desmans | Engagé | 950 m | **jet de cascade** : rideau d'eau intermittent au-dessus d'un ravin |
+| 8 | Le Gué des Lucioles *(niveau du jour)* | Très engagé | 956 m | trail **de nuit** (nouvelle palette) et **jet + radeau** : la cascade tombe sur l'embarcadère d'un radeau mobile, deux cycles à lire ensemble |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
