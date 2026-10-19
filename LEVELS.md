@@ -299,18 +299,18 @@ chute, un humain peut passer.
 | 2 | La crête | Rythme | 646 m | 10 | 7 | — | 0.97 / 0.88 / 0.78 | 18,2 s |
 | 3 | Col du vent | Hors-piste | 762 m | 12 | 11 | — | 0.99 / 0.9 / 0.82 | 21,8 s |
 | 4 | La Brèche aux Isards | Haute route | 1090 m | 20 | 8 | — | 1 / 0.92 / 0.85 | 30,9 s |
-| 5 | L'Estive des Patous | Technique | 940 m | 10 | 3 | 5 passerelles mobiles, 4 patous | 1 / 0.93 / 0.86 | 29,1 s |
-| 6 | Le Couloir des Pierres | Extrême | 1030 m | 13 | 2 | 4 passerelles mobiles, 11 chutes de pierres, 2 patous | 1 / 0.94 / 0.88 | 29,4 s |
-| 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou, **1 jet de cascade** | 1 / 0.93 / 0.86 | 31,9 s |
-| 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 4 | 2 radeaux, 2 patous, 2 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 27,2 s |
+| 5 | L'Estive des Patous | Technique | 940 m | 10 | 3 | 5 passerelles mobiles, 4 patous, 1 filet sous l'ascenseur | 1 / 0.93 / 0.86 | 31,8 s |
+| 6 | Le Couloir des Pierres | Extrême | 1030 m | 13 | 2 | 4 passerelles mobiles, 11 chutes de pierres, 2 patous | 1 / 0.94 / 0.88 | 29,5 s |
+| 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou, **1 jet de cascade** | 1 / 0.93 / 0.86 | 31,7 s |
+| 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 6 | 2 radeaux, 3 patous, 3 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 29,9 s |
 
 Progression voulue : 1–3 apprennent sauts, ronces, passerelles ; 4 = endurance (le plus long,
 aucune mécanique, rivaux à 1,00) ; 5 = découverte des mécaniques v2 avec du temps pour lire
 (bacs lents, patous, chemin double, ascenseur) ; 6 = tout combiné en cadence (pierres
 rapprochées, cheminée, bacs au-dessus du vide, rivaux les plus rapides). « Pilote auto » = temps
-du pilote parfait de `tools/playtest.mjs` (un humain met nettement plus). Pour un nouveau niveau
-quotidien, viser entre 4 et 6 et varier : un niveau « classique » (modèle 4) puis un niveau à
-mécaniques (modèle 5/6).
+du pilote parfait de `tools/playtest.mjs` (un humain met nettement plus). 7 = jet de cascade ;
+8 = nuit, jet + radeau, le plus dur des deux profils après la revue du 19/10. **Prochain niveau
+(N°9) : classique sur le modèle du 4** (règle d'alternance, §6 étape 3b).
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
@@ -326,21 +326,27 @@ Même cerveau que l'autopilote (simulation exacte de la physique), rendu impréc
 * réussite = arche franchie avec **≤ 5 chutes** (essai arrêté au-delà), sur 20 essais.
 
 Profil « attentif » (défaut) et profil « pressé » (`--delay 180-250 --jitter 80 --hold 0.18-0.5`),
-20 essais par niveau, le 18/10/2026 :
+20 essais par niveau, le 19/10/2026 (revue `revue-1910`) :
 
 | N° | Niveau | Étiquette | Attentif : réussite | chutes moy. | temps moy. | Pressé : réussite | chutes moy. | temps moy. |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Sous-bois des cèdres | Balade | 100 % | 0,15 | 15,4 s | 95 % | 0,80 | 17,3 s |
-| 2 | La crête | Rythme | 100 % | 0,10 | 19,8 s | 100 % | 0,70 | 22,0 s |
-| 3 | Col du vent | Hors-piste | 100 % | 0,10 | 22,8 s | 100 % | 0,95 | 28,1 s |
-| 4 | La Brèche aux Isards | Haute route | 100 % | 0,25 | 33,3 s | 95 % | 1,95 | 38,6 s |
-| 5 | L'Estive des Patous | Technique | 100 % | 0,65 | 34,3 s | 70 % | 3,55 | 44,3 s |
-| 6 | Le Couloir des Pierres | Extrême | 95 % | 1,85 | 41,7 s | 75 % | 3,55 | 46,8 s |
-| 7 | La Cascade des Desmans | Engagé | 95 % | 1,55 | 41,3 s | 80 % | 3,45 | 48,1 s |
-| 8 | Le Gué des Lucioles | Très engagé | 100 % | 0,60 | 33,8 s | 70 % | 3,15 | 39,2 s |
+| 1 | Sous-bois des cèdres | Balade | 100 % | 0,15 | 15,4 s | 95 % | 0,80 | 17,5 s |
+| 2 | La crête | Rythme | 100 % | 0,10 | 20,2 s | 100 % | 0,70 | 22,2 s |
+| 3 | Col du vent | Hors-piste | 100 % | 0,10 | 22,8 s | 100 % | 0,95 | 28,2 s |
+| 4 | La Brèche aux Isards | Haute route | 100 % | 0,25 | 33,3 s | 95 % | 1,95 | 38,2 s |
+| 5 | L'Estive des Patous | Technique | 100 % | 0,45 | 36,9 s | 85 % | 2,80 | 49,8 s |
+| 6 | Le Couloir des Pierres | Extrême | 95 % | 1,85 | 42,0 s | 70 % | 3,80 | 48,7 s |
+| 7 | La Cascade des Desmans | Engagé | 95 % | 1,55 | 41,4 s | 80 % | 3,45 | 48,6 s |
+| 8 | Le Gué des Lucioles | Très engagé | 95 % | 1,80 | 39,2 s | 70 % | 3,70 | 44,0 s |
 
-Lecture : la pente est régulière jusqu'à 4, puis marche nette à 5 (mécaniques). 5, 6 et 7 sont
-du même ordre pour un joueur pressé ; l'Estive (5, « Technique ») est même la plus dure dans ce
-profil (13 chutes vers x≈4600 sur 20 essais : sortie de « l’ascenseur du berger », passerelle mobile x=4440 qui monte de 200 px vers la cabane à x=4640). Aucun niveau n'est
-déraisonnable (< 30 % de réussite). Le modèle reste plus régulier qu'un vrai débutant : ces
-chiffres comparent les niveaux entre eux, ce ne sont pas des taux réels.
+Lecture : pente régulière de 1 à 4, marche nette à 5 (mécaniques). Depuis la revue du 19/10,
+5 est le plus facile des niveaux à mécaniques dans les deux profils (ascenseur élargi et ralenti,
+quai allongé, filet sous l'ascenseur, bacs élargis, et correction moteur de la passerelle qui
+monte), et 8 est plus dur que 7 dans les deux profils. 6 (« Extrême ») reste un peu plus dur que
+7 (« Engagé ») : c'est cohérent avec les étiquettes. Aucun niveau n'est déraisonnable (≥ 70 %
+en profil pressé). Le modèle reste plus régulier qu'un vrai débutant : ces chiffres comparent
+les niveaux entre eux, ce ne sont pas des taux réels. Points chauds connus en profil pressé :
+N°8 x≈2600 (appui trop court au-dessus de la ronce avant le radeau) et x≈3400 (sortie du radeau).
+
+Avant la revue (18/10, mêmes réglages) : N°5 100 % / 0,65 — 70 % / 3,55 ; N°8 100 % / 0,60 —
+70 % / 3,15 (N°5 était le plus dur en profil pressé, N°8 plus facile que 7).

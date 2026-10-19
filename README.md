@@ -20,10 +20,28 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 5 | L'Estive des Patous | Technique | 940 m | passerelles mobiles (bacs, ascenseur) et patous |
 | 6 | Le Couloir des Pierres | Extrême | 1030 m | chutes de pierres annoncées par leur ombre, cheminée |
 | 7 | La Cascade des Desmans | Engagé | 950 m | **jet de cascade** : rideau d'eau intermittent au-dessus d'un ravin |
-| 8 | Le Gué des Lucioles *(niveau du jour)* | Très engagé | 956 m | trail **de nuit** (nouvelle palette) et **jet + radeau** : la cascade tombe sur l'embarcadère d'un radeau mobile, deux cycles à lire ensemble |
+| 8 | Le Gué des Lucioles *(niveau du jour)* | Très engagé | 956 m | trail **de nuit** (nouvelle palette, liseré clair sur les sols, gave visible, lucioles) et **jet + radeau** : la cascade tombe sur l'embarcadère d'un radeau mobile, deux cycles à lire ensemble |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
+Alternance : après la série 5–8 à mécaniques, **le N°9 sera un sentier classique** (rythme /
+endurance, modèle N°4, une seule nouveauté). Chaque nouveau sentier passe le pilote « humain »
+(`playtest --human`, deux profils) et doit respecter la courbe de difficulté.
+
+Difficulté mesurée (pilote « humain », 20 essais, réussite / chutes moyennes, 19/10/2026) :
+
+| N° | Attentif | Pressé |
+|---|---|---|
+| 1 | 100 % / 0,15 | 95 % / 0,80 |
+| 2 | 100 % / 0,10 | 100 % / 0,70 |
+| 3 | 100 % / 0,10 | 100 % / 0,95 |
+| 4 | 100 % / 0,25 | 95 % / 1,95 |
+| 5 | 100 % / 0,45 | 85 % / 2,80 |
+| 6 | 95 % / 1,85 | 70 % / 3,80 |
+| 7 | 95 % / 1,55 | 80 % / 3,45 |
+| 8 | 95 % / 1,80 | 70 % / 3,70 |
+
+Détails et méthode : LEVELS.md §8.
 
 ## Source de référence
 
