@@ -141,6 +141,9 @@ export const THEMES = {
     rock: "#9196a8", rockDark: "#5a5f70",
     thorn: "#1b1519", leaf: "#3d5e45", berry: "#e8c14a",
     fog: "#05070f",
+    // Lisibilité de nuit (revue 19/10) : liseré clair sur les sols/passerelles, gave visible
+    // au fond des ravins, lucioles décoratives au-dessus des trous (aucun effet de jeu).
+    rim: "#cfe3ff", water: "#14304f", waterHi: "#7fb6e6", fireflies: true,
   },
 };
 

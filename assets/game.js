@@ -347,6 +347,7 @@ function R(e, t) {
     let r = s.solids
       .filter((e) => e.kind === `ground`)
       .sort((e, t) => e.x - t.x);
+    ((waterGaps = []), (flies = []));
     for (let t = 0; t < r.length - 1; t++) {
       let i = r[t],
         a = r[t + 1],
@@ -362,6 +363,17 @@ function R(e, t) {
         (n.fillStyle = `#070b0a`),
         n.fillRect(o + 6, c + 30, Math.max(0, s - 12), 780),
         (n.globalAlpha = 1));
+      // Palette de nuit : le gave au fond du ravin (décor seul, la chute reste mortelle à y=700).
+      if (e.water) {
+        let wy = Math.min(Math.max(i.y, a.y) + 58, 505);
+        ((n.fillStyle = e.water),
+          n.fillRect(o, wy, s, 780 - wy),
+          (n.fillStyle = e.waterHi),
+          (n.globalAlpha = 0.9),
+          n.fillRect(o, wy, s, 2),
+          (n.globalAlpha = 1),
+          waterGaps.push({ x: o, w: s, y: wy }));
+      }
     }
     for (let t of s.solids)
       t.move
@@ -388,6 +400,21 @@ function R(e, t) {
         layer: i() > 0.45 ? 0.32 : 0.52,
         kind: i(),
       });
+    // Lucioles (thème avec `fireflies`) : positions déterministes au-dessus des trous et des
+    // points d'appel (bords de sol/passerelle, trajets des bacs). Décor seul, aucun effet de jeu.
+    if (e.fireflies) {
+      let fr = de(s.width * 7 + 13),
+        walk = s.solids.filter((t) => !t.move && !t.net && (t.kind === `ground` || t.kind === `plank`)).sort((t, n) => t.x - n.x),
+        add = (x, top, k) => {
+          for (let q = 0; q < k; q++)
+            flies.push({ x: x + (fr() - 0.5) * 50, y: top - 34 - fr() * 60, ph: fr() * 6.283 });
+        };
+      for (let t = 0; t < walk.length - 1; t++) {
+        let a = walk[t], b2 = walk[t + 1], gx = a.x + a.w, gw = b2.x - gx;
+        gw >= 40 && (add(gx + gw / 2, Math.min(a.y, b2.y), 3), add(gx - 12, a.y, 1));
+      }
+      for (let mv of movers) add(mv.move.x0 + mv.move.dx / 2 + mv.w / 2, mv.move.y0 + Math.min(0, mv.move.dy), 3);
+    }
   }
   function Q(e, t, n, r, i, a, o) {
     return {
@@ -789,6 +816,8 @@ function R(e, t) {
     falls = [],
     dogs = [],
     jets = [],
+    waterGaps = [],
+    flies = [],
     autopilot = !1,
     hum = null,
     turbo = 0;
@@ -1109,6 +1138,37 @@ function R(e, t) {
   // --- Rendu des éléments dynamiques ------------------------------------
   function drawDynamic() {
     let th = T[s.theme];
+    // Reflets mouvants sur le gave (nuit)
+    if (th.water)
+      for (let wg of waterGaps) {
+        n.fillStyle = th.waterHi;
+        for (let q = 0; q < wg.w / 26; q++) {
+          let ph = q * 1.7 + wg.x * 0.01,
+            rx = wg.x + ((q * 26 + _ * 18 + Math.sin(ph) * 8) % Math.max(1, wg.w - 14));
+          ((n.globalAlpha = 0.25 + 0.25 * Math.sin(_ * 2.2 + ph)),
+            n.fillRect(rx, wg.y + 7 + (q % 3) * 7, 12, 2));
+        }
+        n.globalAlpha = 1;
+      }
+    for (let fl of flies) {
+      let fx = fl.x + Math.sin(_ * 0.9 + fl.ph) * 14,
+        fy = fl.y + Math.sin(_ * 1.3 + fl.ph * 2) * 8,
+        al = 0.55 + 0.45 * Math.sin(_ * 3 + fl.ph);
+      ((n.globalCompositeOperation = `lighter`),
+        (n.fillStyle = `rgba(200,235,90,${0.22 * al})`),
+        n.beginPath(),
+        n.arc(fx, fy, 10, 0, Math.PI * 2),
+        n.fill(),
+        (n.fillStyle = `rgba(225,250,120,${0.45 * al})`),
+        n.beginPath(),
+        n.arc(fx, fy, 4.5, 0, Math.PI * 2),
+        n.fill(),
+        (n.fillStyle = `rgba(255,255,215,${0.6 + 0.4 * al})`),
+        n.beginPath(),
+        n.arc(fx, fy, 2.2, 0, Math.PI * 2),
+        n.fill(),
+        (n.globalCompositeOperation = `source-over`));
+    }
     for (let m of movers) {
       let mv = m.move;
       ((n.strokeStyle = `rgba(243,237,226,0.22)`),
@@ -1731,6 +1791,21 @@ function pe(e, t, n) {
   ((e.fillStyle = `rgba(0,0,0,0.18)`),
     e.fillRect(t.x, t.y, 7, Math.min(t.h, 220)),
     e.fillRect(t.x + t.w - 7, t.y, 7, Math.min(t.h, 220)));
+  rimTop(e, t, n);
+}
+// Liseré clair sur le dessus des sols et passerelles (palettes de nuit : thème avec `rim`).
+// Purement visuel : rend lisibles les bords et les points d'appel dans le noir.
+function rimTop(e, t, n) {
+  if (!n.rim) return;
+  ((e.fillStyle = n.rim),
+    (e.globalAlpha = 0.18),
+    e.fillRect(t.x - 1, t.y - 3, t.w + 2, 6),
+    (e.globalAlpha = 0.85),
+    e.fillRect(t.x, t.y, t.w, 2),
+    (e.globalAlpha = 0.6),
+    e.fillRect(t.x, t.y, 2, Math.min(t.h, 14)),
+    e.fillRect(t.x + t.w - 2, t.y, 2, Math.min(t.h, 14)),
+    (e.globalAlpha = 1));
 }
 function me(e, t, n) {
   ((e.fillStyle = n.rockDark),
@@ -1766,7 +1841,8 @@ function ge(e, t, n) {
     (e.fillStyle = n.wood),
     e.fillRect(t.x + 2, t.y, t.w - 4, 5),
     (e.fillStyle = `rgba(0,0,0,0.2)`));
-  for (let n = t.x + 18; n < t.x + t.w; n += 22) e.fillRect(n, t.y, 2, t.h);
+  for (let r = t.x + 18; r < t.x + t.w; r += 22) e.fillRect(r, t.y, 2, t.h);
+  rimTop(e, t, n);
 }
 function _e(e, t, n, r, i) {
   ((e.strokeStyle = i.thorn), (e.lineWidth = 3), e.beginPath());
