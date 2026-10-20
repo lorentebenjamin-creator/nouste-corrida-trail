@@ -45,6 +45,8 @@ Le menu affiche les niveaux du N°1 (en haut) au plus récent (en bas) (liste d�
   rivals: [{speed:1.0},{speed:0.92},{speed:0.85}], // EXACTEMENT 3 : Léa Morel (12), Karim El Yazidi (7), Inès Rocha (23)
   rockfalls: [ ... ],      // OPTIONNEL (v2) : chutes de pierres, helper chute()
   patrols: [ ... ],        // OPTIONNEL (v2) : patous, helper patou()
+  medals: { auto: 30.8, gold: 35.5, silver: 42, bronze: 49.5 }, // OPTIONNEL : écrit par tools/medals.mjs (§6 étape 5b)
+  acceptedWarnings: [ { match: "…", reason: "…" } ],           // OPTIONNEL : avertissements check-levels acceptés (§6b)
 }
 ```
 
@@ -238,9 +240,12 @@ chute, un humain peut passer.
    mécaniques. Ensuite on peut alterner : 1 niveau à mécaniques, 1 niveau classique.
    **Le N°9 (prochain job quotidien) DOIT être classique.** Le dire dans le commentaire d'en-tête
    du niveau (`// Niveau classique (règle d'alternance) — nouveauté : …`).
-4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement pour le nouveau niveau**
-   (les niveaux 1–3 d'origine ont des avertissements connus, c'est normal ; les lignes `info`
-   sur les passerelles mobiles imposent l'étape 5).
+4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement non justifié**
+   (dernière ligne : `… 0 erreur(s), 0 avertissement(s) non justifié(s), N accepté(s)`).
+   Un avertissement du nouveau niveau se **corrige dans la géométrie** ; on ne l'accepte
+   (`acceptedWarnings`, §6b) que s'il est voulu et validé par le playtest humain, avec la raison.
+   Les avertissements connus des niveaux 1–3 d'origine sont déjà acceptés. Les lignes `info`
+   (passerelles mobiles, jets au-dessus du vide, niveau sans médailles) imposent les étapes 5 et 5b.
 5. Tester en vrai (recommandé, obligatoire avec des mécaniques v2) :
    ```bash
    tools/serve.sh &                       # http://localhost:8765/nouste-corrida-trail/
@@ -266,6 +271,21 @@ chute, un humain peut passer.
    Attendu : `PLAYTEST OK` (le pilote auto finit sans chute, aucun rival en boucle, aucune erreur
    console) et `E2E OK`. Si le pilote auto échoue, la ligne indique où il est tombé (`chutes à x,y`) :
    élargir la plateforme, réduire l'écart, ralentir la passerelle ou décaler la phase.
+5b. **Médailles** (obligatoire pour le job quotidien, une fois la géométrie définitive) :
+   ```bash
+   node /chemin/vers/tools/medals.mjs $URL last --write     # lance le pilote auto, écrit `medals:` dans le bloc
+   node /chemin/vers/tools/medals.mjs $URL all              # contrôle de tous les niveaux, sans écrire
+   node tools/medals.mjs --from-auto mon-id=31.6 --write    # sans navigateur, si le temps auto est déjà connu
+   ```
+   Le script relance `tools/playtest.mjs` (pilote auto, il faut `chutes joueur 0`), prend le temps
+   d'arrivée `auto` et écrit/remplace, juste sous `rivals:` du bloc, la ligne
+   `medals: { auto, gold, silver, bronze }` avec **or = auto × 1,15, argent = auto × 1,35,
+   bronze = auto × 1,6**, chaque temps **arrondi à la demi-seconde supérieure**. Ne pas l'écrire à
+   la main. **Relancer après toute retouche de géométrie** (le temps auto change). Un niveau sans
+   `medals` (ou avec un champ invalide) fonctionne : simplement aucune médaille (check-levels
+   l'indique en `info`). Le menu affiche, sous chaque sentier, la médaille du record local
+   (localStorage) et les trois temps cibles ; l'écran d'arrivée affiche la médaille de la course,
+   le record et le temps visé pour la médaille suivante. Ajouter le niveau au tableau des médailles (§8).
 6. Classement en ligne (Supabase) : **rien à faire**. Aucun SQL, aucune ligne `level_limits` à
    ajouter : un nouvel `id` est accepté automatiquement avec la borne générale (temps ≥ 8 s).
    `level_limits` (temps minimum par niveau) est un réglage facultatif fait à la main dans le SQL
@@ -274,6 +294,33 @@ chute, un humain peut passer.
 7. Mettre à jour la liste des niveaux du `README.md`, puis
    `git commit -am "Niveau N : <nom>" && git push`. GitHub Pages redéploie en 1–2 min
    (cache ~10 min côté navigateur).
+
+## 6b. Avertissements acceptés (`acceptedWarnings`)
+
+`check-levels` sépare les avertissements **non justifiés** (à corriger, ils comptent dans le total)
+des avertissements **acceptés**, déclarés dans le bloc du niveau :
+
+```js
+rivals: [ ... ],
+// Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+acceptedWarnings: [
+  { match: "ronce @860: seulement 220 px avant le bord", reason: "Ronce collée au rocher @820 : un seul saut, …" },
+],
+```
+
+* `match` = **début exact** du message d'avertissement (copié depuis la sortie, sans `avert.  [n:id]`) ;
+  mettre assez de texte pour ne viser qu'un avertissement (`ronce @300:` ≠ `ronce @3000`).
+* `reason` obligatoire (≥ 10 caractères) : pourquoi c'est voulu, et la preuve (playtest humain…).
+* Les avertissements acceptés sont listés à part, en fin de sortie (`accepté [n:id] … — raison`).
+* Une entrée qui ne correspond plus à aucun avertissement (géométrie corrigée) devient un
+  avertissement `acceptedWarnings obsolète` : la retirer.
+* Les erreurs (`ERREUR`) ne peuvent jamais être acceptées.
+
+Revue du 20/10 : 27 avertissements avant ; corrigés dans la géométrie : N°3 (`col`, le sol
+`p(660, …)` passe de 380 à 420 px : 260 px de sol après le rocher @820 et écart 100 au lieu de 140
+vers le ressaut, ce qui supprime aussi la montée 60/140) et N°8 (`gue-lucioles`, passerelles de
+la nuit 115/125 → 140/140 px : écart 130 au lieu de 155 pour la montée de 40, et 160 au lieu de 175
+vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, radeaux rapides du N°8).
 
 ## 7. Ce qui a été modifié par rapport au bundle d'origine
 
@@ -289,22 +336,43 @@ chute, un humain peut passer.
   ravins corrigé au pied des falaises ; API de test `window.__controlsTest` (`setAutopilot`,
   `teleport`, `getState`, …).
 * `assets/routes-x3PbsDEU.css` : URLs des polices relatives. `custom.css` : liste de niveaux
-  défilante, badge, bouton ↓.
+  défilante, badge, bouton ↓, médailles (disques CSS, sans emoji).
+* Médailles (revue du 20/10) : `medalTargets` / `medalOf` / `medalNext` dans `assets/game.js` lisent
+  le champ facultatif `medals` du niveau ; menu (médaille du record local + temps cibles) et écran
+  d'arrivée (médaille de la course, record, temps visé pour la suivante). `getState()` expose
+  `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
 ## 8. Courbe de difficulté (niveaux 1–9)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
-| 1 | Sous-bois des cèdres | Balade | 498 m | 4 | 4 | — | 0.93 / 0.84 / 0.74 | 14,2 s |
-| 2 | La crête | Rythme | 646 m | 10 | 7 | — | 0.97 / 0.88 / 0.78 | 18,2 s |
-| 3 | Col du vent | Hors-piste | 762 m | 12 | 11 | — | 0.99 / 0.9 / 0.82 | 21,8 s |
-| 4 | La Brèche aux Isards | Haute route | 1090 m | 20 | 8 | — | 1 / 0.92 / 0.85 | 30,9 s |
+| 1 | Sous-bois des cèdres | Balade | 498 m | 4 | 4 | — | 0.93 / 0.84 / 0.74 | 13,9 s |
+| 2 | La crête | Rythme | 646 m | 10 | 7 | — | 0.97 / 0.88 / 0.78 | 18,1 s |
+| 3 | Col du vent | Hors-piste | 762 m | 12 | 11 | — | 0.99 / 0.9 / 0.82 | 21,6 s |
+| 4 | La Brèche aux Isards | Haute route | 1090 m | 20 | 8 | — | 1 / 0.92 / 0.85 | 30,8 s |
 | 5 | L'Estive des Patous | Technique | 940 m | 10 | 3 | 5 passerelles mobiles, 4 patous, 1 filet sous l'ascenseur | 1 / 0.93 / 0.86 | 31,8 s |
-| 6 | Le Couloir des Pierres | Extrême | 1030 m | 13 | 2 | 4 passerelles mobiles, 11 chutes de pierres, 2 patous | 1 / 0.94 / 0.88 | 29,5 s |
+| 6 | Le Couloir des Pierres | Extrême | 1030 m | 13 | 2 | 4 passerelles mobiles, 11 chutes de pierres, 2 patous | 1 / 0.94 / 0.88 | 29,4 s |
 | 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou, **1 jet de cascade** | 1 / 0.93 / 0.86 | 31,7 s |
-| 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 6 | 2 radeaux, 3 patous, 3 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 29,9 s |
+| 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 6 | 2 radeaux, 3 patous, 3 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 29,8 s |
 | 9 | La Hêtraie des Palombes | Endurance | 1120 m | 19 | 8 (dont **2 sur des passerelles**) | — (classique) | 1 / 0.93 / 0.86 | 31,6 s |
+
+Temps « pilote auto » mesurés le 20/10 avec `finishTime` (avant : temps lu au sondage suivant,
+jusqu'à +0,25 s). Ce sont les temps `auto` des médailles :
+
+| N° | Niveau | Pilote auto | Or (×1,15) | Argent (×1,35) | Bronze (×1,6) |
+|---|---|---|---|---|---|
+| 1 | Sous-bois des cèdres | 13,9 s | 16,0 s | 19,0 s | 22,5 s |
+| 2 | La crête | 18,1 s | 21,0 s | 24,5 s | 29,0 s |
+| 3 | Col du vent | 21,6 s | 25,0 s | 29,5 s | 35,0 s |
+| 4 | La Brèche aux Isards | 30,8 s | 35,5 s | 42,0 s | 49,5 s |
+| 5 | L'Estive des Patous | 31,8 s | 37,0 s | 43,0 s | 51,0 s |
+| 6 | Le Couloir des Pierres | 29,4 s | 34,0 s | 40,0 s | 47,5 s |
+| 7 | La Cascade des Desmans | 31,7 s | 36,5 s | 43,0 s | 51,0 s |
+| 8 | Le Gué des Lucioles | 29,8 s | 34,5 s | 40,5 s | 48,0 s |
+| 9 | La Hêtraie des Palombes | 31,6 s | 36,5 s | 43,0 s | 51,0 s |
+
+(arrondi à la demi-seconde supérieure ; recalculer avec `tools/medals.mjs` après toute retouche.)
 
 Progression voulue : 1–3 apprennent sauts, ronces, passerelles ; 4 = endurance (le plus long,
 aucune mécanique, rivaux à 1,00) ; 5 = découverte des mécaniques v2 avec du temps pour lire
@@ -360,6 +428,11 @@ N°9 (mesuré le 20/10, mêmes réglages) : classique, donc légitimement plus f
 attentif 100 % / 0,35 contre 100 % / 0,30, pressé 88 % / 2,00 contre 98 % / 1,93. Points chauds
 en profil pressé : x≈4000 (ronce sur la planche haute de la palombière), x≈7600–7800 (réception
 de la descente du belvédère puis ronce) et x≈10000 (ronce du sprint final).
+
+Revue du 20/10 (géométrie N°3 et N°8, §6b), mêmes réglages, avant → après :
+N°3 attentif 100 % / 0,10 → 100 % / 0,05, pressé 100 % / 0,95 → 100 % / 0,85 ;
+N°8 attentif 95 % / 1,80 → 95 % / 1,75, pressé 70 % / 3,70 → 70 % / 3,65. Courbe inchangée
+(N°3 toujours sous le N°4, N°8 toujours le plus dur en profil pressé avec le N°6).
 
 Avant la revue (18/10, mêmes réglages) : N°5 100 % / 0,65 — 70 % / 3,55 ; N°8 100 % / 0,60 —
 70 % / 3,15 (N°5 était le plus dur en profil pressé, N°8 plus facile que 7).

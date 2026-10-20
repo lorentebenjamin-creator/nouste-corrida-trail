@@ -1752,6 +1752,7 @@ function R(e, t) {
         level: s.id,
         mode: o,
         time: g,
+        finishTime: d?.finishTime ?? null, // temps d'arrivée exact du joueur (g continue après l'arche)
         coins: f.size,
         checkpoint: d?.checkpoint ?? -1,
         grounded: !!d?.grounded,
@@ -1960,6 +1961,39 @@ function W(e) {
 }
 function G(e) {
   return e <= 0 ? `—` : e === 1 ? `1er` : `${e}e`;
+}
+// ---- Médailles (champ facultatif `medals` des niveaux, écrit par tools/medals.mjs) ----
+// medals: { auto, gold, silver, bronze } en secondes. Sans champ (ou champ invalide) : pas de médailles.
+var MEDALS = [
+  { key: `gold`, label: `Or`, long: `Médaille d’or`, next: `l’or` },
+  { key: `silver`, label: `Argent`, long: `Médaille d’argent`, next: `l’argent` },
+  { key: `bronze`, label: `Bronze`, long: `Médaille de bronze`, next: `le bronze` },
+];
+function medalTargets(L) {
+  let md = L && L.medals;
+  if (!md || typeof md != `object`) return null;
+  let ts = MEDALS.map((x) => ({ ...x, t: md[x.key] }));
+  if (!ts.every((x) => typeof x.t == `number` && isFinite(x.t) && x.t > 0)) return null;
+  if (!(ts[0].t < ts[1].t && ts[1].t < ts[2].t)) return null;
+  return ts;
+}
+// Meilleure médaille obtenue pour un temps (null si aucune ou pas de médailles pour ce niveau)
+function medalOf(L, time) {
+  let ts = medalTargets(L);
+  return ts && typeof time == `number` && isFinite(time) ? (ts.find((x) => time <= x.t) ?? null) : null;
+}
+// Médaille suivante à viser après `cur` (null = déjà l'or)
+function medalNext(L, cur) {
+  let ts = medalTargets(L);
+  if (!ts) return null;
+  let i = cur ? ts.findIndex((x) => x.key === cur.key) : ts.length;
+  return i > 0 ? ts[i - 1] : null;
+}
+function medalDisc(key, big) {
+  return (0, U.jsx)(`span`, {
+    className: `medal ${key || `none`}${big ? ` big` : ``}`,
+    "aria-hidden": !0,
+  });
 }
 function K() {
   let e = (0, d.useRef)(null),
@@ -2265,6 +2299,37 @@ function K() {
                                   : ``,
                               ],
                             }),
+                            (() => {
+                              let ts = medalTargets(e);
+                              if (!ts) return null;
+                              let got = r ? medalOf(e, r.bestTime) : null;
+                              return (0, U.jsxs)(`span`, {
+                                className: `medals`,
+                                children: [
+                                  got
+                                    ? (0, U.jsxs)(`span`, {
+                                        className: `got ${got.key}`,
+                                        title: got.long,
+                                        children: [medalDisc(got.key), got.label],
+                                      })
+                                    : (0, U.jsx)(`span`, {
+                                        className: `got none`,
+                                        children: r ? `Pas de médaille` : `À courir`,
+                                      }),
+                                  (0, U.jsx)(`span`, {
+                                    className: `targets`,
+                                    "aria-label": `Temps cibles : ` + ts.map((x) => `${x.label} ${W(x.t)}`).join(`, `),
+                                    children: ts.map((x) =>
+                                      (0, U.jsxs)(
+                                        `span`,
+                                        { className: `tg ${x.key}${got && got.key === x.key ? ` on` : ``}`, children: [medalDisc(x.key), W(x.t)] },
+                                        x.key,
+                                      ),
+                                    ),
+                                  }),
+                                ],
+                              });
+                            })(),
                             menuTops && menuTops[e.id]?.length
                               ? (0, U.jsx)(`span`, {
                                   className: `lb-top`,
@@ -2387,6 +2452,40 @@ function K() {
                     }),
                   ],
                 }),
+                (() => {
+                  // Médaille de cette course, record local et temps visé pour la médaille suivante
+                  if (!medalTargets(M)) return null;
+                  let rec = n.levels[M.id]?.bestTime,
+                    run = ae?.time ?? rec,
+                    got = medalOf(M, run),
+                    recMedal = medalOf(M, rec),
+                    nx = medalNext(M, recMedal);
+                  return (0, U.jsxs)(`div`, {
+                    className: `medal-result ${got ? got.key : `none`}`,
+                    children: [
+                      medalDisc(got?.key, !0),
+                      (0, U.jsxs)(`div`, {
+                        className: `mr-text`,
+                        children: [
+                          (0, U.jsx)(`strong`, { children: got ? got.long : `Pas de médaille` }),
+                          (0, U.jsxs)(`span`, {
+                            className: `mr-line`,
+                            children: [
+                              run != null ? `Temps ${W(run)}` : ``,
+                              rec != null ? (0, U.jsxs)(`span`, { className: `mr-rec`, children: [` · Record ${W(rec)}`, recMedal ? medalDisc(recMedal.key) : null] }) : null,
+                            ],
+                          }),
+                          (0, U.jsx)(`span`, {
+                            className: `mr-next`,
+                            children: nx
+                              ? `Prochaine : ${nx.next} sous ${W(nx.t)}`
+                              : `Toutes les médailles ! Le pilote auto fait ${W((M.medals.auto ?? medalTargets(M)[0].t) + 1e-6)}.`,
+                          }),
+                        ],
+                      }),
+                    ],
+                  });
+                })(),
                 lbEnabled() && lbData && lbData.levelId === M.id ? lbView(lbData) : null,
                 nextLvl
                   ? (0, U.jsxs)(`button`, {

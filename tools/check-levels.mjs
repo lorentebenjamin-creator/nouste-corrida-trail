@@ -17,13 +17,36 @@ const LIMITS = {
 };
 let errors = 0, warnings = 0;
 const err = (l, m) => { errors++; console.log(`ERREUR  [${l}] ${m}`); };
-const warn = (l, m) => { warnings++; console.log(`avert.  [${l}] ${m}`); };
+// Avertissements acceptés : champ `acceptedWarnings: [{ match: "début du message", reason: "pourquoi" }]`
+// dans le bloc du niveau (voir LEVELS.md §6b). Un avertissement dont le texte commence par `match`
+// est listé à part (avec sa raison) et ne compte pas comme avertissement non justifié.
+let accepting = [], acceptedList = [];
+const warn = (l, m) => {
+  const a = accepting.find((x) => m.startsWith(x.match));
+  if (a) { a.used = true; acceptedList.push(`accepté [${l}] ${m} — ${a.reason}`); return; }
+  warnings++; console.log(`avert.  [${l}] ${m}`);
+};
 const info = (l, m) => console.log(`info    [${l}] ${m}`);
 
 const ids = new Set();
 LEVELS.forEach((L, idx) => {
   const tag = `${idx + 1}:${L.id}`;
   const errorsBefore = errors;
+  accepting = [];
+  if (L.acceptedWarnings != null) {
+    if (!Array.isArray(L.acceptedWarnings)) err(tag, `acceptedWarnings doit être un tableau de { match, reason }`);
+    else for (const a of L.acceptedWarnings) {
+      if (!a || typeof a.match !== "string" || !a.match.trim()) err(tag, `acceptedWarnings : chaque entrée doit avoir un "match" non vide`);
+      else if (typeof a.reason !== "string" || a.reason.trim().length < 10) err(tag, `acceptedWarnings "${a.match}" : raison manquante ou trop courte`);
+      else accepting.push({ match: a.match, reason: a.reason.trim(), used: false });
+    }
+  }
+  // Médailles (facultatives) : medals: { auto, gold, silver, bronze } écrit par tools/medals.mjs
+  if (L.medals != null) {
+    const md = L.medals, okNum = (x) => typeof x === "number" && isFinite(x) && x > 0;
+    if (![md.auto, md.gold, md.silver, md.bronze].every(okNum)) err(tag, `medals : auto, gold, silver et bronze doivent être des nombres > 0`);
+    else if (!(md.auto <= md.gold && md.gold < md.silver && md.silver < md.bronze)) err(tag, `medals : il faut auto ≤ or < argent < bronze`);
+  } else info(tag, `pas de médailles (lancer tools/medals.mjs ${L.id} --write)`);
   for (const k of ["id", "name", "blurb", "difficulty", "theme"]) if (typeof L[k] !== "string" || !L[k].trim()) err(tag, `champ texte manquant: ${k}`);
   for (const k of ["width", "floor", "spawnX", "finishX"]) if (typeof L[k] !== "number" || !isFinite(L[k])) err(tag, `champ numérique manquant: ${k}`);
   if (ids.has(L.id)) err(tag, `id déjà utilisé`); ids.add(L.id);
@@ -167,7 +190,10 @@ LEVELS.forEach((L, idx) => {
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
   const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`].filter(Boolean).join(", ");
+  for (const a of accepting) if (!a.used) warn(tag, `acceptedWarnings obsolète : "${a.match}" ne correspond plus à aucun avertissement (le retirer)`);
+  accepting = [];
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);
 });
-console.log(`\n${LEVELS.length} niveaux, ${errors} erreur(s), ${warnings} avertissement(s)`);
+if (acceptedList.length) console.log(`\nAvertissements acceptés (acceptedWarnings, justifiés dans levels.js) :\n` + acceptedList.map((x) => "  " + x).join("\n"));
+console.log(`\n${LEVELS.length} niveaux, ${errors} erreur(s), ${warnings} avertissement(s) non justifié(s), ${acceptedList.length} accepté(s)`);
 process.exit(errors ? 1 : 0);

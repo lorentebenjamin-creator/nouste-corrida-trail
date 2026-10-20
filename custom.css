@@ -27,3 +27,26 @@
 .sheet .lb-msg{margin:.3rem 0 0;font-size:.82rem;color:var(--color-muted)}
 @media (max-width:520px){.sheet .lb-list{columns:1}}
 .level .lb-top{display:block;grid-column:1/-1;margin-top:.3rem;font-size:.78rem;font-weight:600;color:var(--color-signal);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* Médailles (champ `medals` de levels.js, tools/medals.mjs) : disques en CSS, pas d'emoji */
+.medal{display:inline-block;flex:0 0 auto;width:.78rem;height:.78rem;border-radius:50%;vertical-align:-1px;box-shadow:inset 0 0 0 1.5px #0003,0 1px 2px #0006}
+.medal.gold{background:radial-gradient(circle at 35% 30%,#fff3b0,#f2c230 45%,#a87a12)}
+.medal.silver{background:radial-gradient(circle at 35% 30%,#fff,#c9d0d6 45%,#7d8790)}
+.medal.bronze{background:radial-gradient(circle at 35% 30%,#ffd9b0,#c97b3c 45%,#7a4319)}
+.medal.none{background:transparent;box-shadow:inset 0 0 0 1.5px var(--color-line)}
+.medal.big{width:2.6rem;height:2.6rem;box-shadow:inset 0 0 0 3px #0003,0 4px 14px #0007}
+.level .medals{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .7rem;margin-top:.35rem;font-size:.76rem;color:var(--color-muted);font-variant-numeric:tabular-nums}
+.level .medals .got{display:inline-flex;align-items:center;gap:.3rem;font-weight:700;color:var(--color-paper)}
+.level .medals .got.none{font-weight:600;color:var(--color-muted);opacity:.85}
+.level .medals .targets{display:inline-flex;flex-wrap:wrap;gap:.15rem .55rem;margin-left:auto;opacity:.72}
+.level .medals .tg{display:inline-flex;align-items:center;gap:.22rem}
+.level .medals .tg .medal{width:.55rem;height:.55rem}
+.level .medals .tg.on{opacity:1;color:var(--color-paper);font-weight:700}
+.sheet .medal-result{display:flex;align-items:center;gap:.8rem;margin:0 0 .7rem;padding:.55rem .75rem;border:1px solid var(--color-line);border-radius:.8rem;background:#0000001f}
+.sheet .medal-result.gold{border-color:#f2c23088}.sheet .medal-result.silver{border-color:#c9d0d688}.sheet .medal-result.bronze{border-color:#c97b3c88}
+.sheet .medal-result .mr-text{display:flex;flex-direction:column;gap:.08rem;min-width:0}
+.sheet .medal-result strong{font-family:var(--font-display);font-size:1.15rem;font-weight:600;line-height:1.15}
+.sheet .medal-result .mr-line,.sheet .medal-result .mr-next{font-size:.84rem;color:var(--color-muted);font-variant-numeric:tabular-nums}
+.sheet .medal-result .mr-rec{white-space:nowrap}
+.sheet .medal-result .mr-rec .medal{width:.6rem;height:.6rem;margin-left:.3rem}
+.sheet .medal-result .mr-next{color:var(--color-signal);font-weight:600}
+@media (max-width:520px){.level .medals .targets{margin-left:0}.medal.big{width:2.1rem;height:2.1rem}.sheet .medal-result{gap:.6rem;padding:.45rem .6rem}}

@@ -78,7 +78,7 @@ if (!human) {
     const loop = st.r.slice(1).some((x) => x.deaths >= 8);
     const ok = st.mode === 'finish' && st.deaths === 0 && !loop;
     allOk &&= ok;
-    console.log(`${ok ? 'OK   ' : 'ÉCHEC'} [${L.id}] ${L.name} — ${st.mode === 'finish' ? 'arrivé en ' + st.time.toFixed(1) + ' s' : 'NON arrivé (x=' + st.r[0].x + ')'} — chutes joueur ${st.deaths} — balises ${st.coins}/${L.coins} — rivaux ${rivalDeaths}${st.jetHits ? ' — jets subis ' + st.jetHits : ''}${deathsAt.length ? ' — chutes à ' + deathsAt.join(' ') : ''}`);
+    console.log(`${ok ? 'OK   ' : 'ÉCHEC'} [${L.id}] ${L.name} — ${st.mode === 'finish' ? 'arrivé en ' + (st.finishTime ?? st.time).toFixed(1) + ' s' : 'NON arrivé (x=' + st.r[0].x + ')'} — chutes joueur ${st.deaths} — balises ${st.coins}/${L.coins} — rivaux ${rivalDeaths}${st.jetHits ? ' — jets subis ' + st.jetHits : ''}${deathsAt.length ? ' — chutes à ' + deathsAt.join(' ') : ''}`);
   }
 } else {
   // --- Mode humain : essais en parallèle sur `jobs` pages ---

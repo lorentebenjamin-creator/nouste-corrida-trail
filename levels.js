@@ -184,6 +184,11 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1880, 430, 1), y(id, 3640, 430, 2)],
     finishX: 4980,
     rivals: [{ speed: 0.93 }, { speed: 0.84 }, { speed: 0.74 }],
+    medals: { auto: 13.9, gold: 16, silver: 19, bronze: 22.5 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "ronce @2140 trop près du fanion @1880", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : ronce à 260 px du fanion, rivaux lents (≤ 0,93)." },
+    ],
   };
 })());
 
@@ -210,6 +215,20 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1400, 356, 1), y(id, 2580, 430, 2), y(id, 3780, 430, 3)],
     finishX: 6460,
     rivals: [{ speed: 0.97 }, { speed: 0.88 }, { speed: 0.78 }],
+    medals: { auto: 18.1, gold: 21, silver: 24.5, bronze: 29 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "ronce @360 trop près du départ", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : première ronce d'apprentissage, le compte à rebours ne verrouille pas les rivaux comme une réapparition." },
+      { match: "ronce @1560: seulement 190 px avant le bord", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : le sol suivant est au même niveau, on enchaîne ronce + saut." },
+      { match: "ronce @1560 trop près du fanion @1400", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé)." },
+      { match: "ronce @2720: seulement 210 px avant le bord", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : saut suivant vers une passerelle basse." },
+      { match: "ronce @2720 trop près du fanion @2580", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé)." },
+      { match: "ronce @3980: seulement 200 px avant le bord", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé)." },
+      { match: "ronce @3980 trop près du fanion @3780", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé)." },
+      { match: "rock @4480: seulement 240 px avant le bord", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : ravin suivant étroit." },
+      { match: "fanion @1400: moins de 360 px de sol après", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : rivaux jamais en boucle au playtest." },
+      { match: "fanion @2580: moins de 360 px de sol après", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : rivaux jamais en boucle au playtest." },
+    ],
   };
 })());
 
@@ -227,7 +246,7 @@ LEVELS.push((() => {
     blurb: "Le col se referme. Léa ne lâche rien.",
     difficulty: "Hors-piste", theme: "col",
     width: 8200, floor: 440, spawnX: 60,
-    solids: [p(0, 520, 440), p(660, 380, 440), h(820, 440), p(1180, 460, 380), p(1760, 420, 380),
+    solids: [p(0, 520, 440), p(660, 420, 440) /* 380→420 (revue 20/10) : 260 px après le rocher, écart 100 */, h(820, 440), p(1180, 460, 380), p(1760, 420, 380),
       g(1900, 380), p(2300, 380, 320), p(2800, 460, 440), m(3320, 344, 160), m(3560, 276, 150),
       m(3800, 340, 160), p(4020, 360, 440), p(4520, 340, 440), p(5000, 480, 380), h(5220, 380),
       p(5620, 2400, 440)],
@@ -238,6 +257,20 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1240, 380, 1), y(id, 2860, 440, 2), y(id, 5080, 380, 3)],
     finishX: 7620,
     rivals: [{ speed: 0.99 }, { speed: 0.9 }, { speed: 0.82 }],
+    medals: { auto: 21.6, gold: 25, silver: 29.5, bronze: 35 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "ground@4520→ground@5000: montée 60 px avec écart 140 px", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : seule montée longue du niveau, pilote pressé sans chute à cet endroit." },
+      { match: "ronce @300: seulement 220 px avant le bord", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : ronce d'apprentissage, sol suivant au même niveau." },
+      { match: "ronce @300 trop près du départ", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : ronce d'apprentissage juste après le départ." },
+      { match: "ronce @860: seulement 220 px avant le bord", reason: "Ronce collée au rocher @820 qui la recouvre en partie : on franchit rocher + ronce d'un seul saut, la règle « rocher » (260 px) est respectée depuis la revue du 20/10." },
+      { match: "ronce @1400 trop près du fanion @1240", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé)." },
+      { match: "ronce @1980: seulement 200 px avant le bord", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : saut suivant en descente." },
+      { match: "ronce @2460: seulement 220 px avant le bord", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : saut suivant en descente (320 → 440)." },
+      { match: "ronce @3000 trop près du fanion @2860", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé)." },
+      { match: "ronce @4200: seulement 180 px avant le bord", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé)." },
+      { match: "ronce @5180 trop près du fanion @5080", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé)." },
+    ],
   };
 })());
 
@@ -310,6 +343,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2650, 440, 1), y(id, 4230, 440, 2), y(id, 6020, 260, 3), y(id, 8370, 440, 4)],
     finishX: 10900,
     rivals: [{ speed: 1.0 }, { speed: 0.92 }, { speed: 0.85 }],
+    medals: { auto: 30.8, gold: 35.5, silver: 42, bronze: 49.5 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
   };
 })());
 
@@ -380,6 +414,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2080, 440, 1), y(id, 3960, 380, 2), y(id, 6040, 440, 3), y(id, 7320, 440, 4), y(id, 8580, 440, 5)],
     finishX: 9400,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 31.8, gold: 37, silver: 43, bronze: 51 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
   };
 })());
 
@@ -461,6 +496,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1040, 380, 1), y(id, 2320, 170, 2), y(id, 3780, 440, 3), y(id, 5580, 230, 4), y(id, 7000, 440, 5), y(id, 9460, 440, 6)],
     finishX: 10300,
     rivals: [{ speed: 1.0 }, { speed: 0.94 }, { speed: 0.88 }],
+    medals: { auto: 29.4, gold: 34, silver: 40, bronze: 47.5 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
   };
 })());
 
@@ -527,6 +563,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 3060, 440, 1), y(id, 4490, 440, 2), y(id, 5810, 300, 3), y(id, 6890, 440, 4), y(id, 8410, 440, 5)],
     finishX: 9500,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 31.7, gold: 36.5, silver: 43, bronze: 51 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
   };
 })());
 
@@ -566,7 +603,7 @@ LEVELS.push((() => {
       p(4270, 430, 370),
       p(4830, 420, 300),
       // Passerelles dans la nuit
-      m(5410, 300, 115), m(5680, 260, 125), // 150→115/125 (revue 19/10)
+      m(5410, 300, 140), m(5680, 260, 140), // 150→115/125 (revue 19/10) → 140/140 (revue 20/10) : écarts 130 (montée 40) et 160
       p(5980, 560, 340),
       // Le second radeau
       p(6680, 900, 440),
@@ -602,6 +639,12 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2160, 440, 1), y(id, 3470, 440, 2), y(id, 4860, 300, 3), y(id, 6710, 440, 4), y(id, 8110, 440, 5)],
     finishX: 9560,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.87 }],
+    medals: { auto: 29.8, gold: 34.5, silver: 40.5, bronze: 48 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "passerelle mobile @2920: rapide (171 px/s)", reason: "Radeau accéléré volontairement à la revue du 19/10 (4,6 → 4,4 s) pour un niveau « Très engagé » ; validé playtest auto et humain." },
+      { match: "passerelle mobile @7610: rapide (175 px/s)", reason: "Second radeau accéléré volontairement à la revue du 19/10 (4,0 → 3,6 s) ; validé playtest auto et humain." },
+    ],
   };
 })());
 
@@ -676,5 +719,6 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2640, 440, 1), y(id, 5100, 440, 2), y(id, 7050, 250, 3), y(id, 9570, 440, 4)],
     finishX: 11200,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 31.6, gold: 36.5, silver: 43, bronze: 51 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
   };
 })());

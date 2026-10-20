@@ -44,7 +44,18 @@ Difficulté mesurée (pilote « humain », 20 essais, réussite / chutes moyenne
 | 8 | 95 % / 1,80 | 70 % / 3,70 |
 | 9 | 100 % / 0,20 | 90 % / 1,65 |
 
-Détails et méthode : LEVELS.md §8.
+Détails et méthode : LEVELS.md §8. (Revue du 20/10 : N°3 100 % / 0,05 — 100 % / 0,85 ;
+N°8 95 % / 1,75 — 70 % / 3,65 après les retouches de géométrie.)
+
+## Médailles
+
+Chaque sentier a trois temps cibles calculés à partir du **pilote automatique** de
+`tools/playtest.mjs` : **or = ×1,15, argent = ×1,35, bronze = ×1,6** (arrondis à la demi-seconde
+supérieure). Le menu affiche sous chaque sentier la médaille de ton record (enregistré dans le
+navigateur) et les trois temps cibles ; l'écran d'arrivée affiche la médaille de la course, ton
+record et le temps à battre pour la médaille suivante. Les temps sont écrits dans `levels.js`
+(champ `medals`) par `node tools/medals.mjs <url> last --write` ; un sentier sans ce champ
+s'affiche simplement sans médailles (LEVELS.md §6 étape 5b).
 
 ## Source de référence
 
@@ -64,10 +75,12 @@ Site 100 % statique : servir le dossier tel quel (fonctionne à la racine ou sou
 `tools/serve.sh` le sert en local sur http://localhost:8765/nouste-corrida-trail/.
 
 Les niveaux sont dans **`levels.js`** ; le format et la recette pour ajouter un niveau sont
-décrits dans **[LEVELS.md](LEVELS.md)**. Vérification : `node tools/check-levels.mjs`,
+décrits dans **[LEVELS.md](LEVELS.md)**. Vérification : `node tools/check-levels.mjs` (0 erreur, 0 avertissement non justifié ; les
+avertissements voulus sont déclarés dans `acceptedWarnings`, LEVELS.md §6b),
 puis `tools/playtest.mjs` (pilote automatique sur chaque niveau ; `--human --trials 20` pour un
 pilote « humain » imprécis et des taux de réussite), `tools/e2e.mjs` (commandes, fanions, record,
-menu) et `tools/e2e-classement.mjs` (classement, faux backend) avec Playwright.
+menu), `tools/e2e-classement.mjs` (classement, faux backend) et `tools/medals.mjs` (temps des
+médailles) avec Playwright.
 
 ## Classement en ligne
 
