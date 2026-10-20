@@ -145,6 +145,18 @@ export const THEMES = {
     // au fond des ravins, lucioles décoratives au-dessus des trous (aucun effet de jeu).
     rim: "#cfe3ff", water: "#14304f", waterHi: "#7fb6e6", fireflies: true,
   },
+  hetraie: {
+    // Niveau 9 : hêtraie d'automne au petit matin (feuilles rousses, ciel d'octobre)
+    skyTop: "#2a3f66", skyMid: "#9db4c8", skyBot: "#f4d9a8",
+    ridge: "#5a4a5e", ridge2: "#8a6f72",
+    pine: "#7a3416", pine2: "#c4631f",
+    dirt: "#6b4a30", dirtDark: "#45301f",
+    grass: "#c98a3a", grassDark: "#8f5a24",
+    wood: "#8a5a34", woodDark: "#553620",
+    rock: "#a39a8f", rockDark: "#6b645c",
+    thorn: "#2e2018", leaf: "#7a5a2a", berry: "#b8322a",
+    fog: "#1f1612",
+  },
 };
 
 // =====================================================================
@@ -590,5 +602,79 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2160, 440, 1), y(id, 3470, 440, 2), y(id, 4860, 300, 3), y(id, 6710, 440, 4), y(id, 8110, 440, 5)],
     finishX: 9560,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.87 }],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 9 — La Hêtraie des Palombes (niveau du jour, 2026-10-20)
+// Niveau classique (règle d'alternance) — nouveauté : la palombière, des ronces
+// posées SUR les passerelles perchées au-dessus du vide (jamais vu : jusqu'ici les
+// ronces étaient toujours au sol). Aucune mécanique v2/v3 : sols, ravins, ronces,
+// rochers, troncs, passerelles fixes et fanions, sur le modèle du niveau 4.
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "hetraie-palombes", c = v(id);
+  c.line(160, 400, 370, 3); c.arc(450, 560, 330, 3, 40); c.arc(800, 900, 330, 3, 40);
+  c.arc(1060, 1160, 330, 3, 40); c.arc(1380, 1480, 300, 3, 40); c.arc(1620, 1720, 260, 3, 40);
+  c.arc(1940, 2040, 240, 3, 40); c.arc(2140, 2280, 200, 3, 40); c.arc(2480, 2600, 270, 3, 40);
+  c.line(2700, 3000, 370, 4);
+  c.arc(3180, 3300, 300, 3, 40); c.line(3330, 3430, 290, 2); c.line(3620, 3710, 230, 2);
+  c.line(3900, 3990, 190, 2); c.arc(4010, 4110, 150, 3, 40); c.line(4180, 4320, 190, 3);
+  c.arc(4360, 4480, 200, 3, 40); c.line(4500, 4620, 230, 2); c.arc(4640, 4740, 190, 3, 40);
+  c.line(4800, 4920, 230, 2); c.arc(4960, 5080, 260, 3, 40);
+  c.line(5150, 5450, 370, 4); c.arc(5490, 5570, 330, 3, 40);
+  c.arc(5830, 5950, 300, 3, 40); c.arc(6060, 6160, 250, 3, 40); c.arc(6350, 6470, 230, 3, 40);
+  c.arc(6590, 6710, 180, 3, 40); c.arc(6910, 7030, 160, 3, 40); c.line(7100, 7400, 180, 4);
+  c.arc(7450, 7600, 220, 3, 40); c.arc(7760, 7860, 220, 3, 40); c.arc(8040, 8190, 300, 3, 40);
+  c.line(8260, 8520, 370, 3); c.arc(8570, 8700, 330, 3, 40); c.line(8720, 8840, 290, 2);
+  c.arc(8860, 8980, 260, 3, 40); c.line(9000, 9110, 240, 2); c.arc(9130, 9250, 260, 3, 40);
+  c.line(9270, 9390, 280, 2); c.arc(9410, 9540, 300, 3, 40);
+  c.line(9620, 9900, 370, 3); c.arc(9980, 10090, 330, 3, 40); c.arc(10300, 10440, 330, 3, 40);
+  c.arc(10680, 10820, 330, 3, 40); c.arc(10980, 11090, 330, 3, 40); c.line(11120, 11220, 370, 3);
+  return {
+    id, name: "La Hêtraie des Palombes",
+    blurb: "Hêtres roux d'octobre et palombière perchée : les ronces ont envahi les planches, saute-les sans tomber.",
+    difficulty: "Endurance", theme: "hetraie",
+    width: 11640, floor: 440, spawnX: 60,
+    solids: [
+      // Départ sous les hêtres, puis ressauts vers la lisière
+      p(0, 780, 440),
+      p(920, 440, 440), h(1080, 440),
+      p(1480, 440, 370),
+      p(2040, 420, 310), g(2160, 310),
+      p(2610, 560, 440),
+      // Passage clé : la palombière — passerelles perchées au-dessus du vide, envahies de ronces
+      m(3300, 360, 160), m(3590, 300, 150),
+      m(3870, 260, 460), // planche longue : une ronce posée dessus (voir hazards)
+      m(4480, 300, 450), // seconde planche longue, seconde ronce
+      p(5070, 760, 440), h(5500, 440),
+      // Le chaos de blocs : montée vers le belvédère
+      p(5950, 400, 380),
+      p(6470, 440, 310), g(6600, 310),
+      p(7030, 410, 250),
+      // Descente dans les feuilles mortes
+      p(7600, 430, 350),
+      p(8190, 380, 440),
+      // Les passerelles du ruisseau
+      m(8700, 360, 150), m(8980, 310, 150), m(9250, 350, 150),
+      // Dernier sprint jusqu'à l'arche
+      p(9540, 760, 440),
+      p(10440, 1100, 440), g(10700, 440),
+    ],
+    hazards: [
+      _(470, 70, 440),
+      _(1640, 64, 370),
+      // Passage clé : ronces sur les planches de la palombière (sauter sans quitter la planche)
+      _(4030, 64, 260),
+      _(4660, 76, 300),
+      _(6080, 64, 380),
+      _(7780, 64, 350),
+      _(10000, 70, 440),
+      _(11000, 74, 440),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2640, 440, 1), y(id, 5100, 440, 2), y(id, 7050, 250, 3), y(id, 9570, 440, 4)],
+    finishX: 11200,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
   };
 })());

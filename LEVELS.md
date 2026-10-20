@@ -154,7 +154,8 @@ On peut en ajouter dans `THEMES` de `levels.js` (fusionnés dans le bundle) avec
 clés : `skyTop skyMid skyBot ridge ridge2 pine pine2 dirt dirtDark grass grassDark wood woodDark
 rock rockDark thorn leaf berry fog`. Exemple : `breche` (neige au crépuscule) du niveau 4.
 Réutiliser un thème existant est toujours sûr. Palettes ajoutées : `breche` (niv. 4, neige au
-crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier sous l'orage), `cascade` (niv. 7, gorges moussues), `nuit` (niv. 8, trail de nuit au clair de lune).
+crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier sous l'orage), `cascade` (niv. 7, gorges moussues), `nuit` (niv. 8, trail de nuit au clair de lune),
+`hetraie` (niv. 9, hêtraie d'automne au petit matin, sapins roux = hêtres).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -291,7 +292,7 @@ chute, un humain peut passer.
   défilante, badge, bouton ↓.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–8)
+## 8. Courbe de difficulté (niveaux 1–9)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -303,14 +304,18 @@ chute, un humain peut passer.
 | 6 | Le Couloir des Pierres | Extrême | 1030 m | 13 | 2 | 4 passerelles mobiles, 11 chutes de pierres, 2 patous | 1 / 0.94 / 0.88 | 29,5 s |
 | 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou, **1 jet de cascade** | 1 / 0.93 / 0.86 | 31,7 s |
 | 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 6 | 2 radeaux, 3 patous, 3 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 29,9 s |
+| 9 | La Hêtraie des Palombes | Endurance | 1120 m | 19 | 8 (dont **2 sur des passerelles**) | — (classique) | 1 / 0.93 / 0.86 | 31,6 s |
 
 Progression voulue : 1–3 apprennent sauts, ronces, passerelles ; 4 = endurance (le plus long,
 aucune mécanique, rivaux à 1,00) ; 5 = découverte des mécaniques v2 avec du temps pour lire
 (bacs lents, patous, chemin double, ascenseur) ; 6 = tout combiné en cadence (pierres
 rapprochées, cheminée, bacs au-dessus du vide, rivaux les plus rapides). « Pilote auto » = temps
 du pilote parfait de `tools/playtest.mjs` (un humain met nettement plus). 7 = jet de cascade ;
-8 = nuit, jet + radeau, le plus dur des deux profils après la revue du 19/10. **Prochain niveau
-(N°9) : classique sur le modèle du 4** (règle d'alternance, §6 étape 3b).
+8 = nuit, jet + radeau, le plus dur des deux profils après la revue du 19/10. 9 = **classique**
+sur le modèle du 4 (règle d'alternance, §6 étape 3b) : un peu plus long et un cran au-dessus du 4
+(ronces sur les passerelles de la palombière), nettement en dessous des niveaux à mécaniques.
+**Prochain niveau (N°10) : de nouveau à mécaniques possible**, puis alternance 1 classique /
+1 à mécaniques.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
@@ -338,6 +343,7 @@ Profil « attentif » (défaut) et profil « pressé » (`--delay 180-250 --jitt
 | 6 | Le Couloir des Pierres | Extrême | 95 % | 1,85 | 42,0 s | 70 % | 3,80 | 48,7 s |
 | 7 | La Cascade des Desmans | Engagé | 95 % | 1,55 | 41,4 s | 80 % | 3,45 | 48,6 s |
 | 8 | Le Gué des Lucioles | Très engagé | 95 % | 1,80 | 39,2 s | 70 % | 3,70 | 44,0 s |
+| 9 | La Hêtraie des Palombes | Endurance | 100 % | 0,20 | 34,0 s | 90 % | 1,65 | 39,4 s |
 
 Lecture : pente régulière de 1 à 4, marche nette à 5 (mécaniques). Depuis la revue du 19/10,
 5 est le plus facile des niveaux à mécaniques dans les deux profils (ascenseur élargi et ralenti,
@@ -347,6 +353,13 @@ monte), et 8 est plus dur que 7 dans les deux profils. 6 (« Extrême ») reste 
 en profil pressé). Le modèle reste plus régulier qu'un vrai débutant : ces chiffres comparent
 les niveaux entre eux, ce ne sont pas des taux réels. Points chauds connus en profil pressé :
 N°8 x≈2600 (appui trop court au-dessus de la ronce avant le radeau) et x≈3400 (sortie du radeau).
+
+N°9 (mesuré le 20/10, mêmes réglages) : classique, donc légitimement plus facile que 5–8 (étiquette
+« Endurance », pas « plus dur » que « Très engagé »). Sur 20 essais il est au niveau du 4 ; sur
+**40 essais** (pour lisser le bruit), il est un cran au-dessus du 4 dans les deux profils :
+attentif 100 % / 0,35 contre 100 % / 0,30, pressé 88 % / 2,00 contre 98 % / 1,93. Points chauds
+en profil pressé : x≈4000 (ronce sur la planche haute de la palombière), x≈7600–7800 (réception
+de la descente du belvédère puis ronce) et x≈10000 (ronce du sprint final).
 
 Avant la revue (18/10, mêmes réglages) : N°5 100 % / 0,65 — 70 % / 3,55 ; N°8 100 % / 0,60 —
 70 % / 3,15 (N°5 était le plus dur en profil pressé, N°8 plus facile que 7).
