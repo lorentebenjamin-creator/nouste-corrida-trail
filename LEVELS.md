@@ -449,6 +449,11 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   et pilote humain la prévoient), touffes d'herbe, manche à air, stries, panneau et souffle
   (`drawGust`, `tickDynamicSounds`), `getState().gustTime`. Niveaux sans `gusts` : inchangés
   (temps autopilote des N°1–9 identiques au dixième après la modification).
+* **Revue du 21/10** : panneaux de sentier (`signs`, `drawSign`, décor seul) ; pilote humain :
+  option `calm` (attend le calme avant un saut au-dessus du vide dans une rafale) et hésitations
+  après certaines réceptions (`hesitP` 0,2, `pauseMin`/`pauseMax` 0,1–0,4 s), sans aucun effet sur
+  le pilote auto ni les rivaux ; temps cibles de médaille affichés au centième si besoin (`WT`) ;
+  correction de l'affichage des dixièmes (`W(14.1)` affichait 14.0).
 * `assets/routes-x3PbsDEU.css` : URLs des polices relatives. `custom.css` : liste de niveaux
   défilante, badge, bouton ↓, médailles (disques CSS, sans emoji).
 * Médailles (revue du 20/10) : `medalTargets` / `medalOf` / `medalNext` dans `assets/game.js` lisent
@@ -470,25 +475,33 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou, **1 jet de cascade** | 1 / 0.93 / 0.86 | 31,7 s |
 | 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 6 | 2 radeaux, 3 patous, 3 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 29,8 s |
 | 9 | La Hêtraie des Palombes | Endurance | 1120 m | 19 | 8 (dont **2 sur des passerelles**) | — (classique) | 1 / 0.93 / 0.86 | 31,6 s |
-| 10 | Le Plateau des Bérets Envolés | Bien engagé | 947 m | 13 | 4 | **4 zones de rafales de vent** (7 sauts sous le vent) | 1 / 0.93 / 0.86 | 28,1 s |
+| 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | 14 | 4 | **5 zones de rafales de vent** (8 sauts sous le vent, dont **1 ravin au calme**, le Ravin du Béret, avec panneau) | 1 / 0.93 / 0.86 | 30,8 s |
 
-Temps « pilote auto » mesurés le 20/10 avec `finishTime` (avant : temps lu au sondage suivant,
-jusqu'à +0,25 s). Ce sont les temps `auto` des médailles :
+Médailles **calibrées le 21/10** (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ;
+pourcentages ci-dessous sur 20 essais par profil (essais ratés comptés sans médaille) :
 
-| N° | Niveau | Pilote auto | Or (×1,15) | Argent (×1,35) | Bronze (×1,6) |
-|---|---|---|---|---|---|
-| 1 | Sous-bois des cèdres | 13,9 s | 16,0 s | 19,0 s | 22,5 s |
-| 2 | La crête | 18,1 s | 21,0 s | 24,5 s | 29,0 s |
-| 3 | Col du vent | 21,6 s | 25,0 s | 29,5 s | 35,0 s |
-| 4 | La Brèche aux Isards | 30,8 s | 35,5 s | 42,0 s | 49,5 s |
-| 5 | L'Estive des Patous | 31,8 s | 37,0 s | 43,0 s | 51,0 s |
-| 6 | Le Couloir des Pierres | 29,4 s | 34,0 s | 40,0 s | 47,5 s |
-| 7 | La Cascade des Desmans | 31,7 s | 36,5 s | 43,0 s | 51,0 s |
-| 8 | Le Gué des Lucioles | 29,8 s | 34,5 s | 40,5 s | 48,0 s |
-| 9 | La Hêtraie des Palombes | 31,6 s | 36,5 s | 43,0 s | 51,0 s |
-| 10 | Le Plateau des Bérets Envolés | 28,1 s | 32,5 s | 38,0 s | 45,0 s |
+| N° | Niveau | Pilote auto | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
+|---|---|---|---|---|---|---|---|
+| 1 | Sous-bois des cèdres | 13,9 s | 14,1 s | 14,6 s | 15,1 s | 10 % / 60 % / 90 % | 35 % / 50 % / 55 % |
+| 2 | La crête | 18,1 s | 18,25 s | 18,8 s | 19,3 s | 25 % / 85 % / 90 % | 30 % / 45 % / 50 % |
+| 3 | Col du vent | 21,6 s | 21,7 s | 22,2 s | 22,7 s | 25 % / 80 % / 90 % | 10 % / 30 % / 30 % |
+| 4 | La Brèche aux Isards | 30,8 s | 31,1 s | 31,8 s | 34,2 s | 15 % / 50 % / 85 % | 5 % / 10 % / 15 % |
+| 5 | L'Estive des Patous | 31,8 s | 32,0 s | 33,0 s | 42,1 s | 20 % / 55 % / 80 % | 0 % / 20 % / 25 % |
+| 6 | Le Couloir des Pierres | 29,4 s | 31,6 s | 35,2 s | 43,1 s | 10 % / 35 % / 80 % | 0 % / 5 % / 30 % |
+| 7 | La Cascade des Desmans | 31,7 s | 32,1 s | 34,5 s | 40,3 s | 25 % / 60 % / 85 % | 0 % / 5 % / 30 % |
+| 8 | Le Gué des Lucioles | 29,8 s | 33,8 s | 37,4 s | 44,5 s | 15 % / 60 % / 95 % | 15 % / 30 % / 40 % |
+| 9 | La Hêtraie des Palombes | 31,6 s | 32,0 s | 32,5 s | 37,8 s | 15 % / 55 % / 75 % | 10 % / 30 % / 60 % |
+| 10 | Le Plateau des Bérets Envolés | 30,8 s | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
 
-(arrondi à la demi-seconde supérieure ; recalculer avec `tools/medals.mjs` après toute retouche.)
+Lecture : sur un niveau sans mécanique, un essai attentif sans chute ni hésitation finit au temps
+du pilote auto, d'où un or très proche de `auto` (×1,01) ; sur les niveaux à mécaniques (6, 8, 10),
+l'attente (pierres, radeaux, calme) écarte davantage l'or du pilote auto. N°2 : temps attentifs très
+groupés (18,15–18,35 s), aucun dixième ne tombe dans la fenêtre 10–25 % (18,2 s → 3 %, 18,3 s → 28 %
+sur 40 essais) : or au 0,05 s (18,25 s → 13 % sur 40 essais). Sur les niveaux 1 et 2 le profil pressé,
+qui n'hésite jamais, décroche plus souvent l'or que l'attentif (ses essais sans chute sont parfaits).
+N°10 : l'or reste atteignable **en jouant les accalmies** (le profil attentif attend le calme ;
+20 % d'or sur 20 essais, 15 % sur 40). Avant le calibrage (anciens multiplicateurs, ancien profil),
+l'or allait à 85–100 % des essais attentifs sur les N°1–5 et 9, et à 65 % sur le N°10.
 
 Progression voulue : 1–3 apprennent sauts, ronces, passerelles ; 4 = endurance (le plus long,
 aucune mécanique, rivaux à 1,00) ; 5 = découverte des mécaniques v2 avec du temps pour lire
@@ -508,13 +521,21 @@ Même cerveau que l'autopilote (simulation exacte de la physique), rendu impréc
 * **délai de réaction** 150–200 ms (tiré par essai) : les décisions sont prises sur l'état
   extrapolé à +délai et exécutées après ce délai ; si l'anticipation se termine mal (danger pas
   vu), réflexe sur l'état présent ; après une chute, il repart après le délai ;
+* **hésitations** (profil attentif, revue du 21/10) : après une réception, dans 20 % des cas, il
+  lâche la direction 0,1–0,4 s (seulement si s'arrêter là est sûr) — sans elles, tous les essais
+  sans chute finissaient au centième près au temps du pilote auto et l'or ne pouvait pas être
+  calibré ; `--hesit 0` les coupe ;
+* **attente du calme** (profil attentif) : dans une zone de rafale, il ne saute pas au-dessus du
+  vide pendant la rafale ni quand les herbes couchées annoncent une rafale qui arriverait avant
+  la fin du saut (≈ 0,8 s) ; `--calm 0` coupe ce comportement ;
 * **sauts imprécis** : il vise le milieu de la fenêtre de sauts sûrs (pas le dernier moment), puis
   un **jitter gaussien** σ = 45 ms (borné ±2σ) décale l'appel ; **durée d'appui** aléatoire
   0,28–0,55 s (relâcher tôt = saut plus bas) ;
 * **graines déterministes** (essai i → graine 1 + i) : résultats reproductibles ;
 * réussite = arche franchie avec **≤ 5 chutes** (essai arrêté au-delà), sur 20 essais.
 
-Profil « attentif » (défaut) et profil « pressé » (`--delay 180-250 --jitter 80 --hold 0.18-0.5`),
+Profil « attentif » (défaut) et profil « pressé » (`--delay 180-250 --jitter 80 --hold 0.18-0.5`,
+depuis le 21/10 avec `--calm 0 --hesit 0`, ce qui redonne exactement les mêmes essais qu'avant),
 20 essais par niveau, le 19/10/2026 (revue `revue-1910`) :
 
 | N° | Niveau | Étiquette | Attentif : réussite | chutes moy. | temps moy. | Pressé : réussite | chutes moy. | temps moy. |
@@ -529,6 +550,28 @@ Profil « attentif » (défaut) et profil « pressé » (`--delay 180-250 --jitt
 | 8 | Le Gué des Lucioles | Très engagé | 95 % | 1,80 | 39,2 s | 70 % | 3,70 | 44,0 s |
 | 9 | La Hêtraie des Palombes | Endurance | 100 % | 0,20 | 34,0 s | 90 % | 1,65 | 39,4 s |
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 100 % | 0,75 | 35,3 s | 75 % | 2,55 | 38,6 s |
+
+**Mesure du 21/10** (revue `revue-2026-10-21`, profil attentif revu, profil pressé inchangé —
+ses chiffres des N°1–9 sont identiques à ceux du tableau ci-dessus) :
+
+| N° | Attentif : réussite | chutes moy. | temps moy. | Pressé : réussite | chutes moy. | temps moy. |
+|---|---|---|---|---|---|---|
+| 1 | 100 % | 0,10 | 14,8 s | 95 % | 0,80 | 16,0 s |
+| 2 | 100 % | 0,10 | 18,7 s | 100 % | 0,70 | 20,9 s |
+| 3 | 100 % | 0,10 | 22,3 s | 100 % | 0,85 | 26,0 s |
+| 4 | 100 % | 0,35 | 32,5 s | 95 % | 1,95 | 37,2 s |
+| 5 | 100 % | 0,75 | 38,0 s | 85 % | 2,80 | 48,7 s |
+| 6 | 100 % | 1,65 | 39,2 s | 70 % | 3,80 | 47,7 s |
+| 7 | 95 % | 1,10 | 35,0 s | 80 % | 3,45 | 47,0 s |
+| 8 | 100 % | 1,45 | 37,4 s | 70 % | 3,65 | 42,7 s |
+| 9 | 100 % | 0,55 | 35,2 s | 90 % | 1,65 | 38,3 s |
+| 10 | 100 % | 0,25 | 41,2 s | 80 % | 2,65 | 42,3 s |
+
+N°10 avant → après la revue du 21/10 (variante avec le Ravin du Béret, même id, même étiquette) :
+attentif 100 % / 0,75 / 34,0 s → 100 % / 0,25 / 41,2 s (il attend désormais le calme : moins de
+chutes, plus de temps) ; pressé 75 % / 2,55 → 80 % / 2,65 sur 20 essais, et 75 % / 2,90 → 75 % / 2,92
+sur 40 essais, toujours entre le N°7 (80 %) et le N°8 (75 % sur 40 essais, 70 % sur 20). Le ravin
+lui-même fait tomber rarement (pilote auto et rivaux l'attendent) : 1 chute sur 40 essais pressés.
 
 Lecture : pente régulière de 1 à 4, marche nette à 5 (mécaniques). Depuis la revue du 19/10,
 5 est le plus facile des niveaux à mécaniques dans les deux profils (ascenseur élargi et ralenti,

@@ -22,7 +22,7 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 7 | La Cascade des Desmans | Engagé | 950 m | **jet de cascade** : rideau d'eau intermittent au-dessus d'un ravin |
 | 8 | Le Gué des Lucioles | Très engagé | 956 m | trail **de nuit** (nouvelle palette, liseré clair sur les sols, gave visible, lucioles) et **jet + radeau** : la cascade tombe sur l'embarcadère d'un radeau mobile, deux cycles à lire ensemble |
 | 9 | La Hêtraie des Palombes | Endurance | 1120 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) en **hêtraie d'automne** (nouvelle palette) ; passage clé : la **palombière**, des **ronces posées sur les passerelles** perchées au-dessus du vide (jusqu'ici toujours au sol) |
-| 10 | Le Plateau des Bérets Envolés *(niveau du jour)* | Bien engagé | 947 m | mécanique inédite : les **rafales de vent de face** — annoncées par les **herbes qui se couchent**, la manche à air qui se lève et un panneau « vent », elles font courir au ralenti et **raccourcissent les sauts** ; passage clé : la **Crête des Bérets**, trois sauts de 140 px au-dessus du vide à prendre pendant le calme ; nouvelle palette **lande** |
+| 10 | Le Plateau des Bérets Envolés *(niveau du jour)* | Bien engagé | 1000 m | mécanique inédite : les **rafales de vent de face** — annoncées par les **herbes qui se couchent**, la manche à air qui se lève et un panneau « vent », elles font courir au ralenti et **raccourcissent les sauts** ; passages clés : la **Crête des Bérets**, trois sauts de 140 px au-dessus du vide à prendre pendant le calme, et (revue du 21/10) le **Ravin du Béret**, 185 px, annoncé par un panneau « Ravin : saute au calme » — la rafale y fait **tomber** ; nouvelle palette **lande** |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
@@ -31,40 +31,62 @@ endurance, modèle N°4, une seule nouveauté) ; le N°10 est de nouveau à méc
 vent, mécanique inédite) ; **le N°11 doit être classique**, puis on alterne. Chaque nouveau sentier passe le pilote « humain »
 (`playtest --human`, deux profils) et doit respecter la courbe de difficulté.
 
-Difficulté mesurée (pilote « humain », 20 essais, réussite / chutes moyennes, 19/10/2026 ; N°9 le 20/10 ; N°10 le 21/10) :
+Difficulté mesurée (pilote « humain », 20 essais, réussite / chutes moyennes, 21/10/2026 ; profil attentif
+revu le 21/10 : hésitations et attente du calme ; profil pressé inchangé, `--calm 0 --hesit 0`) :
 
 | N° | Attentif | Pressé |
 |---|---|---|
-| 1 | 100 % / 0,15 | 95 % / 0,80 |
+| 1 | 100 % / 0,10 | 95 % / 0,80 |
 | 2 | 100 % / 0,10 | 100 % / 0,70 |
-| 3 | 100 % / 0,10 | 100 % / 0,95 |
-| 4 | 100 % / 0,25 | 95 % / 1,95 |
-| 5 | 100 % / 0,45 | 85 % / 2,80 |
-| 6 | 95 % / 1,85 | 70 % / 3,80 |
-| 7 | 95 % / 1,55 | 80 % / 3,45 |
-| 8 | 95 % / 1,80 | 70 % / 3,70 |
-| 9 | 100 % / 0,20 | 90 % / 1,65 |
-| 10 | 100 % / 0,75 | 75 % / 2,55 |
+| 3 | 100 % / 0,10 | 100 % / 0,85 |
+| 4 | 100 % / 0,35 | 95 % / 1,95 |
+| 5 | 100 % / 0,75 | 85 % / 2,80 |
+| 6 | 100 % / 1,65 | 70 % / 3,80 |
+| 7 | 95 % / 1,10 | 80 % / 3,45 |
+| 8 | 100 % / 1,45 | 70 % / 3,65 |
+| 9 | 100 % / 0,55 | 90 % / 1,65 |
+| 10 | 100 % / 0,25 | 80 % / 2,65 |
 
-Détails et méthode : LEVELS.md §8. (Revue du 20/10 : N°3 100 % / 0,05 — 100 % / 0,85 ;
-N°8 95 % / 1,75 — 70 % / 3,65 après les retouches de géométrie.)
+Détails et méthode : LEVELS.md §8. Sur 40 essais, N°10 en profil pressé : 75 % / 2,92, entre le
+N°7 (80 %) et le N°8 (75 %).
 
 ## Médailles
 
-Chaque sentier a trois temps cibles calculés à partir du **pilote automatique** de
-`tools/playtest.mjs` : **or = ×1,15, argent = ×1,35, bronze = ×1,6** (arrondis à la demi-seconde
-supérieure). Le menu affiche sous chaque sentier la médaille de ton record (enregistré dans le
-navigateur) et les trois temps cibles ; l'écran d'arrivée affiche la médaille de la course, ton
-record et le temps à battre pour la médaille suivante. Les temps sont écrits dans `levels.js`
-(champ `medals`) par `node tools/medals.mjs <url> last --write` ; un sentier sans ce champ
-s'affiche simplement sans médailles (LEVELS.md §6 étape 5b).
+Chaque sentier a trois temps cibles, **calibrés sur le pilote « humain »** (revue du 21/10) :
+`node tools/medals.mjs <url> last --calibrate --trials 40 --write` lance le pilote automatique
+(temps `auto`) puis 40 essais dans chacun des deux profils, attentif et pressé, et choisit les
+temps pour qu'environ **17,5 % des essais attentifs décrochent l'or** (fenêtre 10–25 %), ≈ 50 %
+l'argent et ≈ 85 % le bronze (au dixième, or au 0,05 s si les temps sont très groupés ; or ≥ auto,
+paliers espacés d'au moins 0,5 s). `node tools/medals.mjs <url> all --human --trials 20 --md`
+affiche, sans rien écrire, les pourcentages or / argent / bronze des deux profils. L'ancienne règle
+(or ×1,15, argent ×1,35, bronze ×1,6) donnait l'or à 85–100 % des essais attentifs sur la plupart
+des sentiers ; elle reste disponible sans `--calibrate`. Le menu affiche sous chaque sentier la
+médaille de ton record (enregistré dans le navigateur) et les trois temps cibles ; l'écran
+d'arrivée affiche la médaille de la course, ton record et le temps à battre pour la médaille
+suivante. Un sentier sans champ `medals` s'affiche sans médailles (LEVELS.md §6 étape 5b).
+
+| N° | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
+|---|---|---|---|---|---|
+| 1 | 14,1 s | 14,6 s | 15,1 s | 10 % / 60 % / 90 % | 35 % / 50 % / 55 % |
+| 2 | 18,25 s | 18,8 s | 19,3 s | 25 % / 85 % / 90 % | 30 % / 45 % / 50 % |
+| 3 | 21,7 s | 22,2 s | 22,7 s | 25 % / 80 % / 90 % | 10 % / 30 % / 30 % |
+| 4 | 31,1 s | 31,8 s | 34,2 s | 15 % / 50 % / 85 % | 5 % / 10 % / 15 % |
+| 5 | 32,0 s | 33,0 s | 42,1 s | 20 % / 55 % / 80 % | 0 % / 20 % / 25 % |
+| 6 | 31,6 s | 35,2 s | 43,1 s | 10 % / 35 % / 80 % | 0 % / 5 % / 30 % |
+| 7 | 32,1 s | 34,5 s | 40,3 s | 25 % / 60 % / 85 % | 0 % / 5 % / 30 % |
+| 8 | 33,8 s | 37,4 s | 44,5 s | 15 % / 60 % / 95 % | 15 % / 30 % / 40 % |
+| 9 | 32,0 s | 32,5 s | 37,8 s | 15 % / 55 % / 75 % | 10 % / 30 % / 60 % |
+| 10 | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
+
+(20 essais par profil, 21/10 ; calibrage sur 40 essais.)
 
 ## Source de référence
 
 **Le dépôt GitHub (`main`) et sa copie de travail `/workspace/corrida-site` sont la seule source
-de vérité.** Tout autre dossier (par ex. `/workspace/corrida-classement`, ancien worktree de la
-branche `classement`, désormais aligné sur `main`) n'est qu'une copie : ne rien y modifier, toujours
-partir d'un `git pull` sur `/workspace/corrida-site`.
+de vérité.** L'ancien worktree de la branche `classement` est **périmé** (resté au niveau 7, il
+n'a jamais été réaligné sur `main`) : il a été archivé le 21/10 dans
+`/workspace/corrida-classement-ARCHIVE`. Ne rien y modifier ; toujours partir d'un `git pull` sur
+`/workspace/corrida-site`.
 
 ## Commandes
 
