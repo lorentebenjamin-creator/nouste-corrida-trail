@@ -2130,18 +2130,22 @@ function H(e) {
 }
 var U = t();
 function W(e) {
-  let t = Math.floor(e / 60),
-    n = Math.floor(e % 60),
-    r = Math.floor((e % 1) * 10 + 1e-6); // + 1e-6 : 14.1 % 1 = 0.0999… s'affichait « 14.0 » (médailles au dixième)
+  // en dixièmes entiers (+ 1e-6 : 14.1 s'affichait « 14.0 » ; calculer minutes/secondes/dixièmes
+  // à partir du même entier évite « 0:05.10 » pour 5,9999999 s)
+  let d = Math.floor(e * 10 + 1e-6),
+    t = Math.floor(d / 600),
+    n = Math.floor(d / 10) % 60,
+    r = d % 10;
   return `${t}:${String(n).padStart(2, `0`)}.${r}`;
 }
 // Temps cible de médaille : au dixième comme le chrono, au centième si le calibrage l'impose
 // (tools/medals.mjs --calibrate peut choisir un or au 0,05 s quand les temps sont très groupés).
 function WT(e) {
   if (Math.abs(e * 10 - Math.round(e * 10)) < 1e-6) return W(e + 1e-6);
-  let t = Math.floor(e / 60),
-    n = Math.floor(e % 60),
-    c = Math.round((e % 1) * 100);
+  let d = Math.round(e * 100),
+    t = Math.floor(d / 6000),
+    n = Math.floor(d / 100) % 60,
+    c = d % 100;
   return `${t}:${String(n).padStart(2, `0`)}.${String(c).padStart(2, `0`)}`;
 }
 function G(e) {
