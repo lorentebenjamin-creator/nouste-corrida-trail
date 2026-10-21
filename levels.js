@@ -82,6 +82,19 @@ export const jet = (x, w, top, bottom, period = 3, on = 0.4, phase = 0, warn = 0
   x, w, top, bottom, period, on, phase, warn, push: 260, down: 520,
 });
 
+// ---- Mécanique v4 ----------------------------------------------------------
+// rafale(x1, x2, period=4.2, on=0.4, phase=0, warn=1.0, slow=0.5) : RAFALE DE VENT DE FACE sur la
+//   zone [x1, x2] (toute la hauteur). Cycle de `period` s : soufflante pendant la fraction `on` du
+//   cycle (au début du cycle, décalé par `phase` ∈ [0,1[), puis calme. Pendant les `warn` s qui
+//   précèdent, les herbes de la zone se couchent de droite à gauche, la manche à air plantée à
+//   l'entrée se lève et un panneau « vent » clignote en haut de l'écran.
+//   Active, elle ne tue pas : la vitesse de course vers la droite est multipliée par `slow`
+//   (au sol et en l'air) → on avance au ralenti et les sauts sont raccourcis (≈ moitié) :
+//   un ravin sous la rafale se saute pendant le calme. À mettre dans le tableau `gusts` du niveau.
+export const rafale = (x1, x2, period = 4.2, on = 0.4, phase = 0, warn = 1.0, slow = 0.5) => ({
+  x1, x2, period, on, phase, warn, slow,
+});
+
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
 // On peut en ajouter ici (toutes les clés sont obligatoires) : le décor est
@@ -156,6 +169,20 @@ export const THEMES = {
     rock: "#a39a8f", rockDark: "#6b645c",
     thorn: "#2e2018", leaf: "#7a5a2a", berry: "#b8322a",
     fog: "#1f1612",
+  },
+  lande: {
+    // Niveau 10 : lande ventée du plateau (bruyère mauve, ciel d'averse qui se déchire)
+    skyTop: "#27324d", skyMid: "#8696b0", skyBot: "#ecdcc2",
+    ridge: "#3b4560", ridge2: "#6e7a95",
+    pine: "#2b382f", pine2: "#53664d",
+    dirt: "#5e4d40", dirtDark: "#3c3129",
+    grass: "#8c9150", grassDark: "#62683a",
+    wood: "#7f5e3e", woodDark: "#4e3a27",
+    rock: "#a9a59d", rockDark: "#6d6a64",
+    thorn: "#2e2430", leaf: "#8a5a96", berry: "#c05aa0",
+    fog: "#181b27",
+    // Clé facultative (v4) : couleur des touffes d'herbe qui se couchent sous les rafales.
+    tuft: "#ece2b4",
   },
 };
 
@@ -720,5 +747,76 @@ LEVELS.push((() => {
     finishX: 11200,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
     medals: { auto: 31.6, gold: 36.5, silver: 43, bronze: 51 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 10 — Le Plateau des Bérets Envolés (niveau du jour, 2026-10-21)
+// Niveau à mécaniques (alternance : après le classique N°9) — mécanique INÉDITE v4 :
+// les RAFALES DE VENT DE FACE (helper rafale, tableau `gusts`). Quand les herbes se couchent
+// (de droite à gauche) et que la manche à air se lève, une rafale arrive : on court au ralenti
+// et les sauts sont raccourcis de moitié. Les ravins sous la rafale se sautent pendant le calme.
+// Aucune autre mécanique v2/v3 (ni bac, ni patou, ni pierres, ni jet) : sols, ravins, ronces,
+// rochers, tronc, passerelles fixes et le vent.
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "plateau-berets", c = v(id);
+  c.line(160, 400, 370, 3); c.arc(450, 560, 330, 3, 40); c.arc(820, 960, 360, 3, 40);
+  c.line(1150, 1340, 330, 3); c.arc(1380, 1510, 300, 3, 40); c.line(1600, 1900, 270, 4);
+  c.arc(1970, 2110, 340, 3, 40); c.line(2200, 2700, 370, 5); c.arc(2810, 2930, 340, 3, 40);
+  c.line(3000, 3400, 370, 4); c.arc(3450, 3580, 320, 3, 40); c.line(3800, 3950, 310, 2);
+  c.arc(3980, 4110, 270, 3, 40); c.line(4200, 4500, 250, 3); c.arc(4530, 4660, 330, 3, 40);
+  c.line(4750, 5050, 370, 4); c.arc(5420, 5560, 340, 3, 40); c.line(5600, 5720, 350, 2);
+  c.arc(5760, 5900, 340, 3, 40); c.line(5940, 6060, 350, 2); c.arc(6100, 6240, 320, 3, 40);
+  c.line(6310, 6610, 330, 4); c.arc(7000, 7130, 280, 3, 40); c.arc(7250, 7350, 250, 3, 40);
+  c.arc(7550, 7670, 220, 3, 40); c.line(7720, 8020, 210, 4); c.arc(8070, 8190, 300, 3, 40);
+  c.line(8270, 8570, 370, 4); c.arc(8670, 8770, 330, 3, 50); c.line(8870, 9020, 370, 2);
+  c.arc(9070, 9140, 330, 3, 40); c.line(9220, 9420, 370, 3);
+  return {
+    id, name: "Le Plateau des Bérets Envolés",
+    blurb: "Lande ventée où les bérets s'envolent : quand les herbes se couchent, la rafale arrive. Attends le calme pour sauter.",
+    difficulty: "Bien engagé", theme: "lande",
+    width: 9890, floor: 440, spawnX: 60,
+    solids: [
+      // Montée vers le plateau : ressauts
+      p(0, 820, 440),
+      p(950, 430, 400), h(1080, 400),
+      p(1510, 460, 340),
+      // Le bord du plateau : première rafale sur un ravin (découverte)
+      p(2110, 700, 440),
+      p(2930, 520, 440),
+      // Terrasses de bruyère
+      p(3580, 400, 380),
+      p(4110, 420, 320),
+      p(4660, 760, 440),
+      // Passage clé : la Crête des Bérets — deux passerelles au-dessus du vide, sous la rafale
+      // (écarts de 140 px : faciles au calme, impossibles sous la rafale)
+      m(5560, 420, 200), m(5900, 420, 200),
+      p(6240, 760, 400), h(6700, 400),
+      // Les terrasses du cayolar, en montée sous la troisième rafale (rocher, pas de ronce :
+      // on doit pouvoir s'arrêter devant sans risque si la rafale tombe)
+      p(7130, 420, 340), h(7270, 340),
+      p(7670, 400, 280),
+      // Sprint final face au vent
+      p(8190, 1600, 440), g(8670, 440),
+    ],
+    hazards: [
+      _(480, 70, 440),
+      _(3700, 64, 380),
+      _(5120, 70, 440),
+      _(9070, 70, 440),
+    ],
+    // Mécanique v4 : rafales de vent de face (LEVELS.md §3d). Cycles différents pour chaque zone.
+    gusts: [
+      rafale(2480, 3150, 4.2, 0.45, 0.2),  // découverte : un seul ravin sous le vent
+      rafale(5300, 6200, 4.6, 0.45, 0.55), // passage clé : la Crête des Bérets (3 sauts de 140 px)
+      rafale(6950, 8150, 4.0, 0.45, 0.1),  // terrasses en montée + rocher
+      rafale(8630, 9320, 3.8, 0.4, 0.7),   // sprint final : tronc et ronce face au vent
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2140, 440, 1), y(id, 4690, 440, 2), y(id, 6270, 400, 3), y(id, 8220, 440, 4)],
+    finishX: 9470,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 28.1, gold: 32.5, silver: 38, bronze: 45 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
   };
 })());

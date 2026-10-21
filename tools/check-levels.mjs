@@ -60,7 +60,7 @@ LEVELS.forEach((L, idx) => {
   else L.rivals.forEach((r, i) => { if (!(r.speed > 0.5 && r.speed <= 1.05)) err(tag, `rivals[${i}].speed hors bornes (0.5–1.05)`); });
   if (L.width > LIMITS.maxWidth) err(tag, `width ${L.width} > ${LIMITS.maxWidth}`);
   for (const k of ["solids", "hazards", "coins", "checkpoints"]) if (!Array.isArray(L[k])) err(tag, `${k} doit être un tableau`);
-  for (const k of ["rockfalls", "patrols", "jets"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
+  for (const k of ["rockfalls", "patrols", "jets", "gusts"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
   if (errors > errorsBefore) return;
 
   const movers = L.solids.filter(s => s.move);
@@ -186,10 +186,38 @@ LEVELS.forEach((L, idx) => {
     for (const cp of L.checkpoints) if (cp.x + 60 > jt.x - 60 && cp.x < jt.x + jt.w + 60) err(tag, `${tagj}: trop près du fanion @${cp.x}`);
     if (jt.x < L.spawnX + 300) err(tag, `${tagj}: trop près du départ`);
   }
+  // Rafales de vent de face (v4, LEVELS.md §3d)
+  const gs = (L.gusts || []).slice().sort((a, b) => a.x1 - b.x1);
+  gs.forEach((gu, gi) => {
+    const tagg = `rafale ${gu.x1}–${gu.x2}`, calm = gu.period * (1 - gu.on);
+    if (!(gu.x2 - gu.x1 >= 200)) err(tag, `${tagg}: zone trop étroite (< 200 px)`);
+    if (!(gu.period >= 2.5 && gu.period <= 7)) err(tag, `${tagg}: period ${gu.period} hors 2,5–7 s`);
+    if (!(gu.on >= 0.25 && gu.on <= 0.6)) err(tag, `${tagg}: on ${gu.on} hors 0,25–0,6`);
+    if (calm < 1.4) err(tag, `${tagg}: calme ${calm.toFixed(2)} s < 1,4 s (passage trop serré)`);
+    else if (calm < 1.8) warn(tag, `${tagg}: calme court (${calm.toFixed(2)} s)`);
+    if (!(gu.warn >= 0.6 && gu.warn <= calm - 0.4)) err(tag, `${tagg}: warn ${gu.warn} s hors [0,6 ; calme − 0,4] (la rafale doit être annoncée assez tôt)`);
+    if (!(gu.slow >= 0.45 && gu.slow <= 0.7)) err(tag, `${tagg}: slow ${gu.slow} hors 0,45–0,7`);
+    if (gu.x1 < L.spawnX + 300) err(tag, `${tagg}: trop près du départ`);
+    if (gu.x2 > L.width) err(tag, `${tagg}: sort du monde`);
+    if (gi && gu.x1 < gs[gi - 1].x2) err(tag, `${tagg}: chevauche la rafale ${gs[gi - 1].x1}–${gs[gi - 1].x2}`);
+    if (!L.solids.some(sd => !sd.move && sd.kind === "ground" && gu.x1 - 14 >= sd.x && gu.x1 - 14 <= sd.x + sd.w)) warn(tag, `${tagg}: pas de sol à x1−14 pour la manche à air (annonce moins lisible)`);
+    // une seule mécanique à la fois : pas de passerelle mobile ni de jet dans le vent
+    for (const m of movers.map(env)) if (m.x2 > gu.x1 && m.x1 < gu.x2) warn(tag, `${tagg}: passerelle mobile @${m.m.move.x0} dans la zone (combinaison peu lisible)`);
+    for (const jt of L.jets || []) if (jt.x + jt.w > gu.x1 && jt.x < gu.x2) warn(tag, `${tagg}: jet @${jt.x} dans la zone (combinaison peu lisible)`);
+    // sauts sous la rafale : il faut pouvoir attendre le calme sur la plateforme d'appel
+    let reach2 = walk[0];
+    for (let i = 1; i < walk.length; i++) {
+      const a = reach2, b = walk[i], gap = b.x - (a.x + a.w);
+      if (b.x + b.w > a.x + a.w) reach2 = b;
+      if (gap <= 0 || b.x < gu.x1 || a.x + a.w > gu.x2) continue;
+      if (a.w < 150) warn(tag, `${tagg}: plateforme d'appel ${a.kind}@${a.x} trop courte (${a.w} px < 150) pour attendre le calme`);
+      info(tag, `${tagg}: saut ${a.kind}@${a.x}→${b.kind}@${b.x} (écart ${gap}) sous la rafale — passage chronométré, à valider avec tools/playtest.mjs --human`);
+    }
+  });
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`].filter(Boolean).join(", ");
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`].filter(Boolean).join(", ");
   for (const a of accepting) if (!a.used) warn(tag, `acceptedWarnings obsolète : "${a.match}" ne correspond plus à aucun avertissement (le retirer)`);
   accepting = [];
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);

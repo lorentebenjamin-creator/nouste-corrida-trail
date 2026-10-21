@@ -44,6 +44,7 @@ Le menu affiche les niveaux du N°1 (en haut) au plus récent (en bas) (liste d�
   finishX: 10900,          // ligne d'arrivée ; l'arche est dessinée à finishX-86
   rivals: [{speed:1.0},{speed:0.92},{speed:0.85}], // EXACTEMENT 3 : Léa Morel (12), Karim El Yazidi (7), Inès Rocha (23)
   rockfalls: [ ... ],      // OPTIONNEL (v2) : chutes de pierres, helper chute()
+  gusts: [ ... ],          // OPTIONNEL (v4) : rafales de vent de face, helper rafale() (§3d)
   patrols: [ ... ],        // OPTIONNEL (v2) : patous, helper patou()
   medals: { auto: 30.8, gold: 35.5, silver: 42, bronze: 49.5 }, // OPTIONNEL : écrit par tools/medals.mjs (§6 étape 5b)
   acceptedWarnings: [ { match: "…", reason: "…" } ],           // OPTIONNEL : avertissements check-levels acceptés (§6b)
@@ -148,6 +149,55 @@ dans les 120 px avant le jet (sinon avertissement), jamais à moins de 60 px d'u
 de 300 px du départ. Un jet au-dessus d'un ravin est signalé en `info` : le valider avec
 `tools/playtest.mjs --human`.
 
+## 3d. Mécanique v4 : rafales de vent de face (`gusts`)
+
+```js
+rafale(x1, x2, period = 4.2, on = 0.4, phase = 0, warn = 1.0, slow = 0.5)
+// → { x1, x2, period, on, phase, warn, slow }
+gusts: [ rafale(5300, 6200, 4.6, 0.45, 0.55) ],   // niveau 10, la Crête des Bérets
+```
+
+Zone horizontale `[x1, x2]` (toute la hauteur) balayée par un vent de face. Cycle déterministe de
+`period` s (fonction du temps du monde, comme les autres mécaniques) : **rafale** pendant la
+fraction `on` du cycle (au début du cycle, décalé par `phase` ∈ [0,1[), puis **calme**.
+
+Effet pendant la rafale, si le centre du coureur est dans la zone : **il ne tue pas** ; la vitesse
+de course **vers la droite** est multipliée par `slow` (au sol et en l'air : `vitesse cible =
+352 × speed × slow`). On avance donc au ralenti et **un saut pris (ou fini) sous la rafale est
+raccourci d'environ moitié** (≈ 126 px à plat au lieu de 252 avec `slow = 0.5`) : un ravin de
+120–140 px sous le vent se saute **pendant le calme**, on attend sur la plateforme d'appel.
+Reculer, attendre et sauter verticalement ne sont pas affectés. Sans `gusts`, le moteur est
+strictement inchangé (`gustSlow` renvoie 1).
+
+Annonce (les `warn` s avant la rafale, `warn ≥ 0,6 s`) :
+* **les herbes se couchent** : des touffes (positions déterministes) sur tous les sols et
+  passerelles fixes de la zone se couchent vers la gauche, le front de vent arrivant **de la
+  droite** jusqu'à l'entrée de la zone ; couchées et agitées pendant la rafale, elles se
+  redressent en 0,35 s au calme ;
+* une **manche à air** orange et blanche plantée sur le sol juste avant la zone (`x1 − 14`) :
+  pendante au calme, elle se lève pendant l'annonce et reste tendue pendant la rafale ;
+* un **panneau « vent »** (trois traits) clignote en haut de l'écran pendant l'annonce, fixe
+  pendant la rafale ; stries blanches et feuilles qui filent vers la gauche ; souffle sonore au
+  début de la rafale.
+Couleur des touffes : clé facultative de palette `tuft` (défaut `#e3d9a6`).
+
+IA : la simulation des rivaux, de l'autopilote et du pilote humain (`simRunner`) applique
+exactement le même ralentissement ; un saut qui finirait dans le ravin à cause du vent n'est pas
+« sûr », donc l'IA attend le calme au bord. `getState()` expose `gustTime` (temps passé ralenti).
+
+Validation (`tools/check-levels.mjs`) : zone ≥ 200 px, `period` 2,5–7 s, `on` 0,25–0,6, calme
+`period·(1−on)` ≥ 1,4 s (avertissement sous 1,8 s), `warn` entre 0,6 s et calme − 0,4 s,
+`slow` 0,45–0,7 (en dessous, l'IA croirait être bloquée), zones sans chevauchement, à ≥ 300 px du
+départ, un sol à `x1 − 14` pour la manche à air (sinon avertissement), pas de passerelle mobile
+ni de jet dans la zone (avertissement : une mécanique à la fois), plateforme d'appel ≥ 150 px
+avant chaque saut sous la rafale (pour attendre le calme). Chaque saut sous une rafale est
+signalé en `info` : le valider avec `tools/playtest.mjs --human`.
+
+**Piège connu (pilote IA)** : ne pas poser de **ronce** juste après une réception dans une zone
+de vent, sur une plateforme courte (< ~330 px de sol derrière). Si la rafale tombe, l'IA s'arrête
+collée à la ronce et ne peut ni sauter sans élan ni reculer (elle tomberait) : essai « bloqué ».
+Mettre plutôt un rocher (on peut s'arrêter devant sans risque), ou la ronce sur un long sol.
+
 ## 4. Thèmes
 
 Le décor est **100 % procédural** (dégradé de ciel, crêtes, sapins, sol, ronces) : un thème
@@ -157,7 +207,8 @@ clés : `skyTop skyMid skyBot ridge ridge2 pine pine2 dirt dirtDark grass grassD
 rock rockDark thorn leaf berry fog`. Exemple : `breche` (neige au crépuscule) du niveau 4.
 Réutiliser un thème existant est toujours sûr. Palettes ajoutées : `breche` (niv. 4, neige au
 crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier sous l'orage), `cascade` (niv. 7, gorges moussues), `nuit` (niv. 8, trail de nuit au clair de lune),
-`hetraie` (niv. 9, hêtraie d'automne au petit matin, sapins roux = hêtres).
+`hetraie` (niv. 9, hêtraie d'automne au petit matin, sapins roux = hêtres), `lande` (niv. 10,
+lande ventée du plateau, bruyère mauve, clé facultative `tuft` pour les touffes d'herbe du vent).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -225,7 +276,7 @@ chute, un humain peut passer.
    * `rivals` : vitesses ~1.0 / 0.92 / 0.85 (baisser pour un niveau plus facile) ;
    * optionnel : `rockfalls`, `patrols`, passerelles `mp(...)` (§3b) — 1 à 2 types par niveau suffisent.
 3. **Règle « 1 nouveauté par niveau »** : chaque nouveau niveau doit introduire **au moins une
-   mécanique inédite** (§3b/§3c, ou une nouvelle à coder) **ou au moins un passage clé jamais
+   mécanique inédite** (§3b/§3c/§3d, ou une nouvelle à coder) **ou au moins un passage clé jamais
    vu** (une combinaison ou une mise en page qui n'existe dans aucun niveau précédent : ex. jet
    au-dessus d'un bac mobile, patou sur une passerelle haute, cheminée sous les pierres…).
    Le dire dans un commentaire `// Passage clé : …` au-dessus de l'élément concerné **et** dans la
@@ -240,6 +291,9 @@ chute, un humain peut passer.
    mécaniques. Ensuite on peut alterner : 1 niveau à mécaniques, 1 niveau classique.
    **Le N°9 (prochain job quotidien) DOIT être classique.** Le dire dans le commentaire d'en-tête
    du niveau (`// Niveau classique (règle d'alternance) — nouveauté : …`).
+   Suite : N°9 classique, N°10 à mécaniques (rafales de vent, §3d) → **le N°11 DOIT être
+   classique** (une seule nouveauté ; il peut utiliser une seule mécanique existante, rafales
+   comprises, avec parcimonie), puis N°12 à mécaniques, etc.
 4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement non justifié**
    (dernière ligne : `… 0 erreur(s), 0 avertissement(s) non justifié(s), N accepté(s)`).
    Un avertissement du nouveau niveau se **corrige dans la géométrie** ; on ne l'accepte
@@ -335,6 +389,11 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   passerelle) ; bouton pause masqué pendant une chute (il n'y faisait rien) ; brouillard des
   ravins corrigé au pied des falaises ; API de test `window.__controlsTest` (`setAutopilot`,
   `teleport`, `getState`, …).
+* **v4 (21/10)** : rafales de vent de face (`gusts`, §3d) — `gustState` / `gustSlow` (vitesse
+  cible vers la droite × `slow`, appliquée dans `$` et dans `simRunner`, donc rivaux, autopilote
+  et pilote humain la prévoient), touffes d'herbe, manche à air, stries, panneau et souffle
+  (`drawGust`, `tickDynamicSounds`), `getState().gustTime`. Niveaux sans `gusts` : inchangés
+  (temps autopilote des N°1–9 identiques au dixième après la modification).
 * `assets/routes-x3PbsDEU.css` : URLs des polices relatives. `custom.css` : liste de niveaux
   défilante, badge, bouton ↓, médailles (disques CSS, sans emoji).
 * Médailles (revue du 20/10) : `medalTargets` / `medalOf` / `medalNext` dans `assets/game.js` lisent
@@ -343,7 +402,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–9)
+## 8. Courbe de difficulté (niveaux 1–10)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -356,6 +415,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 7 | La Cascade des Desmans | Engagé | 950 m | 9 | 4 | 2 radeaux lents, 1 patou, **1 jet de cascade** | 1 / 0.93 / 0.86 | 31,7 s |
 | 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 6 | 2 radeaux, 3 patous, 3 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 29,8 s |
 | 9 | La Hêtraie des Palombes | Endurance | 1120 m | 19 | 8 (dont **2 sur des passerelles**) | — (classique) | 1 / 0.93 / 0.86 | 31,6 s |
+| 10 | Le Plateau des Bérets Envolés | Bien engagé | 947 m | 13 | 4 | **4 zones de rafales de vent** (7 sauts sous le vent) | 1 / 0.93 / 0.86 | 28,1 s |
 
 Temps « pilote auto » mesurés le 20/10 avec `finishTime` (avant : temps lu au sondage suivant,
 jusqu'à +0,25 s). Ce sont les temps `auto` des médailles :
@@ -371,6 +431,7 @@ jusqu'à +0,25 s). Ce sont les temps `auto` des médailles :
 | 7 | La Cascade des Desmans | 31,7 s | 36,5 s | 43,0 s | 51,0 s |
 | 8 | Le Gué des Lucioles | 29,8 s | 34,5 s | 40,5 s | 48,0 s |
 | 9 | La Hêtraie des Palombes | 31,6 s | 36,5 s | 43,0 s | 51,0 s |
+| 10 | Le Plateau des Bérets Envolés | 28,1 s | 32,5 s | 38,0 s | 45,0 s |
 
 (arrondi à la demi-seconde supérieure ; recalculer avec `tools/medals.mjs` après toute retouche.)
 
@@ -382,8 +443,8 @@ du pilote parfait de `tools/playtest.mjs` (un humain met nettement plus). 7 = je
 8 = nuit, jet + radeau, le plus dur des deux profils après la revue du 19/10. 9 = **classique**
 sur le modèle du 4 (règle d'alternance, §6 étape 3b) : un peu plus long et un cran au-dessus du 4
 (ronces sur les passerelles de la palombière), nettement en dessous des niveaux à mécaniques.
-**Prochain niveau (N°10) : de nouveau à mécaniques possible**, puis alternance 1 classique /
-1 à mécaniques.
+10 = **rafales de vent de face** (mécanique v4 inédite, §3d), entre le 7 et le 8 en profil pressé.
+**Prochain niveau (N°11) : classique**, puis alternance 1 à mécaniques / 1 classique.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
@@ -412,6 +473,7 @@ Profil « attentif » (défaut) et profil « pressé » (`--delay 180-250 --jitt
 | 7 | La Cascade des Desmans | Engagé | 95 % | 1,55 | 41,4 s | 80 % | 3,45 | 48,6 s |
 | 8 | Le Gué des Lucioles | Très engagé | 95 % | 1,80 | 39,2 s | 70 % | 3,70 | 44,0 s |
 | 9 | La Hêtraie des Palombes | Endurance | 100 % | 0,20 | 34,0 s | 90 % | 1,65 | 39,4 s |
+| 10 | Le Plateau des Bérets Envolés | Bien engagé | 100 % | 0,75 | 35,3 s | 75 % | 2,55 | 38,6 s |
 
 Lecture : pente régulière de 1 à 4, marche nette à 5 (mécaniques). Depuis la revue du 19/10,
 5 est le plus facile des niveaux à mécaniques dans les deux profils (ascenseur élargi et ralenti,
@@ -428,6 +490,16 @@ N°9 (mesuré le 20/10, mêmes réglages) : classique, donc légitimement plus f
 attentif 100 % / 0,35 contre 100 % / 0,30, pressé 88 % / 2,00 contre 98 % / 1,93. Points chauds
 en profil pressé : x≈4000 (ronce sur la planche haute de la palombière), x≈7600–7800 (réception
 de la descente du belvédère puis ronce) et x≈10000 (ronce du sprint final).
+
+N°10 (mesuré le 21/10, mêmes réglages) : étiquette « Bien engagé », voulue entre « Engagé » (7)
+et « Très engagé » (8). En profil pressé, la réussite (75 %) est entre celles du 7 (80 %) et du 8
+(70 %) ; confirmée sur **40 essais** : pressé 75 % / 2,90, attentif 100 % / 0,90. Les chutes
+moyennes sont plus basses que 7 et 8 (le vent ne tue pas, il fait perdre du temps : temps moyen
+attentif 35–36 s pour un pilote auto à 28,1 s). Points chauds en profil pressé : x≈2900 (premier
+ravin sous la rafale, la découverte), x≈2100 (descente vers le bord du plateau) et x≈3600
+(ronce de la terrasse de bruyère). Premier jet de géométrie : une ronce juste après la réception
+des terrasses du cayolar (x≈7200) piégeait l'IA sous la rafale (§3d « piège connu ») : remplacée
+par un rocher.
 
 Revue du 20/10 (géométrie N°3 et N°8, §6b), mêmes réglages, avant → après :
 N°3 attentif 100 % / 0,10 → 100 % / 0,05, pressé 100 % / 0,95 → 100 % / 0,85 ;

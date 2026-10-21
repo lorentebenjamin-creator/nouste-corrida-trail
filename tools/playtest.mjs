@@ -10,6 +10,8 @@
 //   plus bas). Graines déterministes : essai i du niveau → graine seed + i.
 //   Un essai réussit s'il franchit l'arche avec ≤ --max-deaths chutes (5 par défaut) ;
 //   il est arrêté au-delà (ou après 240 s de jeu). Le moteur tourne en accéléré (--turbo).
+// Mécaniques : passerelles mobiles, pierres, patous, jets et rafales de vent (v4) sont simulés par
+// le moteur lui-même (simRunner) : l'IA les prévoit ; la ligne autopilote affiche le temps ralenti par le vent.
 //
 // Usage :
 //   node tools/playtest.mjs [url] [last|all|<levelId>] [capture.png]
@@ -78,7 +80,7 @@ if (!human) {
     const loop = st.r.slice(1).some((x) => x.deaths >= 8);
     const ok = st.mode === 'finish' && st.deaths === 0 && !loop;
     allOk &&= ok;
-    console.log(`${ok ? 'OK   ' : 'ÉCHEC'} [${L.id}] ${L.name} — ${st.mode === 'finish' ? 'arrivé en ' + (st.finishTime ?? st.time).toFixed(1) + ' s' : 'NON arrivé (x=' + st.r[0].x + ')'} — chutes joueur ${st.deaths} — balises ${st.coins}/${L.coins} — rivaux ${rivalDeaths}${st.jetHits ? ' — jets subis ' + st.jetHits : ''}${deathsAt.length ? ' — chutes à ' + deathsAt.join(' ') : ''}`);
+    console.log(`${ok ? 'OK   ' : 'ÉCHEC'} [${L.id}] ${L.name} — ${st.mode === 'finish' ? 'arrivé en ' + (st.finishTime ?? st.time).toFixed(1) + ' s' : 'NON arrivé (x=' + st.r[0].x + ')'} — chutes joueur ${st.deaths} — balises ${st.coins}/${L.coins} — rivaux ${rivalDeaths}${st.jetHits ? ' — jets subis ' + st.jetHits : ''}${st.gustTime ? ' — ralenti par le vent ' + st.gustTime.toFixed(1) + ' s' : ''}${deathsAt.length ? ' — chutes à ' + deathsAt.join(' ') : ''}`);
   }
 } else {
   // --- Mode humain : essais en parallèle sur `jobs` pages ---

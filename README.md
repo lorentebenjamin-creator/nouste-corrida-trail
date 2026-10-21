@@ -21,16 +21,17 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 6 | Le Couloir des Pierres | Extrême | 1030 m | chutes de pierres annoncées par leur ombre, cheminée |
 | 7 | La Cascade des Desmans | Engagé | 950 m | **jet de cascade** : rideau d'eau intermittent au-dessus d'un ravin |
 | 8 | Le Gué des Lucioles | Très engagé | 956 m | trail **de nuit** (nouvelle palette, liseré clair sur les sols, gave visible, lucioles) et **jet + radeau** : la cascade tombe sur l'embarcadère d'un radeau mobile, deux cycles à lire ensemble |
-| 9 | La Hêtraie des Palombes *(niveau du jour)* | Endurance | 1120 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) en **hêtraie d'automne** (nouvelle palette) ; passage clé : la **palombière**, des **ronces posées sur les passerelles** perchées au-dessus du vide (jusqu'ici toujours au sol) |
+| 9 | La Hêtraie des Palombes | Endurance | 1120 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) en **hêtraie d'automne** (nouvelle palette) ; passage clé : la **palombière**, des **ronces posées sur les passerelles** perchées au-dessus du vide (jusqu'ici toujours au sol) |
+| 10 | Le Plateau des Bérets Envolés *(niveau du jour)* | Bien engagé | 947 m | mécanique inédite : les **rafales de vent de face** — annoncées par les **herbes qui se couchent**, la manche à air qui se lève et un panneau « vent », elles font courir au ralenti et **raccourcissent les sauts** ; passage clé : la **Crête des Bérets**, trois sauts de 140 px au-dessus du vide à prendre pendant le calme ; nouvelle palette **lande** |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
 Alternance : après la série 5–8 à mécaniques, **le N°9 est un sentier classique** (rythme /
-endurance, modèle N°4, une seule nouveauté) ; le N°10 pourra de nouveau être à mécaniques,
-puis on alterne. Chaque nouveau sentier passe le pilote « humain »
+endurance, modèle N°4, une seule nouveauté) ; le N°10 est de nouveau à mécaniques (rafales de
+vent, mécanique inédite) ; **le N°11 doit être classique**, puis on alterne. Chaque nouveau sentier passe le pilote « humain »
 (`playtest --human`, deux profils) et doit respecter la courbe de difficulté.
 
-Difficulté mesurée (pilote « humain », 20 essais, réussite / chutes moyennes, 19/10/2026 ; N°9 le 20/10) :
+Difficulté mesurée (pilote « humain », 20 essais, réussite / chutes moyennes, 19/10/2026 ; N°9 le 20/10 ; N°10 le 21/10) :
 
 | N° | Attentif | Pressé |
 |---|---|---|
@@ -43,6 +44,7 @@ Difficulté mesurée (pilote « humain », 20 essais, réussite / chutes moyenne
 | 7 | 95 % / 1,55 | 80 % / 3,45 |
 | 8 | 95 % / 1,80 | 70 % / 3,70 |
 | 9 | 100 % / 0,20 | 90 % / 1,65 |
+| 10 | 100 % / 0,75 | 75 % / 2,55 |
 
 Détails et méthode : LEVELS.md §8. (Revue du 20/10 : N°3 100 % / 0,05 — 100 % / 0,85 ;
 N°8 95 % / 1,75 — 70 % / 3,65 après les retouches de géométrie.)

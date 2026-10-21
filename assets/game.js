@@ -676,6 +676,7 @@ function R(e, t) {
       (e.invuln = Math.max(0, e.invuln - t)),
       (e.squash *= Math.exp(-7 * t)));
     e.stun = Math.max(0, (e.stun || 0) - t);
+    gusts.length && gustSlow(e, _) < 1 && (e.gustT = (e.gustT || 0) + t);
     let i = e.you ? n.edge : e.finished ? !1 : aiStep(e);
     (!e.you && i && (e.hold = !0),
       !e.you && e.grounded && !i && e.vy === 0 && (e.hold = !1));
@@ -689,7 +690,7 @@ function R(e, t) {
     else {
       let r = e.you ? n.left : !1,
         i = e.you ? (n.right ? 1 : 0) - !!r : (e.aiDir ?? 1),
-        a = i * k * e.speed,
+        a = i * k * e.speed * (i > 0 ? gustSlow(e, _) : 1), // v4 : rafale de vent de face
         o = e.grounded ? M : ae;
       if (i !== 0) {
         let n = a - e.vx,
@@ -816,6 +817,7 @@ function R(e, t) {
     falls = [],
     dogs = [],
     jets = [],
+    gusts = [],
     waterGaps = [],
     flies = [],
     autopilot = !1,
@@ -896,6 +898,23 @@ function R(e, t) {
     hit && !e.inJet && ((e.jetHits = (e.jetHits || 0) + 1), e.you && ((z = Math.max(z, 0.1)), r.burst(0.18, 0.05, 1.6)));
     e.inJet = hit;
   }
+  // v4 — Rafale de vent de face : zone [x1, x2] ; active pendant la fraction `on` du cycle,
+  // annoncée `warn` s avant (les herbes se couchent de droite à gauche, la manche à air se lève).
+  // Active, elle ne tue pas : la vitesse de course VERS LA DROITE est multipliée par `slow`
+  // (au sol comme en l'air), donc on avance moins vite et les sauts sont plus courts.
+  function gustState(gu, time) {
+    let t = ((((time / gu.period + (gu.phase || 0)) % 1) + 1) % 1) * gu.period,
+      onT = gu.on * gu.period;
+    if (t < onT) return { on: !0, k: t / onT, warn: 0, since: -1 };
+    let toOn = gu.period - t;
+    return { on: !1, k: 0, warn: toOn < gu.warn ? 1 - toOn / gu.warn : 0, since: t - onT };
+  }
+  function gustSlow(e, time) {
+    if (!gusts.length) return 1;
+    let cx = e.x + e.w * 0.5;
+    for (let gu of gusts) if (cx >= gu.x1 && cx <= gu.x2 && gustState(gu, time).on) return gu.slow;
+    return 1;
+  }
   function dynHit(e, time) {
     for (let fl of falls) {
       let st = fallState(fl, time);
@@ -913,8 +932,24 @@ function R(e, t) {
     falls = s.rockfalls || [];
     dogs = s.patrols || [];
     jets = s.jets || [];
+    gusts = s.gusts || [];
     for (let fl of falls) fl.wasFalling = !1;
     for (let jt of jets) jt.wasOn = !1;
+    // Rafales : touffes d'herbe (positions déterministes) sur les sols/passerelles fixes de la zone,
+    // et manche à air plantée sur le sol juste avant la zone.
+    for (let gu of gusts) {
+      let rn = de(gu.x1 * 31 + gu.x2), tf = [];
+      for (let sd of s.solids) {
+        if (sd.move || sd.net || (sd.kind !== `ground` && sd.kind !== `plank`)) continue;
+        for (let x = Math.max(sd.x + 6, gu.x1); x <= Math.min(sd.x + sd.w - 6, gu.x2); x += 13 + rn() * 6)
+          tf.push({ x, y: sd.y + 1, h: 14 + rn() * 10, ph: rn() * 6.283 });
+      }
+      gu.tufts = tf;
+      let px = gu.x1 - 14,
+        pole = s.solids.find((sd) => !sd.move && sd.kind === `ground` && px >= sd.x && px <= sd.x + sd.w);
+      gu.pole = pole ? { x: px, y: pole.y } : null;
+      gu.wasOn = !1;
+    }
   }
   function tickDynamicSounds() {
     for (let fl of falls) {
@@ -931,6 +966,11 @@ function R(e, t) {
       let on = jetState(jt, _).on;
       (on && !jt.wasOn && o !== `count` && Math.abs(jt.x - (v + b / 2)) < b * 0.6 && r.burst(0.5, 0.035, 0.5),
         (jt.wasOn = on));
+    }
+    for (let gu of gusts) {
+      let on = gustState(gu, _).on;
+      (on && !gu.wasOn && o !== `count` && gu.x1 < v + b * 1.1 && gu.x2 > v - b * 0.1 && (r.burst(0.9, 0.04, 0.35), r.burst(0.6, 0.02, 1.1)),
+        (gu.wasOn = on));
     }
   }
   // --- IA : simulation exacte de la même physique ---------------------
@@ -955,7 +995,7 @@ function R(e, t) {
       let dd = (c.stun || 0) > 0 ? 0 : Array.isArray(dir) ? dir[Math.min(fr, dir.length - 1)] : dir,
         acc = c.grounded ? M : ae;
       if (dd !== 0) {
-        let dv = dd * k * c.speed - c.vx;
+        let dv = dd * k * c.speed * (dd > 0 ? gustSlow(c, _ + fr * dt) : 1) - c.vx;
         c.vx += Math.sign(dv) * Math.min(Math.abs(dv), acc * dt);
       } else {
         let fz = N * dt * (c.grounded ? 1 : 0.25);
@@ -1230,6 +1270,7 @@ function R(e, t) {
       }
     }
     for (let jt of jets) drawJet(jt);
+    for (let gu of gusts) drawGust(gu, th);
     for (let dg of dogs) {
       let rc = dogRect(dg, _),
         st = Math.sin(_ * 16) * 4;
@@ -1269,6 +1310,100 @@ function R(e, t) {
         n.fillRect(31, -29, 4, 3),
         n.fillRect(24, -32, 2, 2),
         n.restore());
+    }
+  }
+  // Inclinaison (0 = droite, 1 = couchée vers la gauche) d'une touffe en x : pendant l'annonce,
+  // le front de vent arrive de la droite et couche les herbes jusqu'à l'entrée de la zone.
+  function gustLean(gu, st, x) {
+    if (st.on) return 1;
+    if (st.warn > 0) {
+      let rel = (gu.x2 - x) / Math.max(1, gu.x2 - gu.x1);
+      return 0.9 * L((st.warn * 1.35 - rel) * 4, 0, 1);
+    }
+    return Math.max(0, 1 - st.since / 0.35);
+  }
+  function drawGust(gu, th) {
+    if (gu.x2 < v - 80 || gu.x1 > v + b + 80) return;
+    let st = gustState(gu, _),
+      col = th.tuft || `#e3d9a6`;
+    // touffes d'herbe qui se couchent (vent de face : elles penchent vers la gauche)
+    n.lineCap = `round`;
+    for (let q = 0; q < gu.tufts.length; q++) {
+      let t = gu.tufts[q];
+      if (t.x < v - 30 || t.x > v + b + 30) continue;
+      let ln = gustLean(gu, st, t.x),
+        fl = ln > 0.5 ? Math.sin(_ * 17 + t.ph) * 0.12 : Math.sin(_ * 2 + t.ph) * 0.08,
+        an = ln * 1.2 + fl;
+      for (let bl = -1; bl <= 1; bl++) {
+        let a2 = an + bl * 0.22 * (1 - ln * 0.7),
+          hh = t.h * (bl ? 0.8 : 1);
+        ((n.strokeStyle = bl ? th.grassDark : col),
+          (n.lineWidth = bl ? 2 : 2.6),
+          n.beginPath(),
+          n.moveTo(t.x + bl * 3, t.y),
+          n.quadraticCurveTo(t.x + bl * 3 - Math.sin(a2 * 0.5) * hh * 0.6, t.y - Math.cos(a2 * 0.5) * hh * 0.6, t.x + bl * 3 - Math.sin(a2) * hh, t.y - Math.cos(a2) * hh),
+          n.stroke());
+      }
+    }
+    // manche à air à l'entrée de la zone : pend au calme, se lève à l'annonce, tendue pendant la rafale
+    if (gu.pole) {
+      let px = gu.pole.x, py = gu.pole.y, ext = gustLean(gu, st, gu.x1),
+        droop = (1 - ext) * 1.25 + (ext > 0.5 ? Math.sin(_ * 14) * 0.05 : 0);
+      ((n.fillStyle = th.woodDark), n.fillRect(px - 2, py - 92, 4, 92));
+      n.save();
+      n.translate(px, py - 88);
+      n.rotate(-droop); // vers la gauche (sens du vent), qui retombe au calme
+      for (let q = 0; q < 5; q++) {
+        let x0 = -q * 11, r0 = 9 - q * 1.2, r1 = 9 - (q + 1) * 1.2;
+        ((n.fillStyle = q % 2 ? `#f3ede2` : `#f26522`),
+          n.beginPath(),
+          n.moveTo(x0, -r0),
+          n.lineTo(x0 - 11, -r1),
+          n.lineTo(x0 - 11, r1),
+          n.lineTo(x0, r0),
+          n.fill());
+      }
+      n.restore();
+    }
+    // rafale active : stries de vent et feuilles qui filent vers la gauche
+    if (st.on || st.warn > 0.6) {
+      let a = st.on ? Math.min(1, st.k * 10) * (st.k > 0.85 ? (1 - st.k) / 0.15 : 1) : (st.warn - 0.6) * 0.8,
+        zw = gu.x2 - gu.x1;
+      n.strokeStyle = `rgba(255,255,255,${0.55 * a})`;
+      n.lineWidth = 2;
+      for (let q = 0; q < 14; q++) {
+        let sx = gu.x2 - ((_ * 760 + q * 211) % zw),
+          sy = y + 70 + ((q * 97) % (E - 150)),
+          ln2 = 36 + (q % 4) * 14;
+        if (sx < v - 80 || sx > v + b + 20) continue;
+        (n.beginPath(), n.moveTo(sx, sy), n.quadraticCurveTo(sx + ln2 * 0.5, sy - 5, sx + ln2, sy), n.stroke());
+      }
+      if (st.on) {
+        n.fillStyle = th.leaf;
+        for (let q = 0; q < 10; q++) {
+          let lx = gu.x2 - ((_ * 520 + q * 157) % zw),
+            ly = y + 120 + ((q * 61) % (E - 200)) + Math.sin(_ * 9 + q) * 10;
+          lx > v - 10 && lx < v + b + 10 && n.fillRect(lx, ly, 5, 3);
+        }
+      }
+    }
+    // panneau « vent » en haut de l'écran : clignote pendant l'annonce, fixe pendant la rafale
+    if ((st.warn > 0 && Math.sin(_ * (8 + st.warn * 16)) > -0.3) || st.on) {
+      let cx = L(v + b * 0.62, gu.x1 + 40, gu.x2 - 40),
+        ty = y + 74;
+      ((n.globalAlpha = st.on ? 0.75 : 1),
+        (n.fillStyle = `#e9f2f7`),
+        n.beginPath(),
+        n.roundRect ? n.roundRect(cx - 22, ty - 15, 44, 30, 7) : n.rect(cx - 22, ty - 15, 44, 30),
+        n.fill(),
+        (n.strokeStyle = `#24384a`),
+        (n.lineWidth = 2.5),
+        n.beginPath(),
+        n.moveTo(cx + 14, ty - 7), n.lineTo(cx - 8, ty - 7), n.arc(cx - 8, ty - 3, 4, -Math.PI / 2, Math.PI, !0),
+        n.moveTo(cx + 16, ty), n.lineTo(cx - 14, ty),
+        n.moveTo(cx + 12, ty + 7), n.lineTo(cx - 4, ty + 7), n.arc(cx - 4, ty + 3, 4, Math.PI / 2, Math.PI, !1),
+        n.stroke(),
+        (n.globalAlpha = 1));
     }
   }
   function drawJet(jt) {
@@ -1758,6 +1893,7 @@ function R(e, t) {
         grounded: !!d?.grounded,
         deaths: d?.deaths ?? 0,
         jetHits: d?.jetHits ?? 0,
+        gustTime: d?.gustT ?? 0, // temps passé ralenti par une rafale (v4)
         deathXs: d?.deathXs ?? [],
       }),
       getRunners: () =>
