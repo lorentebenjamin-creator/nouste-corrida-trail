@@ -1112,7 +1112,7 @@ function R(e, t) {
     hum = {
       opt, rnd,
       D: Math.round((opt.delayMin + (opt.delayMax - opt.delayMin) * rnd()) * 60),
-      f: 0, q: new Map(), jumpAt: -1, holdEnd: -1, dir: 1, plan: null, deaths: -1, jumps: 0,
+      f: 0, q: new Map(), jumpAt: -1, holdEnd: -1, dir: 1, plan: null, deaths: -1, jumps: 0, calmWaits: 0, pauseTo: 0, cAir: !1,
     };
   }
   function gauss(rnd) {
@@ -1148,6 +1148,26 @@ function R(e, t) {
           k0 >= 0 && (aim = Math.round((k0 + k1) / 2));
         }
       }
+      // Rafales (v4) : un humain attentif « joue les accalmies » — il ne prend pas un saut au-dessus
+      // du vide pendant la rafale, ni quand les herbes couchées annoncent une rafale qui arrivera
+      // avant la fin du saut (≈ 0,8 s) ; il attend le calme sur place (si c'est sûr), même si un
+      // saut « au ras » serait encore possible. Option `calm` (profil attentif ; --calm 0 = pressé).
+      if (H.opt.calm && gusts.length && c.grounded && (aim >= 0 || H.jumpAt >= f + D)) {
+        let tj = t0 + (D + Math.max(0, aim)) / 60, w2 = simRunner(c, 1, -1, 70, !0);
+        if (!w2.safe && w2.air >= 0 && (w2.dead < 0 || w2.air <= w2.dead)) {
+          let windy = gusts.some((gu) => gu.x2 > c.x && gu.x1 < c.x + 320 && (gustState(gu, tj).on || (gustState(gu, tj).warn > 0 && gustState(gu, tj + 0.8).on)));
+          if (windy && simRunner(c, 0, -1, 40, !1).safe) {
+            (aim = -1), (dc = { dir: 0, jump: !1 }), (c.plan = null), H.jumpAt >= f + D && (H.jumpAt = -1), (H.calmWaits += 1);
+          }
+        }
+      }
+      // Hésitations : après une réception, il arrive qu'on lâche la direction un instant (on regarde
+      // la suite, on se recale) ; seulement si s'arrêter là est sûr. Elles étalent les temps d'arrivée
+      // (sans elles, tous les essais sans chute finissent au dixième près au temps du pilote auto).
+      if (c.grounded && H.cAir && H.opt.hesitP > 0 && H.rnd() < H.opt.hesitP)
+        H.pauseTo = f + D + Math.round((H.opt.pauseMin + (H.opt.pauseMax - H.opt.pauseMin) * H.rnd()) * 60);
+      H.cAir = !c.grounded;
+      if (f + D < (H.pauseTo || 0) && aim < 0 && H.jumpAt < f && dc.dir === 1 && simRunner(c, 0, -1, 40, !1).safe) dc = { dir: 0, jump: !1 };
       ((H.plan = c.plan), (H.waitT = c.waitT), (H.backT = c.backT), (_ = t0), movers.forEach((m, ix) => ((m.x = sv[ix][0]), (m.y = sv[ix][1]))));
       // saut prévu : on garde l'élan jusqu'à l'appel (pas de freinage de dernière seconde)
       H.q.set(f + D, H.jumpAt >= f + D || aim > 0 ? 1 : dc.dir);
@@ -1270,6 +1290,7 @@ function R(e, t) {
       }
     }
     for (let jt of jets) drawJet(jt);
+    for (let sg of s.signs || []) drawSign(sg, th);
     for (let gu of gusts) drawGust(gu, th);
     for (let dg of dogs) {
       let rc = dogRect(dg, _),
@@ -1405,6 +1426,25 @@ function R(e, t) {
         n.stroke(),
         (n.globalAlpha = 1));
     }
+  }
+  // Panneau de sentier (champ facultatif `signs`, helper panneau() de levels.js) : poteau et
+  // planche posés sur le sol en (x, y), texte sur 1 ou 2 lignes (séparées par « | »). Décor seul,
+  // aucun effet de jeu.
+  function drawSign(sg, th) {
+    if (sg.x < v - 160 || sg.x > v + b + 160) return;
+    let lines = String(sg.text).split(`|`).map((t) => t.trim()),
+      bw = 164, bh = 16 + lines.length * 16, top = sg.y - 64 - bh, x0 = sg.x - bw / 2;
+    ((n.fillStyle = `rgba(0,0,0,0.22)`), n.beginPath(), n.ellipse(sg.x, sg.y + 1, 18, 4, 0, 0, Math.PI * 2), n.fill());
+    ((n.fillStyle = th.woodDark), n.fillRect(sg.x - 3, top + bh - 4, 6, sg.y - top - bh + 4));
+    ((n.fillStyle = th.woodDark), n.beginPath(),
+      n.roundRect ? n.roundRect(x0 - 3, top - 3, bw + 6, bh + 6, 6) : n.rect(x0 - 3, top - 3, bw + 6, bh + 6), n.fill());
+    ((n.fillStyle = `#f4d35e`), n.beginPath(),
+      n.roundRect ? n.roundRect(x0, top, bw, bh, 4) : n.rect(x0, top, bw, bh), n.fill());
+    ((n.strokeStyle = `#24384a`), (n.lineWidth = 2), n.strokeRect(x0 + 4, top + 4, bw - 8, bh - 8));
+    n.save();
+    ((n.fillStyle = `#1f2a33`), (n.font = `800 14px Outfit, sans-serif`), (n.textAlign = `center`), (n.textBaseline = `middle`));
+    lines.forEach((t, i) => n.fillText(t, sg.x, top + 16 + i * 16));
+    n.restore();
   }
   function drawJet(jt) {
     let st = jetState(jt, _),
@@ -1872,14 +1912,14 @@ function R(e, t) {
       setAutopilot: (e, opt) => {
         autopilot = !!e;
         opt?.human
-          ? humanReset({ delayMin: 0.15, delayMax: 0.2, jitter: 0.045, holdMin: 0.28, holdMax: 0.55, ...opt.human })
+          ? humanReset({ delayMin: 0.15, delayMax: 0.2, jitter: 0.045, holdMin: 0.28, holdMax: 0.55, calm: !0, hesitP: 0.2, pauseMin: 0.1, pauseMax: 0.4, ...opt.human })
           : (hum = null);
       },
       // N pas de simulation par image affichée (0 = temps réel) : pour les essais en masse
       setTurbo: (e) => {
         turbo = Math.max(0, Math.min(60, e | 0));
       },
-      getHuman: () => (hum ? { D: hum.D, jumps: hum.jumps } : null),
+      getHuman: () => (hum ? { D: hum.D, jumps: hum.jumps, calmWaits: hum.calmWaits } : null),
       teleport: (e, t) => {
         d && ((d.x = e), (d.y = t), (d.vx = 0), (d.vy = 0));
       },
@@ -2092,8 +2132,17 @@ var U = t();
 function W(e) {
   let t = Math.floor(e / 60),
     n = Math.floor(e % 60),
-    r = Math.floor((e % 1) * 10);
+    r = Math.floor((e % 1) * 10 + 1e-6); // + 1e-6 : 14.1 % 1 = 0.0999… s'affichait « 14.0 » (médailles au dixième)
   return `${t}:${String(n).padStart(2, `0`)}.${r}`;
+}
+// Temps cible de médaille : au dixième comme le chrono, au centième si le calibrage l'impose
+// (tools/medals.mjs --calibrate peut choisir un or au 0,05 s quand les temps sont très groupés).
+function WT(e) {
+  if (Math.abs(e * 10 - Math.round(e * 10)) < 1e-6) return W(e + 1e-6);
+  let t = Math.floor(e / 60),
+    n = Math.floor(e % 60),
+    c = Math.round((e % 1) * 100);
+  return `${t}:${String(n).padStart(2, `0`)}.${String(c).padStart(2, `0`)}`;
 }
 function G(e) {
   return e <= 0 ? `—` : e === 1 ? `1er` : `${e}e`;
@@ -2454,11 +2503,11 @@ function K() {
                                       }),
                                   (0, U.jsx)(`span`, {
                                     className: `targets`,
-                                    "aria-label": `Temps cibles : ` + ts.map((x) => `${x.label} ${W(x.t)}`).join(`, `),
+                                    "aria-label": `Temps cibles : ` + ts.map((x) => `${x.label} ${WT(x.t)}`).join(`, `),
                                     children: ts.map((x) =>
                                       (0, U.jsxs)(
                                         `span`,
-                                        { className: `tg ${x.key}${got && got.key === x.key ? ` on` : ``}`, children: [medalDisc(x.key), W(x.t)] },
+                                        { className: `tg ${x.key}${got && got.key === x.key ? ` on` : ``}`, children: [medalDisc(x.key), WT(x.t)] },
                                         x.key,
                                       ),
                                     ),
@@ -2614,7 +2663,7 @@ function K() {
                           (0, U.jsx)(`span`, {
                             className: `mr-next`,
                             children: nx
-                              ? `Prochaine : ${nx.next} sous ${W(nx.t)}`
+                              ? `Prochaine : ${nx.next} sous ${WT(nx.t)}`
                               : `Toutes les médailles ! Le pilote auto fait ${W((M.medals.auto ?? medalTargets(M)[0].t) + 1e-6)}.`,
                           }),
                         ],

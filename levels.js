@@ -94,6 +94,11 @@ export const jet = (x, w, top, bottom, period = 3, on = 0.4, phase = 0, warn = 0
 export const rafale = (x1, x2, period = 4.2, on = 0.4, phase = 0, warn = 1.0, slow = 0.5) => ({
   x1, x2, period, on, phase, warn, slow,
 });
+// panneau(x, yDuSol, "Ligne 1|Ligne 2") : PANNEAU de sentier planté sur un sol de dessus `yDuSol`
+//   (décor seul, aucun effet de jeu ; « | » sépare les lignes, 2 lignes de ≈ 18 caractères max).
+//   À mettre dans le tableau `signs` du niveau. Obligatoire avant un « ravin au calme » (§3d) :
+//   ravin sous une rafale que l'on ne franchit qu'au calme (la rafale fait tomber).
+export const panneau = (x, yDuSol, text) => ({ x, y: yDuSol, text });
 
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
@@ -211,7 +216,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1880, 430, 1), y(id, 3640, 430, 2)],
     finishX: 4980,
     rivals: [{ speed: 0.93 }, { speed: 0.84 }, { speed: 0.74 }],
-    medals: { auto: 13.9, gold: 16, silver: 19, bronze: 22.5 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 13.9, gold: 14.1, silver: 14.6, bronze: 15.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 63 %, bronze 88 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ronce @2140 trop près du fanion @1880", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : ronce à 260 px du fanion, rivaux lents (≤ 0,93)." },
@@ -242,7 +247,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1400, 356, 1), y(id, 2580, 430, 2), y(id, 3780, 430, 3)],
     finishX: 6460,
     rivals: [{ speed: 0.97 }, { speed: 0.88 }, { speed: 0.78 }],
-    medals: { auto: 18.1, gold: 21, silver: 24.5, bronze: 29 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 18.1, gold: 18.25, silver: 18.8, bronze: 19.3 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 13 %, argent 83 %, bronze 88 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ronce @360 trop près du départ", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : première ronce d'apprentissage, le compte à rebours ne verrouille pas les rivaux comme une réapparition." },
@@ -284,7 +289,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1240, 380, 1), y(id, 2860, 440, 2), y(id, 5080, 380, 3)],
     finishX: 7620,
     rivals: [{ speed: 0.99 }, { speed: 0.9 }, { speed: 0.82 }],
-    medals: { auto: 21.6, gold: 25, silver: 29.5, bronze: 35 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 21.6, gold: 21.7, silver: 22.2, bronze: 22.7 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 80 %, bronze 90 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ground@4520→ground@5000: montée 60 px avec écart 140 px", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : seule montée longue du niveau, pilote pressé sans chute à cet endroit." },
@@ -370,7 +375,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2650, 440, 1), y(id, 4230, 440, 2), y(id, 6020, 260, 3), y(id, 8370, 440, 4)],
     finishX: 10900,
     rivals: [{ speed: 1.0 }, { speed: 0.92 }, { speed: 0.85 }],
-    medals: { auto: 30.8, gold: 35.5, silver: 42, bronze: 49.5 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 30.8, gold: 31.1, silver: 31.8, bronze: 34.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 13 %, argent 50 %, bronze 85 %)
   };
 })());
 
@@ -441,7 +446,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2080, 440, 1), y(id, 3960, 380, 2), y(id, 6040, 440, 3), y(id, 7320, 440, 4), y(id, 8580, 440, 5)],
     finishX: 9400,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.8, gold: 37, silver: 43, bronze: 51 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 31.8, gold: 32, silver: 33, bronze: 42.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 50 %, bronze 85 %)
   };
 })());
 
@@ -523,7 +528,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1040, 380, 1), y(id, 2320, 170, 2), y(id, 3780, 440, 3), y(id, 5580, 230, 4), y(id, 7000, 440, 5), y(id, 9460, 440, 6)],
     finishX: 10300,
     rivals: [{ speed: 1.0 }, { speed: 0.94 }, { speed: 0.88 }],
-    medals: { auto: 29.4, gold: 34, silver: 40, bronze: 47.5 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 29.4, gold: 31.6, silver: 35.2, bronze: 43.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 50 %, bronze 85 %)
   };
 })());
 
@@ -590,7 +595,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 3060, 440, 1), y(id, 4490, 440, 2), y(id, 5810, 300, 3), y(id, 6890, 440, 4), y(id, 8410, 440, 5)],
     finishX: 9500,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.7, gold: 36.5, silver: 43, bronze: 51 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 31.7, gold: 32.1, silver: 34.5, bronze: 40.3 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 20 %, argent 50 %, bronze 85 %)
   };
 })());
 
@@ -666,7 +671,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2160, 440, 1), y(id, 3470, 440, 2), y(id, 4860, 300, 3), y(id, 6710, 440, 4), y(id, 8110, 440, 5)],
     finishX: 9560,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.87 }],
-    medals: { auto: 29.8, gold: 34.5, silver: 40.5, bronze: 48 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 29.8, gold: 33.8, silver: 37.4, bronze: 44.5 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 50 %, bronze 85 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "passerelle mobile @2920: rapide (171 px/s)", reason: "Radeau accéléré volontairement à la revue du 19/10 (4,6 → 4,4 s) pour un niveau « Très engagé » ; validé playtest auto et humain." },
@@ -746,7 +751,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2640, 440, 1), y(id, 5100, 440, 2), y(id, 7050, 250, 3), y(id, 9570, 440, 4)],
     finishX: 11200,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.6, gold: 36.5, silver: 43, bronze: 51 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 31.6, gold: 32, silver: 32.5, bronze: 37.8 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 20 %, argent 53 %, bronze 85 %)
   };
 })());
 
@@ -770,13 +775,14 @@ LEVELS.push((() => {
   c.arc(5760, 5900, 340, 3, 40); c.line(5940, 6060, 350, 2); c.arc(6100, 6240, 320, 3, 40);
   c.line(6310, 6610, 330, 4); c.arc(7000, 7130, 280, 3, 40); c.arc(7250, 7350, 250, 3, 40);
   c.arc(7550, 7670, 220, 3, 40); c.line(7720, 8020, 210, 4); c.arc(8070, 8190, 300, 3, 40);
-  c.line(8270, 8570, 370, 4); c.arc(8670, 8770, 330, 3, 50); c.line(8870, 9020, 370, 2);
-  c.arc(9070, 9140, 330, 3, 40); c.line(9220, 9420, 370, 3);
+  c.line(8270, 8570, 370, 4); c.arc(8670, 8770, 330, 3, 50); c.line(8920, 9040, 370, 2);
+  c.arc(9110, 9250, 320, 3, 40); c.line(9320, 9520, 370, 3);
+  c.arc(9600, 9670, 330, 3, 40); c.line(9750, 9950, 370, 3);
   return {
     id, name: "Le Plateau des Bérets Envolés",
     blurb: "Lande ventée où les bérets s'envolent : quand les herbes se couchent, la rafale arrive. Attends le calme pour sauter.",
     difficulty: "Bien engagé", theme: "lande",
-    width: 9890, floor: 440, spawnX: 60,
+    width: 10475, floor: 440, spawnX: 60,
     solids: [
       // Montée vers le plateau : ressauts
       p(0, 820, 440),
@@ -797,26 +803,38 @@ LEVELS.push((() => {
       // on doit pouvoir s'arrêter devant sans risque si la rafale tombe)
       p(7130, 420, 340), h(7270, 340),
       p(7670, 400, 280),
-      // Sprint final face au vent
-      p(8190, 1600, 440), g(8670, 440),
+      // Sprint final face au vent : tronc, puis l'aire d'attente du Ravin du Béret (240 px sans danger)
+      p(8190, 900, 440), g(8670, 440),
+      // Passage clé (revue 21/10) : le RAVIN DU BÉRET, 185 px. Au calme on le saute largement
+      // (saut ≈ 252 px) ; sous la rafale le saut tombe à ≈ 132 px (+ 30 de corps) : on tombe, et
+      // une rafale qui se lève juste après l'appel suffit aussi. La rafale DÉCIDE du saut : on
+      // attend sur l'aire, herbes droites et manche à air pendante, puis on saute.
+      p(9275, 1100, 440),
     ],
+    // Panneau dédié avant le ravin (en plus des herbes, de la manche à air et du panneau « vent »)
+    signs: [panneau(8800, 440, "Ravin :|saute au calme")],
     hazards: [
       _(480, 70, 440),
       _(3700, 64, 380),
       _(5120, 70, 440),
-      _(9070, 70, 440),
+      _(9600, 70, 440),
     ],
     // Mécanique v4 : rafales de vent de face (LEVELS.md §3d). Cycles différents pour chaque zone.
     gusts: [
       rafale(2480, 3150, 4.2, 0.45, 0.2),  // découverte : un seul ravin sous le vent
       rafale(5300, 6200, 4.6, 0.45, 0.55), // passage clé : la Crête des Bérets (3 sauts de 140 px)
       rafale(6950, 8150, 4.0, 0.45, 0.1),  // terrasses en montée + rocher
-      rafale(8630, 9320, 3.8, 0.4, 0.7),   // sprint final : tronc et ronce face au vent
+      rafale(8630, 8860, 3.8, 0.4, 0.7),   // sprint final : le tronc face au vent
+      rafale(8960, 9560, 4.4, 0.45, 0.3),  // Ravin du Béret : ravin de 185 px, à sauter au calme
     ],
     coins: c.list,
     checkpoints: [y(id, 2140, 440, 1), y(id, 4690, 440, 2), y(id, 6270, 400, 3), y(id, 8220, 440, 4)],
-    finishX: 9470,
+    finishX: 10000,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 28.1, gold: 32.5, silver: 38, bronze: 45 }, // tools/medals.mjs (or ×1,15, argent ×1,35, bronze ×1,6)
+    medals: { auto: 30.8, gold: 35.9, silver: 40.1, bronze: 44.5 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 15 %, argent 53 %, bronze 93 %)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "ground@8190→ground@9275: écart 185 px", reason: "Ravin du Béret (ravin au calme, revue 21/10) : écart voulu > portée sous la rafale (≈ 181 px) ; au calme le rival le plus lent (0,86) porte à ≈ 244 px. Playtest : pilote auto et rivaux sans chute, humain 40 essais attentif 100 % / pressé 75 %." },
+    ],
   };
 })());

@@ -1,8 +1,9 @@
 # Format des niveaux — NOUSTE CORRIDA TRAIL (copie statique)
 
 > **Source de vérité :** le dépôt GitHub (`main`) et sa copie de travail `/workspace/corrida-site`.
-> Les autres dossiers (`/workspace/corrida-classement`, …) ne sont que des copies alignées sur
-> `main` : ne jamais y travailler. Toujours commencer par `git pull` dans `/workspace/corrida-site`.
+> Il n'y a pas d'autre copie de travail à jour : l'ancien worktree de la branche `classement`
+> (périmé, resté sur le niveau 7) est archivé dans `/workspace/corrida-classement-ARCHIVE` depuis
+> le 21/10 — ne jamais y travailler. Toujours commencer par `git pull` dans `/workspace/corrida-site`.
 
 Tous les niveaux vivent dans **`levels.js`** (module ES, lisible, non minifié).
 Le moteur du jeu (`assets/game.js`, code lisible) fait simplement
@@ -45,6 +46,7 @@ Le menu affiche les niveaux du N°1 (en haut) au plus récent (en bas) (liste d�
   rivals: [{speed:1.0},{speed:0.92},{speed:0.85}], // EXACTEMENT 3 : Léa Morel (12), Karim El Yazidi (7), Inès Rocha (23)
   rockfalls: [ ... ],      // OPTIONNEL (v2) : chutes de pierres, helper chute()
   gusts: [ ... ],          // OPTIONNEL (v4) : rafales de vent de face, helper rafale() (§3d)
+  signs: [ ... ],          // OPTIONNEL : panneaux de sentier (décor), helper panneau() (§3d, ravin au calme)
   patrols: [ ... ],        // OPTIONNEL (v2) : patous, helper patou()
   medals: { auto: 30.8, gold: 35.5, silver: 42, bronze: 49.5 }, // OPTIONNEL : écrit par tools/medals.mjs (§6 étape 5b)
   acceptedWarnings: [ { match: "…", reason: "…" } ],           // OPTIONNEL : avertissements check-levels acceptés (§6b)
@@ -193,6 +195,39 @@ ni de jet dans la zone (avertissement : une mécanique à la fois), plateforme d
 avant chaque saut sous la rafale (pour attendre le calme). Chaque saut sous une rafale est
 signalé en `info` : le valider avec `tools/playtest.mjs --human`.
 
+### Ravin au calme (revue du 21/10) et panneaux (`signs`)
+
+Jusqu'au 21/10 le vent ne faisait que ralentir : un saut de 120–140 px pris **au ras du bord**
+passe encore sous la rafale (portée ≈ 132 px + 30 px de corps + le temps de coyote). Un **ravin au
+calme** est un ravin sous une rafale que l'on franchit largement au calme mais **où la rafale fait
+tomber** : même appel au ras du bord, la portée sous la rafale (≈ 181 px avec `slow = 0.5`) est
+inférieure à l'écart ; une rafale qui se lève juste après l'appel suffit aussi à faire tomber
+(portée ≈ 197 px si elle arrive 0,2 s après l'appel). Exemple : le **Ravin du Béret** du N°10
+(écart 185 px, zone `rafale(8960, 9560, 4.4, 0.45, 0.3)`). Recette :
+
+```js
+p(8190, 900, 440),                       // aire d'attente : ≥ 150 px sans danger avant le bord (ici 240)
+p(9275, 1100, 440),                      // écart 185 : ≥ portée sous la rafale, ≤ portée au calme − 40
+signs: [panneau(8800, 440, "Ravin :|saute au calme")],   // panneau dédié dans les 900 px avant le bord
+gusts: [rafale(8960, 9560, 4.4, 0.45, 0.3)],             // manche à air à x1 − 14, sur l'aire d'attente
+```
+
+* `panneau(x, yDuSol, "Ligne 1|Ligne 2")` : panneau jaune sur poteau, planté sur un sol (décor
+  seul, aucun effet de jeu ; 2 lignes de 20 caractères max, séparées par `|`). Il s'ajoute aux
+  indices de vent (herbes, manche à air, panneau « vent ») ; il ne les remplace pas.
+* Un écart > 165 px déclenche l'avertissement « rivaux lents en difficulté » : l'accepter
+  (`acceptedWarnings`, §6b) en citant le playtest (le rival le plus lent, 0,86, a une portée de
+  ≈ 244 px au calme) ; ne jamais dépasser 200 px (erreur).
+* `check-levels` calcule, pour chaque saut sous une rafale, la portée sous la rafale et au calme
+  (même intégration que le moteur) ; si la rafale fait tomber, il l'indique en `info`
+  (« RAVIN AU CALME ») et **avertit** s'il manque le panneau (texte contenant « calme », dans les
+  900 px avant le bord), s'il n'y a pas d'aire d'attente sûre (≥ 150 px sans ronce, rocher,
+  tronc, pierres ni patou avant le bord) ou si l'écart laisse moins de 40 px de marge au calme.
+* Pilote humain : le profil attentif « joue les accalmies » (il ne saute pas au-dessus du vide
+  sous la rafale ni quand les herbes couchées annoncent une rafale qui arriverait avant la fin
+  du saut, ≈ 0,8 s) ; le profil pressé (`--calm 0`) ne s'appuie que sur sa lecture du moment.
+  Valider avec les deux profils (§6 étape 5) : au moins 70 % en profil pressé pour le N°10.
+
 **Piège connu (pilote IA)** : ne pas poser de **ronce** juste après une réception dans une zone
 de vent, sur une plateforme courte (< ~330 px de sol derrière). Si la rafale tombe, l'IA s'arrête
 collée à la ronce et ne peut ni sauter sans élan ni reculer (elle tomberait) : essai « bloqué ».
@@ -312,8 +347,11 @@ chute, un humain peut passer.
    **Pilote humain obligatoire** (job quotidien compris), dans les deux profils :
    ```bash
    node /chemin/vers/tools/playtest.mjs $URL last --human --trials 20 --verbose                                         # attentif
-   node /chemin/vers/tools/playtest.mjs $URL last --human --trials 20 --jitter 80 --hold 0.18-0.5 --delay 180-250 --verbose   # pressé
+   node /chemin/vers/tools/playtest.mjs $URL last --human --trials 20 --jitter 80 --hold 0.18-0.5 --delay 180-250 --calm 0 --hesit 0 --verbose   # pressé
    ```
+   (Depuis le 21/10 le profil attentif hésite parfois après une réception et attend le calme avant
+   un saut au-dessus du vide dans le vent ; le profil pressé ne fait ni l'un ni l'autre :
+   `--calm 0 --hesit 0` redonne exactement le profil pressé des mesures précédentes.)
    Viser **≥ 60 % de réussite** (≤ 5 chutes) en profil pressé pour un niveau « Engagé » et au-delà,
    ≥ 90 % en dessous ; `--verbose` liste les essais ratés et l'endroit des chutes.
    **Courbe monotone** : comparer aux chiffres du niveau précédent (§8). Si l'étiquette dit « plus
@@ -325,21 +363,38 @@ chute, un humain peut passer.
    Attendu : `PLAYTEST OK` (le pilote auto finit sans chute, aucun rival en boucle, aucune erreur
    console) et `E2E OK`. Si le pilote auto échoue, la ligne indique où il est tombé (`chutes à x,y`) :
    élargir la plateforme, réduire l'écart, ralentir la passerelle ou décaler la phase.
-5b. **Médailles** (obligatoire pour le job quotidien, une fois la géométrie définitive) :
+5b. **Médailles, calibrées sur le pilote humain** (obligatoire pour le job quotidien, une fois la
+   géométrie définitive ; méthode de la revue du 21/10) :
    ```bash
-   node /chemin/vers/tools/medals.mjs $URL last --write     # lance le pilote auto, écrit `medals:` dans le bloc
-   node /chemin/vers/tools/medals.mjs $URL all              # contrôle de tous les niveaux, sans écrire
-   node tools/medals.mjs --from-auto mon-id=31.6 --write    # sans navigateur, si le temps auto est déjà connu
+   node /chemin/vers/tools/medals.mjs $URL last --calibrate --trials 40 --write   # pilote auto + 2 profils humains, écrit `medals:`
+   node /chemin/vers/tools/medals.mjs $URL all --human --trials 20 --md           # contrôle de tous les niveaux, sans écrire
    ```
-   Le script relance `tools/playtest.mjs` (pilote auto, il faut `chutes joueur 0`), prend le temps
-   d'arrivée `auto` et écrit/remplace, juste sous `rivals:` du bloc, la ligne
-   `medals: { auto, gold, silver, bronze }` avec **or = auto × 1,15, argent = auto × 1,35,
-   bronze = auto × 1,6**, chaque temps **arrondi à la demi-seconde supérieure**. Ne pas l'écrire à
-   la main. **Relancer après toute retouche de géométrie** (le temps auto change). Un niveau sans
-   `medals` (ou avec un champ invalide) fonctionne : simplement aucune médaille (check-levels
-   l'indique en `info`). Le menu affiche, sous chaque sentier, la médaille du record local
-   (localStorage) et les trois temps cibles ; l'écran d'arrivée affiche la médaille de la course,
-   le record et le temps visé pour la médaille suivante. Ajouter le niveau au tableau des médailles (§8).
+   `--calibrate` lance le pilote auto (temps `auto`, il faut `chutes joueur 0`), puis le pilote
+   humain dans les **deux profils** (attentif ; pressé = `--delay 180-250 --jitter 80 --hold
+   0.18-0.5 --calm 0 --hesit 0`) et choisit **au dixième de seconde** les temps cibles d'après les
+   essais **attentifs** (un essai raté compte sans médaille) :
+   * **or** : la part des essais attentifs qui l'atteignent est la plus proche de **17,5 %**, dans
+     la fenêtre **10–25 %** (sinon le script affiche ⚠ : temps trop groupés, voir le pilote humain) ;
+   * **argent** ≈ **50 %** des essais attentifs, **bronze** ≈ **85 %** ;
+   * toujours `auto ≤ or`, argent ≥ or + 0,5 s, bronze ≥ argent + 0,5 s (paliers progressivement
+     plus faciles).
+   Il écrit/remplace, juste sous `rivals:` du bloc, la ligne `medals: { auto, gold, silver, bronze }`
+   avec en commentaire les parts obtenues (`// tools/medals.mjs --calibrate (40 essais attentifs :
+   or 18 %, argent 50 %, bronze 85 %)`), et affiche pour chaque niveau les pourcentages or / argent /
+   bronze des deux profils. Les graines étant fixes, deux lancements donnent les mêmes temps.
+   Ne pas l'écrire à la main. **Relancer après toute retouche de géométrie.** Vérifier ensuite
+   avec `--human --trials 20` que l'or reste dans 10–25 % des essais attentifs (sur 20 essais,
+   ±1 essai de bruit, soit 5–30 %, est acceptable) et ajouter la ligne au tableau des médailles (§8).
+   Sur un niveau à rafales, l'or doit rester atteignable **en jouant les accalmies** (le profil
+   attentif attend le calme : ses meilleurs temps sont l'objectif de l'or).
+   Ancienne règle, encore disponible sans pilote humain (`node tools/medals.mjs $URL last --write`
+   ou `--from-auto mon-id=31.6 --write`) : or = auto × 1,15, argent × 1,35, bronze × 1,6, arrondis
+   à la demi-seconde supérieure — trop généreuse (85–95 % d'or en profil attentif sur les niveaux
+   1–4 et 9), à ne plus utiliser pour le job quotidien.
+   Un niveau sans `medals` (ou avec un champ invalide) fonctionne : simplement aucune médaille
+   (check-levels l'indique en `info`). Le menu affiche, sous chaque sentier, la médaille du record
+   local (localStorage) et les trois temps cibles ; l'écran d'arrivée affiche la médaille de la
+   course, le record et le temps visé pour la médaille suivante.
 6. Classement en ligne (Supabase) : **rien à faire**. Aucun SQL, aucune ligne `level_limits` à
    ajouter : un nouvel `id` est accepté automatiquement avec la borne générale (temps ≥ 8 s).
    `level_limits` (temps minimum par niveau) est un réglage facultatif fait à la main dans le SQL

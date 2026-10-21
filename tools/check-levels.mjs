@@ -15,6 +15,18 @@ const LIMITS = {
   afterBlock: 260,    // sol restant après un rocher / tronc
   maxWidth: 30000,    // canvas hors-écran = width × 780 px
 };
+// Portée horizontale d'un saut complet (pieds revenus à la hauteur d'arrivée, `up` px plus haut),
+// même intégration que le moteur (pas 1/60 s, LEVELS.md §5), course à 352 px/s × `slow` dès l'appel
+// (rafale qui souffle pendant tout le saut ; slow = 1 : calme).
+function jumpReach(slow = 1, up = 0) {
+  let vx = 352, vy = -770, x = 0, yy = 0; const dt = 1 / 60;
+  for (let f = 0; f < 300; f++) {
+    const dv = 352 * slow - vx; vx += Math.sign(dv) * Math.min(Math.abs(dv), 2100 * dt);
+    let gr = vy < 0 ? 2100 : 4700; if (Math.abs(vy) < 110) gr = 1200; vy = Math.min(1080, vy + gr * dt);
+    x += vx * dt; yy += vy * dt; if (vy > 0 && yy >= -up) return x;
+  }
+  return x;
+}
 let errors = 0, warnings = 0;
 const err = (l, m) => { errors++; console.log(`ERREUR  [${l}] ${m}`); };
 // Avertissements acceptés : champ `acceptedWarnings: [{ match: "début du message", reason: "pourquoi" }]`
@@ -212,12 +224,36 @@ LEVELS.forEach((L, idx) => {
       if (gap <= 0 || b.x < gu.x1 || a.x + a.w > gu.x2) continue;
       if (a.w < 150) warn(tag, `${tagg}: plateforme d'appel ${a.kind}@${a.x} trop courte (${a.w} px < 150) pour attendre le calme`);
       info(tag, `${tagg}: saut ${a.kind}@${a.x}→${b.kind}@${b.x} (écart ${gap}) sous la rafale — passage chronométré, à valider avec tools/playtest.mjs --human`);
+      // « Ravin au calme » (revue 21/10) : la rafale fait TOMBER (même appel au ras du bord, avec le
+      // temps de coyote) alors qu'on passe au calme. Il faut alors : un panneau (signs) dont le texte
+      // parle du calme, dans les 900 px avant le bord ; une aire d'attente ≥ 150 px sans danger
+      // juste avant le bord (ni ronce, ni rocher/tronc, ni pierres, ni patou).
+      const up2 = a.y - b.y, edge = a.x + a.w;
+      const rGust = jumpReach(gu.slow, up2) + 30 + 0.11 * 352 * gu.slow, rCalm = jumpReach(1, up2) + 30;
+      if (gap >= rGust) {
+        if (gap > rCalm - 40) warn(tag, `${tagg}: ravin au calme ${a.kind}@${a.x}→${b.kind}@${b.x} : écart ${gap} px trop près de la portée au calme (${Math.round(rCalm)} px, marge < 40)`);
+        info(tag, `${tagg}: RAVIN AU CALME ${a.kind}@${a.x}→${b.kind}@${b.x} (écart ${gap} px ; portée sous la rafale ≈ ${Math.round(rGust)} px, au calme ≈ ${Math.round(rCalm)} px) : la rafale fait tomber — valider avec tools/playtest.mjs --human`);
+        const sg = (L.signs || []).find((sn) => sn.x <= edge && sn.x >= edge - 900 && /calme/i.test(sn.text || ""));
+        if (!sg) warn(tag, `${tagg}: ravin au calme @${edge} sans panneau (signs: panneau(x, yDuSol, "Ravin :|saute au calme")) dans les 900 px avant le bord`);
+        const wx1 = edge - 150, hit = (x1, x2) => x2 > wx1 && x1 < edge;
+        const blocked = L.hazards.some((hz) => hit(hz.x, hz.x + hz.w)) || L.solids.some((sd) => (sd.kind === "rock" || sd.kind === "log") && hit(sd.x, sd.x + sd.w))
+          || (L.rockfalls || []).some((fl) => hit(fl.x, fl.x + fl.size)) || (L.patrols || []).some((dg) => hit(dg.x1, dg.x2));
+        if (a.w < 150 || blocked) warn(tag, `${tagg}: ravin au calme @${edge} sans aire d'attente sûre (≥ 150 px de sol sans danger avant le bord)`);
+      }
     }
   });
+  // Panneaux de sentier (facultatifs, décor) : posés sur un sol, texte court
+  if (L.signs != null && !Array.isArray(L.signs)) err(tag, `signs doit être un tableau (ou absent)`);
+  for (const sn of L.signs || []) {
+    if (typeof sn.text !== "string" || !sn.text.trim()) { err(tag, `panneau @${sn.x}: texte manquant`); continue; }
+    if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.y === sn.y && sn.x - 10 >= sd.x && sn.x + 10 <= sd.x + sd.w)) err(tag, `panneau @${sn.x}: pas planté sur un sol de dessus y=${sn.y}`);
+    const lines = sn.text.split("|");
+    if (lines.length > 2 || lines.some((t) => t.trim().length > 20)) warn(tag, `panneau @${sn.x}: texte trop long (2 lignes de 20 caractères max, séparées par « | »)`);
+  }
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`].filter(Boolean).join(", ");
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
   for (const a of accepting) if (!a.used) warn(tag, `acceptedWarnings obsolète : "${a.match}" ne correspond plus à aucun avertissement (le retirer)`);
   accepting = [];
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);
