@@ -243,7 +243,8 @@ rock rockDark thorn leaf berry fog`. Exemple : `breche` (neige au crépuscule) d
 Réutiliser un thème existant est toujours sûr. Palettes ajoutées : `breche` (niv. 4, neige au
 crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier sous l'orage), `cascade` (niv. 7, gorges moussues), `nuit` (niv. 8, trail de nuit au clair de lune),
 `hetraie` (niv. 9, hêtraie d'automne au petit matin, sapins roux = hêtres), `lande` (niv. 10,
-lande ventée du plateau, bruyère mauve, clé facultative `tuft` pour les touffes d'herbe du vent).
+lande ventée du plateau, bruyère mauve, clé facultative `tuft` pour les touffes d'herbe du vent),
+`neve` (niv. 11, névé d'altitude au soleil de midi, neige éblouissante, crevasses bleu nuit).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -462,7 +463,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–10)
+## 8. Courbe de difficulté (niveaux 1–11)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -476,6 +477,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 6 | 2 radeaux, 3 patous, 3 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 29,8 s |
 | 9 | La Hêtraie des Palombes | Endurance | 1120 m | 19 | 8 (dont **2 sur des passerelles**) | — (classique) | 1 / 0.93 / 0.86 | 31,6 s |
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | 14 | 4 | **5 zones de rafales de vent** (8 sauts sous le vent, dont **1 ravin au calme**, le Ravin du Béret, avec panneau) | 1 / 0.93 / 0.86 | 30,8 s |
+| 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | 22 | 6 | — (classique ; passage clé : **7 séracs en dents de scie**) | 1 / 0.93 / 0.86 | 32,3 s |
 
 Médailles **calibrées le 21/10** (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ;
 pourcentages ci-dessous sur 20 essais par profil (essais ratés comptés sans médaille) :
@@ -492,6 +494,7 @@ pourcentages ci-dessous sur 20 essais par profil (essais ratés comptés sans m�
 | 8 | Le Gué des Lucioles | 29,8 s | 33,8 s | 37,4 s | 44,5 s | 15 % / 60 % / 95 % | 15 % / 30 % / 40 % |
 | 9 | La Hêtraie des Palombes | 31,6 s | 32,0 s | 32,5 s | 37,8 s | 15 % / 55 % / 75 % | 10 % / 30 % / 60 % |
 | 10 | Le Plateau des Bérets Envolés | 30,8 s | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
+| 11 | Le Névé des Marmottes Frileuses | 32,3 s | 32,8 s | 33,4 s | 43,6 s | 15 % / 60 % / 85 % | 0 % / 10 % / 50 % |
 
 Lecture : sur un niveau sans mécanique, un essai attentif sans chute ni hésitation finit au temps
 du pilote auto, d'où un or très proche de `auto` (×1,01) ; sur les niveaux à mécaniques (6, 8, 10),
@@ -512,7 +515,8 @@ du pilote parfait de `tools/playtest.mjs` (un humain met nettement plus). 7 = je
 sur le modèle du 4 (règle d'alternance, §6 étape 3b) : un peu plus long et un cran au-dessus du 4
 (ronces sur les passerelles de la palombière), nettement en dessous des niveaux à mécaniques.
 10 = **rafales de vent de face** (mécanique v4 inédite, §3d), entre le 7 et le 8 en profil pressé.
-**Prochain niveau (N°11) : classique**, puis alternance 1 à mécaniques / 1 classique.
+11 = **classique** (névé, séracs en dents de scie), un cran au-dessus du 9 en chutes.
+**Prochain niveau (N°12) : à mécaniques**, puis alternance 1 à mécaniques / 1 classique.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
@@ -566,6 +570,7 @@ ses chiffres des N°1–9 sont identiques à ceux du tableau ci-dessus) :
 | 8 | 100 % | 1,45 | 37,4 s | 70 % | 3,65 | 42,7 s |
 | 9 | 100 % | 0,55 | 35,2 s | 90 % | 1,65 | 38,3 s |
 | 10 | 100 % | 0,25 | 41,2 s | 80 % | 2,65 | 42,3 s |
+| 11 | 100 % | 0,40 | 37,8 s | 100 % | 2,25 | 46,1 s |
 
 N°10 avant → après la revue du 21/10 (variante avec le Ravin du Béret, même id, même étiquette) :
 attentif 100 % / 0,75 / 34,0 s → 100 % / 0,25 / 41,2 s (il attend désormais le calme : moins de
@@ -598,6 +603,14 @@ ravin sous la rafale, la découverte), x≈2100 (descente vers le bord du platea
 (ronce de la terrasse de bruyère). Premier jet de géométrie : une ronce juste après la réception
 des terrasses du cayolar (x≈7200) piégeait l'IA sous la rafale (§3d « piège connu ») : remplacée
 par un rocher.
+
+N°11 (mesuré le 22/10, mêmes réglages) : classique, étiquette « Haute montagne » (sous les
+niveaux à mécaniques 5–8 et 10). Sur **40 essais** : attentif 100 % / 0,42 (N°9 : 100 % / 0,35),
+pressé 98 % / 2,13 (N°9 : 88 % / 2,00) : plus de chutes que le 9 (ravins plus longs, séracs étroits)
+mais aucune ronce sur passerelle, donc presque aucun abandon. Points chauds en profil pressé :
+x≈10700 (dernier ravin de 155 px avant le sprint), x≈3300 (entrée des Dents de la Marmotte, montée
+de 60 px après 130 px de crevasse) et x≈9700 (ronce après la descente). Premiers jets (séracs de
+180 puis 160 px, crevasses de 120/140) : pressé 98–100 % / 1,65–1,98, jugé trop proche du 9.
 
 Revue du 20/10 (géométrie N°3 et N°8, §6b), mêmes réglages, avant → après :
 N°3 attentif 100 % / 0,10 → 100 % / 0,05, pressé 100 % / 0,95 → 100 % / 0,85 ;

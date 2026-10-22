@@ -189,6 +189,18 @@ export const THEMES = {
     // Clé facultative (v4) : couleur des touffes d'herbe qui se couchent sous les rafales.
     tuft: "#ece2b4",
   },
+  neve: {
+    // Niveau 11 : névé d'altitude au soleil de midi (neige éblouissante, crevasses bleu nuit)
+    skyTop: "#0b3d7a", skyMid: "#4f97d8", skyBot: "#e3f2ff",
+    ridge: "#6f86a3", ridge2: "#c4d5e8",
+    pine: "#1f3540", pine2: "#3e5b68",
+    dirt: "#7d8b9a", dirtDark: "#4d5a68",
+    grass: "#f3f8fd", grassDark: "#bfd0e1",
+    wood: "#8a6440", woodDark: "#553f2a",
+    rock: "#a0abb6", rockDark: "#5f6b78",
+    thorn: "#28303c", leaf: "#3f5a4c", berry: "#3f78c8",
+    fog: "#142338",
+  },
 };
 
 // =====================================================================
@@ -836,5 +848,76 @@ LEVELS.push((() => {
     acceptedWarnings: [
       { match: "ground@8190→ground@9275: écart 185 px", reason: "Ravin du Béret (ravin au calme, revue 21/10) : écart voulu > portée sous la rafale (≈ 181 px) ; au calme le rival le plus lent (0,86) porte à ≈ 244 px. Playtest : pilote auto et rivaux sans chute, humain 40 essais attentif 100 % / pressé 75 %." },
     ],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 11 — Le Névé des Marmottes Frileuses (niveau du jour, 2026-10-22)
+// Niveau classique (règle d'alternance, après le N°10 à mécaniques) — nouveauté : un seul passage
+// clé inédit, les DENTS DE LA MARMOTTE, sept séracs étroits (150 px) en dents de scie, une montée
+// puis une descente à chaque saut, de plus en plus hautes (60 → 70 → 80 → 90 px). Jusqu'ici les
+// suites de sauts montaient ou descendaient toujours dans le même sens. Aucune mécanique v2/v3/v4 :
+// sols, ravins (crevasses), ronces, rochers, troncs, passerelles fixes et fanions, sur le modèle
+// du niveau 4. Nouvelle palette `neve` (névé au soleil de midi).
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "neve-marmottes", c = v(id);
+  c.line(120, 640, 370, 5); c.arc(770, 980, 380, 3, 40); c.line(1060, 1220, 370, 2);
+  c.arc(1350, 1550, 310, 3, 40); c.line(1630, 1790, 300, 2); c.arc(1920, 2110, 250, 3, 40);
+  c.line(2190, 2330, 240, 2); c.arc(2460, 2670, 250, 3, 40); c.line(2750, 3030, 370, 2);
+  c.arc(3160, 3360, 320, 3, 40); c.arc(3440, 3670, 320, 3, 40); c.arc(3750, 3950, 310, 3, 40);
+  c.arc(4030, 4260, 310, 3, 40); c.arc(4340, 4540, 300, 3, 40); c.arc(4620, 4850, 300, 3, 40);
+  c.arc(4930, 5130, 290, 3, 40); c.arc(5210, 5430, 290, 3, 40); c.line(5520, 6020, 370, 4);
+  c.arc(6150, 6350, 320, 3, 40); c.arc(6440, 6600, 270, 3, 40); c.arc(6680, 6840, 270, 3, 40);
+  c.arc(6930, 7090, 320, 3, 40); c.line(7170, 7390, 370, 2); c.arc(7520, 7710, 320, 3, 40);
+  c.line(7790, 7930, 310, 2); c.arc(8060, 8250, 240, 3, 40); c.line(8330, 8450, 230, 2);
+  c.arc(8580, 8780, 240, 3, 40); c.line(8860, 9000, 310, 2); c.arc(9130, 9350, 320, 3, 40);
+  c.line(9410, 9830, 370, 4); c.arc(9960, 10185, 380, 3, 40); c.line(10265, 10385, 370, 2);
+  c.arc(10515, 10740, 380, 3, 40); c.line(10820, 11640, 370, 5);
+  return {
+    id, name: "Le Névé des Marmottes Frileuses",
+    blurb: "Neige éblouissante et crevasses bleues : les séracs montent et descendent en dents de scie. Garde le rythme, les marmottes sifflent.",
+    difficulty: "Haute montagne", theme: "neve",
+    width: 11900, floor: 440, spawnX: 60,
+    solids: [
+      // Départ sur le névé, puis ressauts vers les séracs
+      p(0, 800, 440),
+      p(940, 440, 440), h(1100, 440),
+      p(1510, 440, 370),
+      p(2070, 420, 310), g(2190, 310),
+      p(2630, 560, 440),
+      // Passage clé : les DENTS DE LA MARMOTTE — sept séracs de 150 px en dents de scie
+      // (monter, redescendre, remonter plus haut…), crevasses de 130 px en montée, 160 en descente
+      p(3320, 150, 380), p(3630, 150, 440),
+      p(3910, 150, 370), p(4220, 150, 440),
+      p(4500, 150, 360), p(4810, 150, 440),
+      p(5090, 150, 350),
+      p(5390, 790, 440), h(5900, 440),
+      // Les ponts de neige : passerelles au-dessus de la grande crevasse
+      m(6310, 380, 160), m(6560, 330, 150), m(6800, 380, 160),
+      p(7050, 500, 440),
+      // Montée au col des marmottes
+      p(7670, 420, 380),
+      p(8210, 400, 300), g(8330, 300),
+      // Descente sur le névé
+      p(8740, 420, 380),
+      p(9310, 680, 440),
+      // Dernier sprint jusqu'à l'arche
+      p(10145, 400, 440),
+      p(10700, 1100, 440), g(10900, 440),
+    ],
+    hazards: [
+      _(470, 70, 440),
+      _(1640, 64, 370),
+      _(7250, 64, 440),
+      _(7790, 64, 380),
+      _(9680, 70, 440),
+      _(11250, 74, 440),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2660, 440, 1), y(id, 5420, 440, 2), y(id, 8760, 380, 3), y(id, 10175, 440, 4)],
+    finishX: 11450,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 32.3, gold: 32.8, silver: 33.4, bronze: 43.6 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 50 %, bronze 85 %)
   };
 })());
