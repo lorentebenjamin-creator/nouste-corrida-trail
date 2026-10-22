@@ -890,7 +890,7 @@ LEVELS.push((() => {
       // (monter, redescendre, remonter plus haut…), crevasses de 130 px en montée, 160 en descente
       p(3320, 150, 380), p(3630, 150, 440),
       p(3910, 150, 370), p(4220, 150, 440),
-      p(4500, 150, 360), p(4810, 150, 440),
+      p(4500, 150, 360), p(4810, 150, 440), // revue du 22/10 : ronce au bord du 6e sérac (dent basse)
       p(5090, 150, 350),
       p(5390, 790, 440), h(5900, 440),
       // Les ponts de neige : passerelles au-dessus de la grande crevasse
@@ -909,6 +909,9 @@ LEVELS.push((() => {
     hazards: [
       _(470, 70, 440),
       _(1640, 64, 370),
+      // Revue du 22/10 : ronce de 60 px sur la lèvre du 6e sérac (dent basse après la descente de
+      // 80 px) — un saut lâché trop tôt retombe dedans ; un saut complet la survole (≈ 90 px de réception).
+      _(4810, 60, 440),
       _(7250, 64, 440),
       _(7790, 64, 380),
       _(9680, 70, 440),
@@ -918,6 +921,10 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2660, 440, 1), y(id, 5420, 440, 2), y(id, 8760, 380, 3), y(id, 10175, 440, 4)],
     finishX: 11450,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "ronce @4810: seulement 150 px avant le bord", reason: "Revue du 22/10 : ronce voulue sur la lèvre d'un sérac de 150 px (dent basse des Dents de la Marmotte), pour durcir le N°11 en profil pressé (98 % → 93 % sur 40 essais) ; la ronce se survole en descendant du sérac précédent (80 px plus haut, 160 px de crevasse) et il reste ≈ 90 px de sérac pour se recevoir et repartir vers la dent suivante, comme sur tous les séracs de 150 px du passage ; validé playtest auto (0 chute, rivaux 0 chute) et humain (attentif 100 %)." },
+    ],
     medals: { auto: 32.3, gold: 32.8, silver: 33.4, bronze: 43.6 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 50 %, bronze 85 %)
   };
 })());
