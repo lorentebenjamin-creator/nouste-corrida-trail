@@ -72,6 +72,23 @@ médaille de ton record (enregistré dans le navigateur) et les trois temps cibl
 d'arrivée affiche la médaille de la course, ton record et le temps à battre pour la médaille
 suivante. Un sentier sans champ `medals` s'affiche sans médailles (LEVELS.md §6 étape 5b).
 
+Temps cibles actuels (or / argent / bronze ; argent des N°4, 5, 6, 7, 9 et 11 recalibré le 22/10
+avec la règle pressée ; parts sur 40 essais pour ces niveaux, détails LEVELS.md §8) :
+
+| N° | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
+|---|---|---|---|---|---|
+| 1 | 14,1 s | 14,6 s | 15,1 s | 10 % / 60 % / 90 % | 35 % / 50 % / 55 % |
+| 2 | 18,25 s | 18,8 s | 19,3 s | 25 % / 85 % / 90 % | 30 % / 45 % / 50 % |
+| 3 | 21,7 s | 22,2 s | 22,7 s | 25 % / 80 % / 90 % | 10 % / 30 % / 30 % |
+| 4 | 31,1 s | 32,6 s | 34,2 s | 13 % / 68 % / 85 % | 8 % / 15 % / 28 % |
+| 5 | 32,0 s | 37,0 s | 42,1 s | 18 % / 68 % / 85 % | 5 % / 20 % / 28 % |
+| 6 | 31,6 s | 37,3 s | 43,1 s | 18 % / 60 % / 85 % | 0 % / 13 % / 33 % |
+| 7 | 32,1 s | 36,2 s | 40,3 s | 20 % / 60 % / 85 % | 3 % / 18 % / 35 % |
+| 8 | 33,8 s | 37,4 s | 44,5 s | 15 % / 60 % / 95 % | 15 % / 30 % / 40 % |
+| 9 | 32,0 s | 32,9 s | 37,8 s | 20 % / 60 % / 85 % | 5 % / 30 % / 50 % |
+| 10 | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
+| 11 | 32,8 s | 36,2 s | 48,0 s | 18 % / 65 % / 85 % | 5 % / 30 % / 50 % |
+
 | N° | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
 |---|---|---|---|---|---|
 | 1 | 14,1 s | 14,6 s | 15,1 s | 10 % / 60 % / 90 % | 35 % / 50 % / 55 % |

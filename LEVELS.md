@@ -505,20 +505,21 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | 14 | 4 | **5 zones de rafales de vent** (8 sauts sous le vent, dont **1 ravin au calme**, le Ravin du Béret, avec panneau) | 1 / 0.93 / 0.86 | 30,8 s |
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | 22 | 7 (dont **1 sur un sérac**, revue du 22/10) | — (classique ; passage clé : **7 séracs en dents de scie**) | 1 / 0.93 / 0.86 | 32,3 s |
 
-Médailles **calibrées le 21/10** (N°11 : le 22/10) (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ;
-pourcentages ci-dessous sur 20 essais par profil (essais ratés comptés sans médaille) :
+Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10)
+(`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
+par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 : 40 essais par profil :
 
 | N° | Niveau | Pilote auto | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
 |---|---|---|---|---|---|---|---|
 | 1 | Sous-bois des cèdres | 13,9 s | 14,1 s | 14,6 s | 15,1 s | 10 % / 60 % / 90 % | 35 % / 50 % / 55 % |
 | 2 | La crête | 18,1 s | 18,25 s | 18,8 s | 19,3 s | 25 % / 85 % / 90 % | 30 % / 45 % / 50 % |
 | 3 | Col du vent | 21,6 s | 21,7 s | 22,2 s | 22,7 s | 25 % / 80 % / 90 % | 10 % / 30 % / 30 % |
-| 4 | La Brèche aux Isards | 30,8 s | 31,1 s | 31,8 s | 34,2 s | 15 % / 50 % / 85 % | 5 % / 10 % / 15 % |
-| 5 | L'Estive des Patous | 31,8 s | 32,0 s | 33,0 s | 42,1 s | 20 % / 55 % / 80 % | 0 % / 20 % / 25 % |
-| 6 | Le Couloir des Pierres | 29,4 s | 31,6 s | 35,2 s | 43,1 s | 10 % / 35 % / 80 % | 0 % / 5 % / 30 % |
-| 7 | La Cascade des Desmans | 31,7 s | 32,1 s | 34,5 s | 40,3 s | 25 % / 60 % / 85 % | 0 % / 5 % / 30 % |
+| 4 | La Brèche aux Isards | 30,8 s | 31,1 s | **32,6 s** | 34,2 s | 13 % / 68 % / 85 % | 8 % / 15 % / 28 % |
+| 5 | L'Estive des Patous | 31,8 s | 32,0 s | **37,0 s** | 42,1 s | 18 % / 68 % / 85 % | 5 % / 20 % / 28 % |
+| 6 | Le Couloir des Pierres | 29,4 s | 31,6 s | **37,3 s** | 43,1 s | 18 % / 60 % / 85 % | 0 % / 13 % / 33 % |
+| 7 | La Cascade des Desmans | 31,7 s | 32,1 s | **36,2 s** | 40,3 s | 20 % / 60 % / 85 % | 3 % / 18 % / 35 % |
 | 8 | Le Gué des Lucioles | 29,8 s | 33,8 s | 37,4 s | 44,5 s | 15 % / 60 % / 95 % | 15 % / 30 % / 40 % |
-| 9 | La Hêtraie des Palombes | 31,6 s | 32,0 s | 32,5 s | 37,8 s | 15 % / 55 % / 75 % | 10 % / 30 % / 60 % |
+| 9 | La Hêtraie des Palombes | 31,6 s | 32,0 s | **32,9 s** | 37,8 s | 20 % / 60 % / 85 % | 5 % / 30 % / 50 % |
 | 10 | Le Plateau des Bérets Envolés | 30,8 s | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
 | 11 | Le Névé des Marmottes Frileuses | 32,3 s | 32,8 s | 36,2 s | 48,0 s | 18 % / 65 % / 85 % | 5 % / 30 % / 50 % |
 
@@ -527,15 +528,15 @@ N°11 : ligne de la **revue du 22/10** (après la ronce du sérac, cible d'argen
 attentif et 3 % / 13 % / 50 % pressé sur 40 essais (0 % / 10 % / 50 % sur 20) — 0,6 s entre or et
 argent, puis 10,2 s jusqu'au bronze.
 
-**Autres paliers déséquilibrés repérés le 22/10** (non recalibrés : géométrie inchangée ; à revoir
-lors d'une prochaine revue, `medals.mjs all --calibrate --trials 40 --keep-auto` sans `--write`
-donne les propositions), 40 essais par profil :
-N°5 or 32,0 / argent 33,0 / bronze 42,1 s (écarts 1,0 / 9,1 s ; pressé 5 % / 18 % / 28 %) → proposé
-argent 37,0 s (pressé 20 %, attentif 68 %, plafonné au milieu or–bronze) ;
-N°9 32,0 / 32,5 / 37,8 s (0,5 / 5,3 s ; pressé 5 % / 20 % / 50 %) → argent 32,9 s (pressé 30 %) ;
-N°6 31,6 / 35,2 / 43,1 s (pressé 0 % / 5 % / 33 %) → argent 37,3 s (pressé 13 %) ;
-N°7 32,1 / 34,5 / 40,3 s (pressé 3 % / 10 % / 35 %) → argent 36,2 s (pressé 18 %) ;
-N°4 31,1 / 31,8 / 34,2 s (pressé 8 % / 15 % / 28 %) → argent 32,6 s (pressé 15 %).
+**Recalibrage du 22/10 (N°4, 5, 6, 7, 9)**, nouvelle règle de l'argent (≈ 30 % des essais pressés,
+plafonné au milieu or–bronze), `--calibrate --trials 40 --write` niveau par niveau, géométrie
+inchangée : **seul l'argent change** (or et bronze identiques, or toujours dans 10–25 % attentif).
+Avant → après (argent ; parts attentif / pressé de l'argent, 40 essais) :
+N°4 31,8 → 32,6 s (50 → 68 % / 15 → 15 %) ; N°5 33,0 → 37,0 s (50 → 68 % / 18 → 20 %) ;
+N°6 35,2 → 37,3 s (50 → 60 % / 5 → 13 %) ; N°7 34,5 → 36,2 s (50 → 60 % / 10 → 18 %) ;
+N°9 32,5 → 32,9 s (53 → 60 % / 20 → 30 %). Sur les N°4–7 le plafond (milieu or–bronze) s'applique :
+30 % des pressés n'arrivent qu'au-delà, l'argent pressé reste sous 30 % (voulu : niveaux à
+mécaniques ou très groupés, on ne vide pas l'écart argent–bronze).
 N°1–3, 8 et 10 : propositions identiques aux valeurs actuelles. Sur les N°1–3, temps attentifs
 très groupés, les trois paliers tiennent en 1 s (0,5 / 0,5 s) : voulu (sentiers courts).
 
