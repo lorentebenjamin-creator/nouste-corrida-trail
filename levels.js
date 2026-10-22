@@ -925,6 +925,6 @@ LEVELS.push((() => {
     acceptedWarnings: [
       { match: "ronce @4810: seulement 150 px avant le bord", reason: "Revue du 22/10 : ronce voulue sur la lèvre d'un sérac de 150 px (dent basse des Dents de la Marmotte), pour durcir le N°11 en profil pressé (98 % → 93 % sur 40 essais) ; la ronce se survole en descendant du sérac précédent (80 px plus haut, 160 px de crevasse) et il reste ≈ 90 px de sérac pour se recevoir et repartir vers la dent suivante, comme sur tous les séracs de 150 px du passage ; validé playtest auto (0 chute, rivaux 0 chute) et humain (attentif 100 %)." },
     ],
-    medals: { auto: 32.3, gold: 32.8, silver: 33.4, bronze: 43.6 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 50 %, bronze 85 %)
+    medals: { auto: 32.3, gold: 32.8, silver: 36.2, bronze: 48 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 65 %, bronze 85 % ; pressés : or 5 %, argent 30 %, bronze 50 %)
   };
 })());
