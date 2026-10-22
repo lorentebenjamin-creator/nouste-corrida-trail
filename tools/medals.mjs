@@ -15,6 +15,10 @@
 //    qu'une part donnée des essais ATTENTIFS (ratés compris, comptés sans médaille) les atteigne :
 //      or ≈ 17,5 % (fenêtre visée 10–25 %), argent ≈ 50 %, bronze ≈ 85 %,
 //    avec or ≥ auto, argent ≥ or + 0,5 s, bronze ≥ argent + 0,5 s (paliers progressivement plus faciles).
+//    Cible d'argent sur le profil PRESSÉ (revue du 22/10) : l'argent est en plus relevé, si besoin,
+//    jusqu'au temps atteint par ≈ 30 % des essais pressés, sans dépasser le MILIEU de l'intervalle
+//    or–bronze (règle d'espacement : l'argent ne colle plus à l'or quand le bronze est loin, et ne
+//    mange jamais plus de la moitié de l'écart or–bronze). Sans essais pressés : règle attentive seule.
 //    Graines déterministes : deux lancements identiques donnent les mêmes temps.
 // 2) Ancienne règle (multiplicateurs, sans pilote humain) : or = auto × 1,15 ; argent × 1,35 ;
 //    bronze × 1,6, arrondis à la demi-seconde supérieure :
@@ -34,7 +38,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const levelsPath = join(here, '..', 'levels.js');
 export const COEF = { gold: 1.15, silver: 1.35, bronze: 1.6 };
-export const TARGET = { gold: 0.175, goldMin: 0.10, goldMax: 0.25, silver: 0.5, bronze: 0.85, gap: 0.5 };
+export const TARGET = { gold: 0.175, goldMin: 0.10, goldMax: 0.25, silver: 0.5, silverPressed: 0.3, bronze: 0.85, gap: 0.5 };
 export const PROFILES = {
   attentif: [],
   'pressé': ['--delay', '180-250', '--jitter', '80', '--hold', '0.18-0.5', '--calm', '0', '--hesit', '0'],
@@ -51,7 +55,8 @@ function quantileUp(times, q, lo) {
   const t = need <= 0 ? lo : need > ok.length ? (ok.at(-1) ?? lo) + 1 : ok[need - 1];
   return Math.max(lo, Math.ceil(t * 10 - 1e-6) / 10);
 }
-export function calibrate(auto, times) {
+// times = essais attentifs ; pressed = essais pressés (facultatif) — null = raté
+export function calibrate(auto, times, pressed) {
   const lo = Math.ceil(auto * 10 - 1e-6) / 10;
   // or : seuil au dixième dont la part d'essais attentifs est la plus proche de 17,5 % (fenêtre 10–25 %)
   const cands = [...new Set([lo, ...times.filter((x) => x != null && x >= lo).map((x) => Math.ceil(x * 10 - 1e-6) / 10)])].sort((a, b) => a - b);
@@ -64,8 +69,14 @@ export function calibrate(auto, times) {
   // temps très groupés (aucun dixième dans la fenêtre 10–25 %) : on s'autorise le 0,05 s
   // (le jeu affiche alors ce temps cible au centième)
   if (best >= 1) pick([...new Set(times.filter((x) => x != null && x >= lo).map((x) => Math.ceil(x * 20 - 1e-6) / 20))].sort((a, b) => a - b));
-  const silver = r1(Math.max(gold + TARGET.gap, quantileUp(times, TARGET.silver, lo)));
-  const bronze = r1(Math.max(silver + TARGET.gap, quantileUp(times, TARGET.bronze, lo)));
+  let silver = r1(Math.max(gold + TARGET.gap, quantileUp(times, TARGET.silver, lo)));
+  const bronze0 = r1(Math.max(silver + TARGET.gap, quantileUp(times, TARGET.bronze, lo)));
+  // cible pressée (≈ 30 % des essais pressés), plafonnée au milieu de l'intervalle or–bronze
+  if (pressed?.length) {
+    const mid = Math.floor(((gold + bronze0) / 2) * 10 + 1e-6) / 10;
+    silver = r1(Math.max(silver, Math.min(quantileUp(pressed, TARGET.silverPressed, lo), mid)));
+  }
+  const bronze = r1(Math.max(silver + TARGET.gap, bronze0));
   return { auto, gold: r2(gold), silver, bronze };
 }
 
@@ -125,9 +136,10 @@ for (const L of list) {
   if (calib) {
     const ta = hum.attentif?.[id];
     if (!ta) { console.log(`[${id}] pas d'essais humains`); process.exitCode = 1; continue; }
-    mdl = calibrate(auto, ta);
-    const f = (k) => String(Math.round(100 * share(ta, mdl[k])));
-    lineTxt = `medals: { auto: ${auto}, gold: ${mdl.gold}, silver: ${mdl.silver}, bronze: ${mdl.bronze} }, // tools/medals.mjs --calibrate (${trials} essais attentifs : or ${f('gold')} %, argent ${f('silver')} %, bronze ${f('bronze')} %)`;
+    const tp = hum['pressé']?.[id];
+    mdl = calibrate(auto, ta, tp);
+    const f = (k, ts = ta) => String(Math.round(100 * share(ts, mdl[k])));
+    lineTxt = `medals: { auto: ${auto}, gold: ${mdl.gold}, silver: ${mdl.silver}, bronze: ${mdl.bronze} }, // tools/medals.mjs --calibrate (${trials} essais attentifs : or ${f('gold')} %, argent ${f('silver')} %, bronze ${f('bronze')} %${tp ? ` ; pressés : or ${f('gold', tp)} %, argent ${f('silver', tp)} %, bronze ${f('bronze', tp)} %` : ''})`;
   } else if (human) {
     mdl = L.medals;
     if (!mdl) { console.log(`[${id}] pas de médailles dans levels.js`); continue; }
