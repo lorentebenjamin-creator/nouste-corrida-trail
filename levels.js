@@ -387,7 +387,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2650, 440, 1), y(id, 4230, 440, 2), y(id, 6020, 260, 3), y(id, 8370, 440, 4)],
     finishX: 10900,
     rivals: [{ speed: 1.0 }, { speed: 0.92 }, { speed: 0.85 }],
-    medals: { auto: 30.8, gold: 31.1, silver: 31.8, bronze: 34.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 13 %, argent 50 %, bronze 85 %)
+    medals: { auto: 30.8, gold: 31.1, silver: 32.6, bronze: 34.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 13 %, argent 68 %, bronze 85 % ; pressés : or 8 %, argent 15 %, bronze 28 %)
   };
 })());
 
@@ -458,7 +458,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2080, 440, 1), y(id, 3960, 380, 2), y(id, 6040, 440, 3), y(id, 7320, 440, 4), y(id, 8580, 440, 5)],
     finishX: 9400,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.8, gold: 32, silver: 33, bronze: 42.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 50 %, bronze 85 %)
+    medals: { auto: 31.8, gold: 32, silver: 37, bronze: 42.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 68 %, bronze 85 % ; pressés : or 5 %, argent 20 %, bronze 28 %)
   };
 })());
 
@@ -540,7 +540,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1040, 380, 1), y(id, 2320, 170, 2), y(id, 3780, 440, 3), y(id, 5580, 230, 4), y(id, 7000, 440, 5), y(id, 9460, 440, 6)],
     finishX: 10300,
     rivals: [{ speed: 1.0 }, { speed: 0.94 }, { speed: 0.88 }],
-    medals: { auto: 29.4, gold: 31.6, silver: 35.2, bronze: 43.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 50 %, bronze 85 %)
+    medals: { auto: 29.4, gold: 31.6, silver: 37.3, bronze: 43.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 60 %, bronze 85 % ; pressés : or 0 %, argent 13 %, bronze 33 %)
   };
 })());
 
@@ -607,7 +607,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 3060, 440, 1), y(id, 4490, 440, 2), y(id, 5810, 300, 3), y(id, 6890, 440, 4), y(id, 8410, 440, 5)],
     finishX: 9500,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.7, gold: 32.1, silver: 34.5, bronze: 40.3 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 20 %, argent 50 %, bronze 85 %)
+    medals: { auto: 31.7, gold: 32.1, silver: 36.2, bronze: 40.3 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 20 %, argent 60 %, bronze 85 % ; pressés : or 3 %, argent 18 %, bronze 35 %)
   };
 })());
 
@@ -763,7 +763,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2640, 440, 1), y(id, 5100, 440, 2), y(id, 7050, 250, 3), y(id, 9570, 440, 4)],
     finishX: 11200,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.6, gold: 32, silver: 32.5, bronze: 37.8 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 20 %, argent 53 %, bronze 85 %)
+    medals: { auto: 31.6, gold: 32, silver: 32.9, bronze: 37.8 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 20 %, argent 60 %, bronze 85 % ; pressés : or 5 %, argent 30 %, bronze 50 %)
   };
 })());
 
