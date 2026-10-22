@@ -503,9 +503,9 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 8 | Le Gué des Lucioles | Très engagé | 956 m | 11 | 6 | 2 radeaux, 3 patous, 3 jets (dont **1 sur l'embarcadère d'un radeau**) | 1 / 0.93 / 0.87 | 29,8 s |
 | 9 | La Hêtraie des Palombes | Endurance | 1120 m | 19 | 8 (dont **2 sur des passerelles**) | — (classique) | 1 / 0.93 / 0.86 | 31,6 s |
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | 14 | 4 | **5 zones de rafales de vent** (8 sauts sous le vent, dont **1 ravin au calme**, le Ravin du Béret, avec panneau) | 1 / 0.93 / 0.86 | 30,8 s |
-| 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | 22 | 6 | — (classique ; passage clé : **7 séracs en dents de scie**) | 1 / 0.93 / 0.86 | 32,3 s |
+| 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | 22 | 7 (dont **1 sur un sérac**, revue du 22/10) | — (classique ; passage clé : **7 séracs en dents de scie**) | 1 / 0.93 / 0.86 | 32,3 s |
 
-Médailles **calibrées le 21/10** (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ;
+Médailles **calibrées le 21/10** (N°11 : le 22/10) (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ;
 pourcentages ci-dessous sur 20 essais par profil (essais ratés comptés sans médaille) :
 
 | N° | Niveau | Pilote auto | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
@@ -520,7 +520,24 @@ pourcentages ci-dessous sur 20 essais par profil (essais ratés comptés sans m�
 | 8 | Le Gué des Lucioles | 29,8 s | 33,8 s | 37,4 s | 44,5 s | 15 % / 60 % / 95 % | 15 % / 30 % / 40 % |
 | 9 | La Hêtraie des Palombes | 31,6 s | 32,0 s | 32,5 s | 37,8 s | 15 % / 55 % / 75 % | 10 % / 30 % / 60 % |
 | 10 | Le Plateau des Bérets Envolés | 30,8 s | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
-| 11 | Le Névé des Marmottes Frileuses | 32,3 s | 32,8 s | 33,4 s | 43,6 s | 15 % / 60 % / 85 % | 0 % / 10 % / 50 % |
+| 11 | Le Névé des Marmottes Frileuses | 32,3 s | 32,8 s | 36,2 s | 48,0 s | 18 % / 65 % / 85 % | 5 % / 30 % / 50 % |
+
+N°11 : ligne de la **revue du 22/10** (après la ronce du sérac, cible d'argent pressée), sur
+**40 essais** par profil ; avant : or 32,8 / argent 33,4 / bronze 43,6 s, soit 18 % / 50 % / 85 %
+attentif et 3 % / 13 % / 50 % pressé sur 40 essais (0 % / 10 % / 50 % sur 20) — 0,6 s entre or et
+argent, puis 10,2 s jusqu'au bronze.
+
+**Autres paliers déséquilibrés repérés le 22/10** (non recalibrés : géométrie inchangée ; à revoir
+lors d'une prochaine revue, `medals.mjs all --calibrate --trials 40 --keep-auto` sans `--write`
+donne les propositions), 40 essais par profil :
+N°5 or 32,0 / argent 33,0 / bronze 42,1 s (écarts 1,0 / 9,1 s ; pressé 5 % / 18 % / 28 %) → proposé
+argent 37,0 s (pressé 20 %, attentif 68 %, plafonné au milieu or–bronze) ;
+N°9 32,0 / 32,5 / 37,8 s (0,5 / 5,3 s ; pressé 5 % / 20 % / 50 %) → argent 32,9 s (pressé 30 %) ;
+N°6 31,6 / 35,2 / 43,1 s (pressé 0 % / 5 % / 33 %) → argent 37,3 s (pressé 13 %) ;
+N°7 32,1 / 34,5 / 40,3 s (pressé 3 % / 10 % / 35 %) → argent 36,2 s (pressé 18 %) ;
+N°4 31,1 / 31,8 / 34,2 s (pressé 8 % / 15 % / 28 %) → argent 32,6 s (pressé 15 %).
+N°1–3, 8 et 10 : propositions identiques aux valeurs actuelles. Sur les N°1–3, temps attentifs
+très groupés, les trois paliers tiennent en 1 s (0,5 / 0,5 s) : voulu (sentiers courts).
 
 Lecture : sur un niveau sans mécanique, un essai attentif sans chute ni hésitation finit au temps
 du pilote auto, d'où un or très proche de `auto` (×1,01) ; sur les niveaux à mécaniques (6, 8, 10),
@@ -637,6 +654,19 @@ mais aucune ronce sur passerelle, donc presque aucun abandon. Points chauds en p
 x≈10700 (dernier ravin de 155 px avant le sprint), x≈3300 (entrée des Dents de la Marmotte, montée
 de 60 px après 130 px de crevasse) et x≈9700 (ronce après la descente). Premiers jets (séracs de
 180 puis 160 px, crevasses de 120/140) : pressé 98–100 % / 1,65–1,98, jugé trop proche du 9.
+
+**Revue du 22/10 (N°11 durci)** : à 98 % en profil pressé contre 88 % pour le N°9 (contrôlé : 35/40),
+le N°11 n'était pas « un cran au-dessus ». Son seul raté pressé était d'ailleurs un blocage du
+pilote (graine 21, arrêté au bord à x≈7540 avant la montée de 60 px, artefact du pilote, pas une
+difficulté du niveau), aucun essai ne dépassait 5 chutes. Ronce de **60 px sur la lèvre du 6e
+sérac** (`_(4810, 60, 440)`, dent basse après la descente de 80 px, avertissement accepté §6b) :
+un saut lâché trop tôt retombe dedans. Sur 40 essais : attentif 100 % / 0,42 → **100 % / 0,63**,
+pressé 98 % / 2,13 → **93 % / 2,40** (3 essais à 6 chutes, aucun blocage), N°9 inchangé
+(100 % / 0,47 et 88 % / 2,00). Variantes écartées (40 essais pressés) : dernier ravin élargi à 160 ou
+165 px (98 %, chutes inchangées : on y meurt juste après le fanion 4, donc sans accumuler), ronce
+de 40–70 px sur la réception du dernier ravin (95–98 %), ronce de 30–45 px sur le sérac (93–95 %
+dont 1–2 blocages du pilote), ronce de 40 px sur le dernier sérac (attentif 50 % : injouable).
+Points chauds pressés après : x≈10700:14, x≈3300:13, x≈4900:9 (la nouvelle ronce).
 
 Revue du 20/10 (géométrie N°3 et N°8, §6b), mêmes réglages, avant → après :
 N°3 attentif 100 % / 0,10 → 100 % / 0,05, pressé 100 % / 0,95 → 100 % / 0,85 ;

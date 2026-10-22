@@ -52,6 +52,8 @@ revu le 21/10 : hésitations et attente du calme ; profil pressé inchangé, `--
 Détails et méthode : LEVELS.md §8. Sur 40 essais, N°10 en profil pressé : 75 % / 2,92, entre le
 N°7 (80 %) et le N°8 (75 %). N°11 (classique) sur 40 essais : attentif 100 % / 0,42, pressé 98 % / 2,13
 (plus de chutes que le N°9, 88 % / 2,00, mais pas de ronce sur passerelle : réussite plus haute).
+**Revue du 22/10** : ronce ajoutée sur un sérac du N°11 ; sur 40 essais, attentif 100 % / 0,63,
+pressé **93 % / 2,40**, désormais un cran au-dessus du N°9 en chutes et proche en réussite.
 
 ## Médailles
 
