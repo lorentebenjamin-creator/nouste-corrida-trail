@@ -1,6 +1,6 @@
 // Tests de bout en bout (Chromium headless) : compte à rebours, chute/réapparition,
 // fanions, R, pause, passerelle traversée par le bas (clavier + tactile), commandes tactiles,
-// sauvegarde du record, menu avec beaucoup de niveaux.
+// sauvegarde du record, menu avec beaucoup de niveaux, médailles (menu, record, niveau sans médailles).
 // Usage : node tools/e2e.mjs [url]   (playwright requis, voir tools/playtest.mjs)
 import { chromium } from 'playwright';
 const url = process.argv[2] || 'http://localhost:8765/nouste-corrida-trail/';
@@ -136,6 +136,31 @@ const last = pg.locator('.level', { hasText: 'Sous-bois' }); await last.scrollIn
 await waitMode(pg, 'count', 3000).catch(() => {});
 ok((await st(pg)).level === 'sousbois', 'menu : le dernier bouton de la liste se lance');
 await pg.close();
+
+// 9. Médailles (rapatrié de pwtest/livemedals.mjs et nomedals.mjs, revue du 22/10)
+{
+  pg = await page({ width: 1280, height: 900 });
+  await pg.goto(url, { waitUntil: 'networkidle' }); await pg.waitForSelector('.level');
+  const lv = await pg.evaluate(async () => (await import(new URL('levels.js', location.href).href)).LEVELS.map((l) => ({ id: l.id, md: l.medals })));
+  const withMd = lv.filter((l) => l.md).length;
+  ok((await pg.locator('.level .medals').count()) === withMd, `menu : un bloc médailles par sentier qui en a (${withMd}/${lv.length})`);
+  // records locaux : or, argent, bronze sur les trois premiers sentiers → médaille affichée sous la carte
+  const keys = ['gold', 'silver', 'bronze'], three = lv.filter((l) => l.md).slice(0, 3);
+  await pg.evaluate((three) => localStorage.setItem('crete-trail-v1', JSON.stringify({ version: 1, name: 'Toi', mute: true, levels: Object.fromEntries(three.map((l, i) => [l.id, { bestTime: l.md[['gold', 'silver', 'bronze'][i]], bestCoins: 10, bestPlace: 1 }])) })), three);
+  await pg.reload({ waitUntil: 'networkidle' }); await pg.waitForSelector('.level .medals');
+  const got = await pg.locator('.level .medals .got').allInnerTexts();
+  ok(got.length >= 3 && /Or/.test(got[0]) && /Argent/.test(got[1]) && /Bronze/.test(got[2]), `menu : médaille du record local (${JSON.stringify(got.slice(0, 3))})`);
+  await pg.close();
+  // niveau sans champ medals : pas de médailles, le jeu marche (arrivée sans bloc médaille)
+  pg = await page();
+  await pg.route('**/levels.js', async (r) => { const res = await r.fetch(); const t = (await res.text()).replace(/\n\s*medals: \{[^\n]*/g, ''); await r.fulfill({ response: res, body: t, headers: { ...res.headers(), 'content-type': 'text/javascript' } }); });
+  await pg.goto(url, { waitUntil: 'networkidle' }); await pg.waitForSelector('.level');
+  ok((await pg.locator('.level .medals').count()) === 0, 'sans champ medals : aucun bloc médailles dans le menu');
+  await open(pg, 'Sous-bois'); await pg.evaluate(() => __controlsTest.setAutopilot(true));
+  await waitMode(pg, 'finish', 60000); await pg.waitForTimeout(800);
+  ok((await pg.locator('.medal-result').count()) === 0 && (await pg.locator('.sheet .next-level').count()) === 1, 'sans champ medals : arrivée sans médaille, « Niveau suivant » présent');
+  await pg.close();
+}
 
 ok(errs.length === 0, 'aucune erreur console' + (errs.length ? ' : ' + JSON.stringify(errs) : ''));
 console.log(fails ? `E2E ÉCHEC (${fails})` : 'E2E OK');
