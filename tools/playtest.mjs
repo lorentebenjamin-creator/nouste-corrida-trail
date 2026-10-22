@@ -28,6 +28,7 @@ for (let i = 2; i < process.argv.length; i++) {
   if (a.startsWith('--')) { const k = a.slice(2); const nx = process.argv[i + 1]; if (nx != null && !nx.startsWith('--') && !['human', 'md', 'verbose', 'json'].includes(k)) { flags[k] = nx; i++; } else flags[k] = true; }
   else pos.push(a);
 }
+if (pos[0] && !/^https?:\/\//.test(pos[0])) pos.unshift(''); // URL facultative : `playtest.mjs all` marche aussi
 const url = pos[0] || 'http://localhost:8765/nouste-corrida-trail/';
 const which = pos[1] || 'last';
 const shot = pos[2];

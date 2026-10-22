@@ -86,6 +86,7 @@ const flagVal = (k, d) => { const i = args.indexOf(k); return i >= 0 && args[i +
 const trials = Number(flagVal('--trials', calib ? 40 : 20));
 const valued = new Set(['--trials', '--seed', '--jobs']);
 const pos = args.filter((a, i) => !a.startsWith('--') && !valued.has(args[i - 1]));
+if (pos[0] && !/^https?:\/\//.test(pos[0])) pos.unshift(''); // URL facultative : `medals.mjs all --human` marche aussi
 const url = pos[0] || 'http://localhost:8765/nouste-corrida-trail/', which = pos[1] || 'last';
 const { LEVELS } = await import(pathToFileURL(levelsPath).href + '?t=' + Date.now());
 const list = which === 'all' ? LEVELS : which === 'last' ? [LEVELS.at(-1)] : LEVELS.filter((l) => l.id === which);
