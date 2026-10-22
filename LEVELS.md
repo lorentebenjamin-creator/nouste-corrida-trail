@@ -337,18 +337,31 @@ chute, un humain peut passer.
    Les avertissements connus des niveaux 1–3 d'origine sont déjà acceptés. Les lignes `info`
    (passerelles mobiles, jets au-dessus du vide, niveau sans médailles) imposent les étapes 5 et 5b.
 5. Tester en vrai (recommandé, obligatoire avec des mécaniques v2) :
+   **Source de vérité des outils : `tools/` de ce dépôt** (revue du 22/10). On les lance **depuis
+   la racine du dépôt**, Playwright étant fourni par un **lien symbolique temporaire `node_modules`**
+   vers une installation existante (`/workspace/pwtest/node_modules` sur la machine du job) ; le
+   lien est ignoré par git (`.gitignore`), ne jamais le commiter, le supprimer à la fin, et arrêter
+   le serveur. **Ne pas copier les scripts dans `pwtest`** (ni ailleurs) pour les lancer : les
+   copies dérivent (constaté le 22/10) et `medals.mjs` / `check-levels.mjs` lisent `../levels.js`
+   relativement à leur emplacement (une copie dans `pwtest` ne trouve pas le bon fichier). Toute
+   amélioration d'un outil se fait dans `tools/` et se commite.
    ```bash
-   tools/serve.sh &                       # http://localhost:8765/nouste-corrida-trail/
-   # dans un dossier où playwright est installé (npm i playwright && npx playwright install chromium) :
-   node /chemin/vers/tools/playtest.mjs http://localhost:8765/nouste-corrida-trail/ last /tmp/niveau.png
-   node /chemin/vers/tools/playtest.mjs http://localhost:8765/nouste-corrida-trail/ all   # tous les niveaux
-   node /chemin/vers/tools/e2e.mjs http://localhost:8765/nouste-corrida-trail/            # commandes, fanions, record, menu
-   node /chemin/vers/tools/playtest.mjs http://localhost:8765/nouste-corrida-trail/ last --human --trials 20 --verbose
+   ln -s /workspace/pwtest/node_modules node_modules   # Playwright (sinon : npm i playwright && npx playwright install chromium ailleurs)
+   tools/serve.sh &                                     # http://localhost:8765/nouste-corrida-trail/
+   URL=http://localhost:8765/nouste-corrida-trail/      # URL facultative : c'est la valeur par défaut des outils
+   node tools/playtest.mjs $URL last /tmp/niveau.png
+   node tools/playtest.mjs $URL all                     # tous les niveaux
+   node tools/e2e.mjs $URL                              # commandes, fanions, record, menu, médailles
+   node tools/e2e-classement.mjs $URL                   # classement en ligne (faux backend)
+   node tools/capture.mjs $URL <id> /tmp/passage.png --x 10500   # capture d'un passage (pilote auto)
+   node tools/playtest.mjs $URL last --human --trials 20 --verbose
+   # à la fin :
+   kill %1; rm node_modules
    ```
    **Pilote humain obligatoire** (job quotidien compris), dans les deux profils :
    ```bash
-   node /chemin/vers/tools/playtest.mjs $URL last --human --trials 20 --verbose                                         # attentif
-   node /chemin/vers/tools/playtest.mjs $URL last --human --trials 20 --jitter 80 --hold 0.18-0.5 --delay 180-250 --calm 0 --hesit 0 --verbose   # pressé
+   node tools/playtest.mjs $URL last --human --trials 20 --verbose                                         # attentif
+   node tools/playtest.mjs $URL last --human --trials 20 --jitter 80 --hold 0.18-0.5 --delay 180-250 --calm 0 --hesit 0 --verbose   # pressé
    ```
    (Depuis le 21/10 le profil attentif hésite parfois après une réception et attend le calme avant
    un saut au-dessus du vide dans le vent ; le profil pressé ne fait ni l'un ni l'autre :
@@ -367,8 +380,9 @@ chute, un humain peut passer.
 5b. **Médailles, calibrées sur le pilote humain** (obligatoire pour le job quotidien, une fois la
    géométrie définitive ; méthode de la revue du 21/10) :
    ```bash
-   node /chemin/vers/tools/medals.mjs $URL last --calibrate --trials 40 --write   # pilote auto + 2 profils humains, écrit `medals:`
-   node /chemin/vers/tools/medals.mjs $URL all --human --trials 20 --md           # contrôle de tous les niveaux, sans écrire
+   node tools/medals.mjs $URL last --calibrate --trials 40 --write   # pilote auto + 2 profils humains, écrit `medals:`
+   node tools/medals.mjs $URL all --human --trials 20 --md           # contrôle de tous les niveaux, sans écrire
+   node tools/medals.mjs $URL all --calibrate --trials 40 --keep-auto # propositions pour tous, sans écrire
    ```
    `--calibrate` lance le pilote auto (temps `auto`, il faut `chutes joueur 0`), puis le pilote
    humain dans les **deux profils** (attentif ; pressé = `--delay 180-250 --jitter 80 --hold
@@ -377,8 +391,20 @@ chute, un humain peut passer.
    * **or** : la part des essais attentifs qui l'atteignent est la plus proche de **17,5 %**, dans
      la fenêtre **10–25 %** (sinon le script affiche ⚠ : temps trop groupés, voir le pilote humain) ;
    * **argent** ≈ **50 %** des essais attentifs, **bronze** ≈ **85 %** ;
+   * **cible d'argent sur le profil pressé** (revue du 22/10) : l'argent est relevé, si besoin,
+     jusqu'au temps atteint par **≈ 30 % des essais pressés**, mais **jamais au-delà du milieu de
+     l'intervalle or–bronze** (règle d'espacement). Pourquoi : quand les essais attentifs sans
+     chute sont très groupés et que les ratés partiels étirent la queue, l'argent « 50 % attentif »
+     collait à l'or (N°11 au 21/10 : or 32,8 / argent 33,4 / bronze 43,6 s, soit 0,6 s puis 10,2 s ;
+     profil pressé 3 % / 13 % / 50 % sur 40 essais). Le plafond au milieu évite l'excès inverse sur
+     les niveaux à mécaniques, où 30 % des pressés n'arrivent qu'au-delà du bronze (N°5–7) : l'argent
+     ne prend jamais plus de la moitié de l'écart or–bronze ;
    * toujours `auto ≤ or`, argent ≥ or + 0,5 s, bronze ≥ argent + 0,5 s (paliers progressivement
      plus faciles).
+   La ligne écrite donne aussi les parts du profil pressé (`… ; pressés : or 3 %, argent 30 %,
+   bronze 50 %`). Sans `--write`, `--calibrate` affiche les propositions sans rien changer :
+   l'utiliser sur `all` pour repérer un niveau déséquilibré, **mais ne réécrire que le niveau du
+   jour** (ou un niveau dont la géométrie a changé) — ne pas recalibrer tout sans raison.
    Il écrit/remplace, juste sous `rivals:` du bloc, la ligne `medals: { auto, gold, silver, bronze }`
    avec en commentaire les parts obtenues (`// tools/medals.mjs --calibrate (40 essais attentifs :
    or 18 %, argent 50 %, bronze 85 %)`), et affiche pour chaque niveau les pourcentages or / argent /

@@ -60,7 +60,9 @@ Chaque sentier a trois temps cibles, **calibrés sur le pilote « humain »** (r
 (temps `auto`) puis 40 essais dans chacun des deux profils, attentif et pressé, et choisit les
 temps pour qu'environ **17,5 % des essais attentifs décrochent l'or** (fenêtre 10–25 %), ≈ 50 %
 l'argent et ≈ 85 % le bronze (au dixième, or au 0,05 s si les temps sont très groupés ; or ≥ auto,
-paliers espacés d'au moins 0,5 s). `node tools/medals.mjs <url> all --human --trials 20 --md`
+paliers espacés d'au moins 0,5 s). Depuis la revue du 22/10, l'argent vise aussi **≈ 30 % des
+essais pressés**, sans dépasser le milieu de l'intervalle or–bronze (il ne colle plus à l'or quand
+le bronze est loin). `node tools/medals.mjs <url> all --human --trials 20 --md`
 affiche, sans rien écrire, les pourcentages or / argent / bronze des deux profils. L'ancienne règle
 (or ×1,15, argent ×1,35, bronze ×1,6) donnait l'or à 85–100 % des essais attentifs sur la plupart
 des sentiers ; elle reste disponible sans `--calibrate`. Le menu affiche sous chaque sentier la
@@ -107,8 +109,19 @@ décrits dans **[LEVELS.md](LEVELS.md)**. Vérification : `node tools/check-leve
 avertissements voulus sont déclarés dans `acceptedWarnings`, LEVELS.md §6b),
 puis `tools/playtest.mjs` (pilote automatique sur chaque niveau ; `--human --trials 20` pour un
 pilote « humain » imprécis et des taux de réussite), `tools/e2e.mjs` (commandes, fanions, record,
-menu), `tools/e2e-classement.mjs` (classement, faux backend) et `tools/medals.mjs` (temps des
-médailles) avec Playwright.
+menu, médailles), `tools/e2e-classement.mjs` (classement, faux backend), `tools/medals.mjs` (temps des
+médailles) et `tools/capture.mjs` (capture d'un passage) avec Playwright.
+
+**Les outils de référence sont ceux de `tools/` (ce dépôt)** : on les lance depuis la racine du
+dépôt, avec Playwright fourni par un lien symbolique temporaire `node_modules` (ignoré par git,
+jamais commité), pas avec des copies des scripts placées dans un autre dossier (ex. `pwtest`) :
+```bash
+ln -s /workspace/pwtest/node_modules node_modules   # Playwright déjà installé là
+tools/serve.sh &                                     # http://localhost:8765/nouste-corrida-trail/
+node tools/check-levels.mjs && node tools/playtest.mjs all && node tools/e2e.mjs && node tools/e2e-classement.mjs
+kill %1; rm node_modules                             # à la fin : arrêter le serveur, supprimer le lien
+```
+Une amélioration d'outil se fait dans `tools/` et se commite (LEVELS.md §6 étape 5).
 
 ## Classement en ligne
 
