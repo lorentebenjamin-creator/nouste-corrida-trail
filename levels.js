@@ -872,7 +872,7 @@ LEVELS.push((() => {
     medals: { auto: 30.8, gold: 35.9, silver: 40.1, bronze: 44.5 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 15 %, argent 53 %, bronze 93 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
-      { match: "ground@8190→ground@9275: écart 185 px", reason: "Ravin du Béret (ravin au calme, revue 21/10) : écart voulu > portée sous la rafale (≈ 181 px) ; au calme le rival le plus lent (0,86) porte à ≈ 244 px. Playtest : pilote auto et rivaux sans chute, humain 40 essais attentif 100 % / pressé 75 %." },
+      { match: "ground@8190→ground@9275: écart 185 px", reason: "Ravin du Béret (ravin au calme, revue 21/10) : écart voulu > portée sous la rafale (≈ 181 px) ; au calme le rival le plus lent (0,86) porte à ≈ 244 px. Playtest : pilote auto et rivaux sans chute, humain 40 essais (pilote corrigé du 23/10) attentif 100 % / pressé 95 % (≈ 94 % sur 80 essais) ; 75 % avec l'ancien pilote, 21/10." },
     ],
   };
 })());
