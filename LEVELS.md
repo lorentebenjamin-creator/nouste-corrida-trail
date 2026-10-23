@@ -446,7 +446,12 @@ chute, un humain peut passer.
      les niveaux à mécaniques, où 30 % des pressés n'arrivent qu'au-delà du bronze (N°5–7) : l'argent
      ne prend jamais plus de la moitié de l'écart or–bronze ;
    * toujours `auto ≤ or`, argent ≥ or + 0,5 s, bronze ≥ argent + 0,5 s (paliers progressivement
-     plus faciles).
+     plus faciles) ;
+   * **écart relatif or → argent** (revue du 23/10) : **argent ≥ or × 1,08** (arrondi au dixième
+     supérieur). Si cette règle relève l'argent, le bronze est relevé au besoin pour que l'argent reste
+     au plus au milieu de l'intervalle or–bronze. `check-levels.mjs` avertit (`medals : argent … à moins
+     de 8 % au-dessus de l'or`) ; l'avertissement se corrige en recalibrant, ou se justifie dans
+     `acceptedWarnings` (raison obligatoire).
    La ligne écrite donne aussi les parts du profil pressé (`… ; pressés : or 3 %, argent 30 %,
    bronze 50 %`). Sans `--write`, `--calibrate` affiche les propositions sans rien changer :
    l'utiliser sur `all` pour repérer un niveau déséquilibré, **mais ne réécrire que le niveau du
@@ -558,24 +563,29 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | 22 | 7 (dont **1 sur un sérac**, revue du 22/10) | — (classique ; passage clé : **7 séracs en dents de scie**) | 1 / 0.93 / 0.86 | 32,3 s |
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | 19 (dont 9 autour des mottes) | 4 | **6 mottes plongeantes** (1 seule, puis 2, puis la **Ronde des Crapauds** à 3), 2 panneaux | 1 / 0.93 / 0.86 | 30,9 s |
 
-Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10)
+Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
 par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 : 40 essais par profil :
 
 | N° | Niveau | Pilote auto | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
 |---|---|---|---|---|---|---|---|
-| 1 | Sous-bois des cèdres | 13,9 s | 14,1 s | 14,6 s | 15,1 s | 10 % / 60 % / 90 % | 35 % / 50 % / 55 % |
-| 2 | La crête | 18,1 s | 18,25 s | 18,8 s | 19,3 s | 25 % / 85 % / 90 % | 30 % / 45 % / 50 % |
-| 3 | Col du vent | 21,6 s | 21,7 s | 22,2 s | 22,7 s | 25 % / 80 % / 90 % | 10 % / 30 % / 30 % |
-| 4 | La Brèche aux Isards | 30,8 s | 31,1 s | **32,6 s** | 34,2 s | 13 % / 68 % / 85 % | 8 % / 15 % / 28 % |
-| 5 | L'Estive des Patous | 31,8 s | 32,0 s | **37,0 s** | 42,1 s | 18 % / 68 % / 85 % | 5 % / 20 % / 28 % |
-| 6 | Le Couloir des Pierres | 29,4 s | 31,6 s | **37,3 s** | 43,1 s | 18 % / 60 % / 85 % | 0 % / 13 % / 33 % |
-| 7 | La Cascade des Desmans | 31,7 s | 32,1 s | **36,2 s** | 40,3 s | 20 % / 60 % / 85 % | 3 % / 18 % / 35 % |
-| 8 | Le Gué des Lucioles | 29,8 s | 33,8 s | 37,4 s | 44,5 s | 15 % / 60 % / 95 % | 15 % / 30 % / 40 % |
-| 9 | La Hêtraie des Palombes | 31,6 s | 32,0 s | **32,9 s** | 37,8 s | 20 % / 60 % / 85 % | 5 % / 30 % / 50 % |
-| 10 | Le Plateau des Bérets Envolés | 30,8 s | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
-| 11 | Le Névé des Marmottes Frileuses | 32,3 s | 32,8 s | 36,2 s | 48,0 s | 18 % / 65 % / 85 % | 5 % / 30 % / 50 % |
-| 12 | La Tourbière des Crapauds Ronfleurs | 30,9 s | 31,2 s | 32,3 s | 44,5 s | 15 % / 50 % / 85 % | 5 % / 30 % / 48 % |
+| 1 | Sous-bois des cèdres | 13,9 s | 14 s | 15,2 s | 16,4 s | 25 % / 100 % / 100 % | 35 % / 45 % / 48 % |
+| 2 | La crête | 18,1 s | 18,2 s | 19,7 s | 21,2 s | 8 % / 93 % / 98 % | 13 % / 40 % / 60 % |
+| 3 | Col du vent | 21,6 s | 21,6 s | 23,4 s | 25,2 s | 23 % / 90 % / 93 % | 10 % / 25 % / 30 % |
+| 4 | La Brèche aux Isards | 30,8 s | 30,9 s | 33,4 s | 35,9 s | 25 % / 100 % / 100 % | 13 % / 23 % / 35 % |
+| 5 | L'Estive des Patous | 31,8 s | 32,0 s | 37,0 s | 42,1 s | 35 % / 80 % / 85 % | 0 % / 20 % / 45 % |
+| 6 | Le Couloir des Pierres | 29,4 s | 31,6 s | 37,3 s | 43,1 s | 60 % / 80 % / 95 % | 25 % / 40 % / 60 % |
+| 7 | La Cascade des Desmans | 31,7 s | 32,1 s | 36,2 s | 40,3 s | 55 % / 80 % / 80 % | 5 % / 20 % / 45 % |
+| 8 | Le Gué des Lucioles | 29,8 s | 33,8 s | 37,4 s | 44,5 s | 35 % / 65 % / 100 % | 15 % / 35 % / 60 % |
+| 9 | La Hêtraie des Palombes | 31,6 s | 31,7 s | 34,3 s | 36,9 s | 18 % / 98 % / 98 % | 5 % / 15 % / 25 % |
+| 10 | Le Plateau des Bérets Envolés | 30,8 s | 35,9 s | 40,1 s | 44,5 s | 50 % / 70 % / 95 % | 40 % / 55 % / 65 % |
+| 11 | Le Névé des Marmottes Frileuses | 32,3 s | 32,8 s | 36,2 s | 48,0 s | 25 % / 65 % / 100 % | 0 % / 15 % / 40 % |
+| 12 | La Tourbière des Crapauds Ronfleurs | 30,9 s | 31 s | 33,5 s | 36,1 s | 23 % / 80 % / 90 % | 5 % / 15 % / 25 % |
+
+**Tableau à jour au 23/10** (temps : N°1, 2, 3, 4, 9, 12 recalibrés le 23/10, voir plus bas ; les autres inchangés depuis
+les 21–22/10). Parts : 40 essais pour les six niveaux recalibrés, 20 essais (pilote corrigé du 23/10, temps
+inchangés) pour les autres. Les parts historiques (21–22/10, ancien pilote) sont rappelées dans les
+paragraphes suivants.
 
 N°11 : ligne de la **revue du 22/10** (après la ronce du sérac, cible d'argent pressée), sur
 **40 essais** par profil ; avant : or 32,8 / argent 33,4 / bronze 43,6 s, soit 18 % / 50 % / 85 %
@@ -614,8 +624,8 @@ sur le modèle du 4 (règle d'alternance, §6 étape 3b) : un peu plus long et u
 (ronces sur les passerelles de la palombière), nettement en dessous des niveaux à mécaniques.
 10 = **rafales de vent de face** (mécanique v4 inédite, §3d), entre le 7 et le 8 en profil pressé.
 11 = **classique** (névé, séracs en dents de scie), un cran au-dessus du 9 en chutes.
-12 = **mottes plongeantes** (mécanique v5 inédite, §3e), tourbière sous l'orage ; en profil pressé au
-niveau du 10 (85 % sur 40 essais), un cran au-dessus en chutes de l'attentif.
+12 = **mottes plongeantes** (mécanique v5 inédite, §3e), tourbière sous l'orage ; avec le pilote corrigé
+(23/10), en profil pressé au niveau du 10 (≈ 90–95 % sur 80 essais), un peu plus de chutes (2,5 contre 2,2).
 **Prochain niveau (N°13) : classique**, puis alternance 1 à mécaniques / 1 classique.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
@@ -632,9 +642,21 @@ Même cerveau que l'autopilote (simulation exacte de la physique), rendu impréc
 * **attente du calme** (profil attentif) : dans une zone de rafale, il ne saute pas au-dessus du
   vide pendant la rafale ni quand les herbes couchées annoncent une rafale qui arriverait avant
   la fin du saut (≈ 0,8 s) ; `--calm 0` coupe ce comportement ;
-* **sauts imprécis** : il vise le milieu de la fenêtre de sauts sûrs (pas le dernier moment), puis
+* **sauts imprécis** : il vise **à 35 % de la fenêtre de sauts sûrs** (`--aim 0.35`, revue du 23/10 ;
+  0 = premier instant sûr, 1 = dernier, avant : le milieu), puis
   un **jitter gaussien** σ = 45 ms (borné ±2σ) décale l'appel ; **durée d'appui** aléatoire
   0,28–0,55 s (relâcher tôt = saut plus bas) ;
+* **fenêtre de sauts sûrs complète** (revue du 23/10) : elle était plafonnée à 45 images et chaque
+  saut simulé sur 85 images seulement ; un saut tardif, encore en l'air à l'horizon, comptait « non
+  sûr », si bien que vu de loin (premier ravin du N°12, x≈800, 110 px) la fenêtre se réduisait à son
+  tout premier instant (atterrissage de justesse) : le pilote sautait toujours au pire moment, la
+  gigue le faisait tomber une fois sur deux. Plafond 70 images (horizon de la marche) et horizon du
+  saut = délai + 85 images. Sans plafond, viser le milieu rendait le profil pressé trop propre
+  (95–100 % partout) ; 35 % donne des chutes du même ordre que les anciennes mesures sans le biais ;
+* **recul si immobile** (revue du 23/10) : immobile au sol depuis 1,5 s, le pilote recule 0,4 s (si
+  c'est sûr) pour reprendre de l'élan (blocage du N°11 x≈7550 : le recul de l'IA, 60 images, est
+  refusé par une ronce derrière) ; ce correctif n'est que dans le pilote humain, l'autopilote et les
+  rivaux sont inchangés (temps `auto` identiques au centième) ;
 * **graines déterministes** (essai i → graine 1 + i) : résultats reproductibles ;
 * réussite = arche franchie avec **≤ 5 chutes** (essai arrêté au-delà), sur 20 essais.
 
@@ -671,6 +693,31 @@ ses chiffres des N°1–9 sont identiques à ceux du tableau ci-dessus) :
 | 9 | 100 % | 0,55 | 35,2 s | 90 % | 1,65 | 38,3 s |
 | 10 | 100 % | 0,25 | 41,2 s | 80 % | 2,65 | 42,3 s |
 | 11 | 100 % | 0,40 | 37,8 s | 100 % | 2,25 | 46,1 s |
+
+**Mesure du 23/10 (revue `revue-23-10`, pilote corrigé : fenêtre de sauts complète, visée à 35 %,
+recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1–40), niveaux 1–12 :
+
+| N° | Niveau | Étiquette | Attentif : réussite | chutes moy. | temps moy. | Pressé : réussite | chutes moy. | temps moy. |
+|---|---|---|---|---|---|---|---|---|
+| 1 | Sous-bois des cèdres | Balade | 100 % | 0,00 | 14,2 s | 100 % | 0,88 | 17,5 s |
+| 2 | La crête | Rythme | 100 % | 0,07 | 18,6 s | 100 % | 0,97 | 21,6 s |
+| 3 | Col du vent | Hors-piste | 100 % | 0,07 | 22,1 s | 100 % | 1,20 | 28,2 s |
+| 4 | La Brèche aux Isards | Haute route | 100 % | 0,00 | 31,1 s | 95 % | 2,08 | 39,3 s |
+| 5 | L'Estive des Patous | Technique | 100 % | 0,28 | 34,7 s | 85 % | 3,20 | 50,3 s |
+| 6 | Le Couloir des Pierres | Extrême | 100 % | 0,38 | 32,4 s | 88 % | 2,48 | 40,2 s |
+| 7 | La Cascade des Desmans | Engagé | 100 % | 0,45 | 34,9 s | 90 % | 3,00 | 44,4 s |
+| 8 | Le Gué des Lucioles | Très engagé | 100 % | 0,63 | 34,9 s | 85 % | 2,77 | 42,5 s |
+| 9 | La Hêtraie des Palombes | Endurance | 100 % | 0,03 | 32,2 s | 95 % | 2,02 | 42,0 s |
+| 10 | Le Plateau des Bérets Envolés | Bien engagé | 100 % | 0,03 | 38,8 s | 95 % | 1,98 | 39,8 s |
+| 11 | Le Névé des Marmottes Frileuses | Haute montagne | 100 % | 0,23 | 34,7 s | 85 % | 3,20 | 51,7 s |
+| 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 100 % | 0,20 | 32,7 s | 95 % | 2,45 | 44,5 s |
+
+Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
+(fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le
+pressé se resserre (85–100 % contre 70–100 %). L'ordre des niveaux est moins net qu'avant (les N°5 et
+11 à 85 % sont les plus durs avec le 8), **ne pas comparer ces taux à ceux des revues précédentes** :
+seule la comparaison entre niveaux d'une même mesure a un sens. `aimAt` plus bas (`--aim 0.25`) durcit
+tous les niveaux (surtout les faciles), plus haut (`--aim 0.5`) donne 95–100 % partout.
 
 N°10 avant → après la revue du 21/10 (variante avec le Ravin du Béret, même id, même étiquette) :
 attentif 100 % / 0,75 / 34,0 s → 100 % / 0,25 / 41,2 s (il attend désormais le calme : moins de
@@ -725,14 +772,46 @@ de 40–70 px sur la réception du dernier ravin (95–98 %), ronce de 30–45 p
 dont 1–2 blocages du pilote), ronce de 40 px sur le dernier sérac (attentif 50 % : injouable).
 Points chauds pressés après : x≈10700:14, x≈3300:13, x≈4900:9 (la nouvelle ronce).
 
-N°12 (mesuré le 23/10, mêmes réglages) : mécanique v5 (mottes plongeantes), étiquette « Bien
-engagé » comme le 10. Sur 20 essais : attentif 100 % / 0,65, pressé 85 % / 2,55 ; sur **40 essais**
-(calibrage des médailles) : attentif 100 % / 0,72, pressé 85 % / 2,42 (N°10 : 75 % / 2,92 ; N°11 :
-93 % / 2,40). Points chauds en profil pressé : x≈1500 (ronce sur le ressaut), x≈5000 (deuxième
-gouille, deux mottes) et x≈6800 (ronce des buttes) ; x≈800 (premier ravin) ressort surtout avec
-une graine (artefact du pilote : fenêtre de saut plafonnée + gigue). En attentif : x≈8000 (Ronde des
-Crapauds). Premier jet : première motte à `on` 0,6 → 8 chutes attentives sur la découverte
-(x≈2700) : passée à 0,7. Autopilote 30,9 s, rivaux 0 chute ; N°1–11 inchangés au dixième.
+N°12 (mesuré le 23/10) : mécanique v5 (mottes plongeantes), étiquette « Bien engagé » comme le 10.
+**Avant la revue du 23/10** (ancien pilote), sur 40 essais : attentif 100 % / 0,72, pressé 85 % / 2,42
+(N°10 : 75 % / 2,92 ; N°11 : 93 % / 2,40) ; x≈800 (premier ravin, 110 px) ressortait comme point chaud.
+**Cause trouvée : un biais du pilote, pas du niveau** (fenêtre de sauts plafonnée à 45 images + saut
+simulé sur 85 images : la fenêtre du premier ravin se réduisait à une seule image, au pire moment ;
+§7). **Après correction** (pilote 23/10), sur 40 essais : attentif 100 % / 0,20, pressé **95 % / 2,45** ;
+sur 40 autres essais (graines 41–80) 85 % / 2,60, soit **90 % / 2,53 sur 80** (N°10 : 95 % / 1,98 et
+93 % / 2,38, soit 94 % sur 80). Le x≈800 a disparu des points chauds ; restent x≈4900–5000 (deuxième
+gouille, deux mottes : le passage voulu), x≈8500 (Ronde des Crapauds) et x≈1500 (ronce du ressaut).
+**Durcissement : écarté.** La consigne visait ≈ 75–80 % pressé en partant d'un N°12 « à 85 % contre 75 %
+pour le N°10 » ; avec le pilote corrigé, N°10 et N°12 sont au même niveau en réussite (≈ 90–95 %) et le
+N°12 a plus de chutes (2,5 contre 2,2 sur 80 essais), c'est-à-dire exactement l'étiquette commune
+« Bien engagé ». Viser 75–80 % en faisant du N°12 le niveau le plus dur de la série (le N°11 est à 85 %,
+les N°5 et 8 à 85 %) casserait la courbe ; aucune géométrie ni aucun id modifiés. Premier jet : première
+motte à `on` 0,6 → 8 chutes attentives sur la découverte (x≈2700) : passée à 0,7. Autopilote 30,9 s,
+rivaux 0 chute ; N°1–11 inchangés (temps `auto` identiques).
+
+**Recalibrage des médailles du 23/10 (règle argent ≥ or × 1,08).** Niveaux concernés parmi les N°1–11 :
+N°1 (14,1 / 14,6 → écart 3,5 %), 2 (18,25 / 18,8 → 3,0 %), 3 (21,7 / 22,2 → 2,3 %), 4 (31,1 / 32,6 → 4,8 %)
+et 9 (32,0 / 32,9 → 2,8 %) ; les N°5–8, 10 et 11 respectent déjà la règle (+10 à +18 %) et ne sont pas
+modifiés. N°12 : 31,2 / 32,3 → 3,5 %. Les six ont été recalibrés par `medals.mjs --calibrate --trials 40 --write`
+(`calibrate()` impose argent ≥ or × 1,08, bronze relevé pour garder l'argent sous le milieu or–bronze) :
+
+| N° | Avant (or / argent / bronze) | Après (or / argent / bronze) | Argent / or | Attentif après (40 essais) | Pressé après (40 essais) |
+|---|---|---|---|---|---|
+| 1 | 14,1 / 14,6 / 15,1 s | 14,0 / 15,2 / 16,4 s | +8,6 % | 25 / 100 / 100 % | 35 / 45 / 48 % |
+| 2 | 18,25 / 18,8 / 19,3 s | 18,2 / 19,7 / 21,2 s | +8,2 % | 8 / 93 / 98 % | 13 / 40 / 60 % |
+| 3 | 21,7 / 22,2 / 22,7 s | 21,6 / 23,4 / 25,2 s | +8,3 % | 23 / 90 / 93 % | 10 / 25 / 30 % |
+| 4 | 31,1 / 32,6 / 34,2 s | 30,9 / 33,4 / 35,9 s | +8,1 % | 25 / 100 / 100 % | 13 / 23 / 35 % |
+| 9 | 32,0 / 32,9 / 37,8 s | 31,7 / 34,3 / 36,9 s | +8,2 % | 18 / 98 / 98 % | 5 / 15 / 25 % |
+| 12 | 31,2 / 32,3 / 44,5 s | 31,0 / 33,5 / 36,1 s | +8,1 % | 23 / 80 / 90 % | 5 / 15 / 25 % |
+
+Avant, N°12 : attentif 15 % / 50 % / 85 %, pressé 5 % / 30 % / 48 %. Lecture : sur les N°1–4 et 9 les temps
+attentifs sont très groupés (≤ 8 % de l'or) : la règle donne un argent et un bronze que presque tous
+les essais attentifs atteignent (90–100 %), seul l'or discrimine ; c'est le prix de l'écart minimal
+sur des sentiers courts ou sans mécanique. N°2 : or à 8 % (< fenêtre 10–25 %, ⚠ de l'outil : temps
+trop groupés, 18,2 s → 8 %, 18,3 s → 28 %), conservé. Aucun `acceptedWarnings` ajouté : pas de niveau
+laissé hors règle. Parts des niveaux non recalibrés avec le pilote corrigé (20 essais, temps
+inchangés) : attentif or 25–60 % (N°5 35, 6 60, 7 55, 8 35, 10 50, 11 25) : plus généreux que la cible
+10–25 % ; à recalibrer en lot après validation (cela change les temps affichés aux joueurs).
 
 Revue du 20/10 (géométrie N°3 et N°8, §6b), mêmes réglages, avant → après :
 N°3 attentif 100 % / 0,10 → 100 % / 0,05, pressé 100 % / 0,95 → 100 % / 0,85 ;

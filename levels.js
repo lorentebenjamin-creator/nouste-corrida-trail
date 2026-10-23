@@ -254,7 +254,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1880, 430, 1), y(id, 3640, 430, 2)],
     finishX: 4980,
     rivals: [{ speed: 0.93 }, { speed: 0.84 }, { speed: 0.74 }],
-    medals: { auto: 13.9, gold: 14.1, silver: 14.6, bronze: 15.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 63 %, bronze 88 %)
+    medals: { auto: 13.9, gold: 14, silver: 15.2, bronze: 16.4 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 25 %, argent 100 %, bronze 100 % ; pressés : or 35 %, argent 45 %, bronze 48 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ronce @2140 trop près du fanion @1880", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : ronce à 260 px du fanion, rivaux lents (≤ 0,93)." },
@@ -285,7 +285,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1400, 356, 1), y(id, 2580, 430, 2), y(id, 3780, 430, 3)],
     finishX: 6460,
     rivals: [{ speed: 0.97 }, { speed: 0.88 }, { speed: 0.78 }],
-    medals: { auto: 18.1, gold: 18.25, silver: 18.8, bronze: 19.3 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 13 %, argent 83 %, bronze 88 %)
+    medals: { auto: 18.1, gold: 18.2, silver: 19.7, bronze: 21.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 8 %, argent 93 %, bronze 98 % ; pressés : or 13 %, argent 40 %, bronze 60 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ronce @360 trop près du départ", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : première ronce d'apprentissage, le compte à rebours ne verrouille pas les rivaux comme une réapparition." },
@@ -327,7 +327,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1240, 380, 1), y(id, 2860, 440, 2), y(id, 5080, 380, 3)],
     finishX: 7620,
     rivals: [{ speed: 0.99 }, { speed: 0.9 }, { speed: 0.82 }],
-    medals: { auto: 21.6, gold: 21.7, silver: 22.2, bronze: 22.7 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 80 %, bronze 90 %)
+    medals: { auto: 21.6, gold: 21.6, silver: 23.4, bronze: 25.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 23 %, argent 90 %, bronze 93 % ; pressés : or 10 %, argent 25 %, bronze 30 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ground@4520→ground@5000: montée 60 px avec écart 140 px", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : seule montée longue du niveau, pilote pressé sans chute à cet endroit." },
@@ -413,7 +413,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2650, 440, 1), y(id, 4230, 440, 2), y(id, 6020, 260, 3), y(id, 8370, 440, 4)],
     finishX: 10900,
     rivals: [{ speed: 1.0 }, { speed: 0.92 }, { speed: 0.85 }],
-    medals: { auto: 30.8, gold: 31.1, silver: 32.6, bronze: 34.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 13 %, argent 68 %, bronze 85 % ; pressés : or 8 %, argent 15 %, bronze 28 %)
+    medals: { auto: 30.8, gold: 30.9, silver: 33.4, bronze: 35.9 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 25 %, argent 100 %, bronze 100 % ; pressés : or 13 %, argent 23 %, bronze 35 %)
   };
 })());
 
@@ -789,7 +789,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2640, 440, 1), y(id, 5100, 440, 2), y(id, 7050, 250, 3), y(id, 9570, 440, 4)],
     finishX: 11200,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.6, gold: 32, silver: 32.9, bronze: 37.8 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 20 %, argent 60 %, bronze 85 % ; pressés : or 5 %, argent 30 %, bronze 50 %)
+    medals: { auto: 31.6, gold: 31.7, silver: 34.3, bronze: 36.9 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 98 %, bronze 98 % ; pressés : or 5 %, argent 15 %, bronze 25 %)
   };
 })());
 
@@ -1023,6 +1023,6 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1920, 440, 1), y(id, 4210, 440, 2), y(id, 7200, 440, 3), y(id, 8760, 440, 4)],
     finishX: 10650,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 30.9, gold: 31.2, silver: 32.3, bronze: 44.5 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 15 %, argent 50 %, bronze 85 % ; pressés : or 5 %, argent 30 %, bronze 48 %)
+    medals: { auto: 30.9, gold: 31, silver: 33.5, bronze: 36.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 23 %, argent 80 %, bronze 90 % ; pressés : or 5 %, argent 15 %, bronze 25 %)
   };
 })());

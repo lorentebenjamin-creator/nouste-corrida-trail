@@ -19,6 +19,8 @@
 //    jusqu'au temps atteint par ≈ 30 % des essais pressés, sans dépasser le MILIEU de l'intervalle
 //    or–bronze (règle d'espacement : l'argent ne colle plus à l'or quand le bronze est loin, et ne
 //    mange jamais plus de la moitié de l'écart or–bronze). Sans essais pressés : règle attentive seule.
+//    Écart minimal or → argent (revue du 23/10) : argent ≥ or × 1,08 (arrondi au dixième supérieur) ; le
+//    bronze est relevé si besoin pour garder l'argent au plus au milieu de l'intervalle or–bronze.
 //    Graines déterministes : deux lancements identiques donnent les mêmes temps.
 // 2) Ancienne règle (multiplicateurs, sans pilote humain) : or = auto × 1,15 ; argent × 1,35 ;
 //    bronze × 1,6, arrondis à la demi-seconde supérieure :
@@ -38,7 +40,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const levelsPath = join(here, '..', 'levels.js');
 export const COEF = { gold: 1.15, silver: 1.35, bronze: 1.6 };
-export const TARGET = { gold: 0.175, goldMin: 0.10, goldMax: 0.25, silver: 0.5, silverPressed: 0.3, bronze: 0.85, gap: 0.5 };
+export const TARGET = { gold: 0.175, goldMin: 0.10, goldMax: 0.25, silver: 0.5, silverPressed: 0.3, bronze: 0.85, gap: 0.5, silverMin: 1.08 };
 export const PROFILES = {
   attentif: [],
   'pressé': ['--delay', '180-250', '--jitter', '80', '--hold', '0.18-0.5', '--calm', '0', '--hesit', '0'],
@@ -76,7 +78,14 @@ export function calibrate(auto, times, pressed) {
     const mid = Math.floor(((gold + bronze0) / 2) * 10 + 1e-6) / 10;
     silver = r1(Math.max(silver, Math.min(quantileUp(pressed, TARGET.silverPressed, lo), mid)));
   }
-  const bronze = r1(Math.max(silver + TARGET.gap, bronze0));
+  // écart relatif or → argent (revue du 23/10) : argent ≥ or × 1,08, sinon l'argent « colle » à l'or sur les
+  // sentiers courts ou très groupés (écart de 0,3 s ≈ une seule image de jitter). check-levels.mjs l'impose
+  // (avertissement). Si cette règle relève l'argent, le bronze est relevé au besoin pour que l'argent reste
+  // au plus au milieu de l'intervalle or–bronze (règle d'espacement du 22/10).
+  const minSilver = Math.ceil(gold * TARGET.silverMin * 10 - 1e-6) / 10;
+  let bronzeFloor = silver + TARGET.gap;
+  if (silver < minSilver) { silver = r1(minSilver); bronzeFloor = Math.max(silver + TARGET.gap, Math.ceil((2 * silver - gold) * 10 - 1e-6) / 10); }
+  const bronze = r1(Math.max(bronzeFloor, bronze0));
   return { auto, gold: r2(gold), silver, bronze };
 }
 

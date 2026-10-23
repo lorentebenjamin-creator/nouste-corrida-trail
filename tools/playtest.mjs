@@ -37,12 +37,14 @@ const trials = Number(flags.trials || 20), seed0 = Number(flags.seed || 1), maxD
 const jobs = Number(flags.jobs || 4), turbo = Number(flags.turbo || 24);
 // réglages du pilote humain (défauts dans assets/game.js) : --delay 150-200 (ms) --jitter 45 (ms) --hold 0.28-0.55 (s)
 //   --hesit 0.2 (probabilité d'hésiter après une réception) --pause 0.1-0.4 (s, durée de l'hésitation)
+//   --aim 0.35 (où il vise dans la fenêtre de sauts sûrs : 0 = premier instant, 1 = dernier, 0.5 = milieu ; revue du 23/10)
 //   --calm 1 (attend le calme avant un saut au-dessus du vide dans une zone de rafale ; --calm 0 pour l'ancien comportement)
 const hopt = {};
 if (flags.delay) { const [a, c] = String(flags.delay).split('-').map(Number); hopt.delayMin = a / 1000; hopt.delayMax = (c ?? a) / 1000; }
 if (flags.jitter != null) hopt.jitter = Number(flags.jitter) / 1000;
 if (flags.hesit != null) hopt.hesitP = Number(flags.hesit);
 if (flags.pause) { const [a, c] = String(flags.pause).split('-').map(Number); hopt.pauseMin = a; hopt.pauseMax = c ?? a; }
+if (flags.aim != null) hopt.aimAt = Number(flags.aim);
 if (flags.calm != null) hopt.calm = flags.calm !== '0';
 if (flags.hold) { const [a, c] = String(flags.hold).split('-').map(Number); hopt.holdMin = a; hopt.holdMax = c ?? a; }
 

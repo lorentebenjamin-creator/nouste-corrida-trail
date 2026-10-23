@@ -58,6 +58,9 @@ LEVELS.forEach((L, idx) => {
     const md = L.medals, okNum = (x) => typeof x === "number" && isFinite(x) && x > 0;
     if (![md.auto, md.gold, md.silver, md.bronze].every(okNum)) err(tag, `medals : auto, gold, silver et bronze doivent être des nombres > 0`);
     else if (!(md.auto <= md.gold && md.gold < md.silver && md.silver < md.bronze)) err(tag, `medals : il faut auto ≤ or < argent < bronze`);
+    // Écart relatif or → argent (revue du 23/10) : argent ≥ or × 1,08. En dessous, l'argent « colle » à l'or
+    // (quelques dixièmes = le jitter d'une image) : recalibrer (tools/medals.mjs --calibrate) ou justifier.
+    else if (md.silver < md.gold * 1.08 - 1e-9) warn(tag, `medals : argent ${md.silver} s à moins de 8 % au-dessus de l'or ${md.gold} s (+${((md.silver / md.gold - 1) * 100).toFixed(1)} %, viser ≥ ${(Math.ceil(md.gold * 1.08 * 10 - 1e-6) / 10).toFixed(1)} s)`);
   } else info(tag, `pas de médailles (lancer tools/medals.mjs ${L.id} --write)`);
   for (const k of ["id", "name", "blurb", "difficulty", "theme"]) if (typeof L[k] !== "string" || !L[k].trim()) err(tag, `champ texte manquant: ${k}`);
   for (const k of ["width", "floor", "spawnX", "finishX"]) if (typeof L[k] !== "number" || !isFinite(L[k])) err(tag, `champ numérique manquant: ${k}`);

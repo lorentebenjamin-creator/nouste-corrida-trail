@@ -33,30 +33,31 @@ endurance, modèle N°4, une seule nouveauté) ; le N°10 est de nouveau à méc
 vent, mécanique inédite) ; le N°11 est classique (Névé des Marmottes Frileuses) ; le N°12 est à mécaniques (mottes plongeantes, mécanique inédite) ; **le N°13 sera classique**, puis on alterne. Chaque nouveau sentier passe le pilote « humain »
 (`playtest --human`, deux profils) et doit respecter la courbe de difficulté.
 
-Difficulté mesurée (pilote « humain », 20 essais, réussite / chutes moyennes, 21/10/2026 ; profil attentif
-revu le 21/10 : hésitations et attente du calme ; profil pressé inchangé, `--calm 0 --hesit 0`) :
+Difficulté mesurée (pilote « humain », **40 essais**, réussite / chutes moyennes, **23/10/2026** ; profil
+attentif par défaut, profil pressé `--delay 180-250 --jitter 80 --hold 0.18-0.5 --calm 0 --hesit 0`).
+Depuis la revue du 23/10 le pilote vise **à 35 % de la fenêtre de sauts sûrs** (au lieu de son milieu)
+et la fenêtre n'est plus tronquée (voir LEVELS.md §7) : les chiffres sont donc un peu plus indulgents que
+ceux des revues précédentes (20/22 oct., fenêtre tronquée), **ne pas les comparer d'une revue à l'autre** :
 
 | N° | Attentif | Pressé |
 |---|---|---|
-| 1 | 100 % / 0,10 | 95 % / 0,80 |
-| 2 | 100 % / 0,10 | 100 % / 0,70 |
-| 3 | 100 % / 0,10 | 100 % / 0,85 |
-| 4 | 100 % / 0,35 | 95 % / 1,95 |
-| 5 | 100 % / 0,75 | 85 % / 2,80 |
-| 6 | 100 % / 1,65 | 70 % / 3,80 |
-| 7 | 95 % / 1,10 | 80 % / 3,45 |
-| 8 | 100 % / 1,45 | 70 % / 3,65 |
-| 9 | 100 % / 0,55 | 90 % / 1,65 |
-| 10 | 100 % / 0,25 | 80 % / 2,65 |
-| 11 | 100 % / 0,40 | 100 % / 2,25 |
-| 12 | 100 % / 0,65 | 85 % / 2,55 |
+| 1 | 100 % / 0,00 | 100 % / 0,88 |
+| 2 | 100 % / 0,07 | 100 % / 0,97 |
+| 3 | 100 % / 0,07 | 100 % / 1,20 |
+| 4 | 100 % / 0,00 | 95 % / 2,08 |
+| 5 | 100 % / 0,28 | 85 % / 3,20 |
+| 6 | 100 % / 0,38 | 88 % / 2,48 |
+| 7 | 100 % / 0,45 | 90 % / 3,00 |
+| 8 | 100 % / 0,63 | 85 % / 2,77 |
+| 9 | 100 % / 0,03 | 95 % / 2,02 |
+| 10 | 100 % / 0,03 | 95 % / 1,98 |
+| 11 | 100 % / 0,23 | 85 % / 3,20 |
+| 12 | 100 % / 0,20 | 95 % / 2,45 |
 
-Détails et méthode : LEVELS.md §8. Sur 40 essais, N°10 en profil pressé : 75 % / 2,92, entre le
-N°7 (80 %) et le N°8 (75 %). N°11 (classique) sur 40 essais : attentif 100 % / 0,42, pressé 98 % / 2,13
-(plus de chutes que le N°9, 88 % / 2,00, mais pas de ronce sur passerelle : réussite plus haute).
-**Revue du 22/10** : ronce ajoutée sur un sérac du N°11 ; sur 40 essais, attentif 100 % / 0,63,
-pressé **93 % / 2,40**, désormais un cran au-dessus du N°9 en chutes et proche en réussite.
-N°12 (mottes plongeantes) sur 40 essais : attentif 100 % / 0,72, pressé 85 % / 2,42, au niveau du N°10.
+Détails et méthode : LEVELS.md §8. N°12 (mottes plongeantes) : pressé 95 % / 2,45 sur 40 essais
+(graines 1–40), 85 % / 2,60 sur 40 autres (graines 41–80) soit 90 % / 2,53 sur 80 ; N°10 : 95 % / 1,98
+puis 93 % / 2,38 (94 % sur 80). **Le N°12 est donc bien au niveau du N°10 (« Bien engagé »)**, avec un cran
+de chutes en plus : pas de durcissement nécessaire (LEVELS.md §8, revue du 23/10).
 
 ## Médailles
 
@@ -67,7 +68,8 @@ temps pour qu'environ **17,5 % des essais attentifs décrochent l'or** (fenêtre
 l'argent et ≈ 85 % le bronze (au dixième, or au 0,05 s si les temps sont très groupés ; or ≥ auto,
 paliers espacés d'au moins 0,5 s). Depuis la revue du 22/10, l'argent vise aussi **≈ 30 % des
 essais pressés**, sans dépasser le milieu de l'intervalle or–bronze (il ne colle plus à l'or quand
-le bronze est loin). `node tools/medals.mjs <url> all --human --trials 20 --md`
+le bronze est loin) ; depuis la revue du 23/10, l'argent est aussi **≥ or × 1,08** (check-levels
+avertit sinon ; le bronze est relevé au besoin). `node tools/medals.mjs <url> all --human --trials 20 --md`
 affiche, sans rien écrire, les pourcentages or / argent / bronze des deux profils. L'ancienne règle
 (or ×1,15, argent ×1,35, bronze ×1,6) donnait l'or à 85–100 % des essais attentifs sur la plupart
 des sentiers ; elle reste disponible sans `--calibrate`. Le menu affiche sous chaque sentier la
@@ -75,39 +77,30 @@ médaille de ton record (enregistré dans le navigateur) et les trois temps cibl
 d'arrivée affiche la médaille de la course, ton record et le temps à battre pour la médaille
 suivante. Un sentier sans champ `medals` s'affiche sans médailles (LEVELS.md §6 étape 5b).
 
-Temps cibles actuels (or / argent / bronze ; argent des N°4, 5, 6, 7, 9 et 11 recalibré le 22/10
-avec la règle pressée ; parts sur 40 essais pour ces niveaux, détails LEVELS.md §8) :
+Temps cibles actuels (or / argent / bronze). **Revue du 23/10** : N°1, 2, 3, 4, 9 et 12
+recalibrés (40 essais, nouveau pilote) pour respecter la règle **argent ≥ or × 1,08** ; parts sur 40
+essais pour ces six niveaux, sur 20 essais (pilote du 23/10) pour les autres, dont les temps
+sont **inchangés** (LEVELS.md §8) :
 
 | N° | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
 |---|---|---|---|---|---|
-| 1 | 14,1 s | 14,6 s | 15,1 s | 10 % / 60 % / 90 % | 35 % / 50 % / 55 % |
-| 2 | 18,25 s | 18,8 s | 19,3 s | 25 % / 85 % / 90 % | 30 % / 45 % / 50 % |
-| 3 | 21,7 s | 22,2 s | 22,7 s | 25 % / 80 % / 90 % | 10 % / 30 % / 30 % |
-| 4 | 31,1 s | 32,6 s | 34,2 s | 13 % / 68 % / 85 % | 8 % / 15 % / 28 % |
-| 5 | 32,0 s | 37,0 s | 42,1 s | 18 % / 68 % / 85 % | 5 % / 20 % / 28 % |
-| 6 | 31,6 s | 37,3 s | 43,1 s | 18 % / 60 % / 85 % | 0 % / 13 % / 33 % |
-| 7 | 32,1 s | 36,2 s | 40,3 s | 20 % / 60 % / 85 % | 3 % / 18 % / 35 % |
-| 8 | 33,8 s | 37,4 s | 44,5 s | 15 % / 60 % / 95 % | 15 % / 30 % / 40 % |
-| 9 | 32,0 s | 32,9 s | 37,8 s | 20 % / 60 % / 85 % | 5 % / 30 % / 50 % |
-| 10 | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
-| 11 | 32,8 s | 36,2 s | 48,0 s | 18 % / 65 % / 85 % | 5 % / 30 % / 50 % |
-| 12 | 31,2 s | 32,3 s | 44,5 s | 15 % / 50 % / 85 % | 5 % / 30 % / 48 % |
+| 1 | 14 s | 15,2 s | 16,4 s | 25 % / 100 % / 100 % | 35 % / 45 % / 48 % |
+| 2 | 18,2 s | 19,7 s | 21,2 s | 8 % / 93 % / 98 % | 13 % / 40 % / 60 % |
+| 3 | 21,6 s | 23,4 s | 25,2 s | 23 % / 90 % / 93 % | 10 % / 25 % / 30 % |
+| 4 | 30,9 s | 33,4 s | 35,9 s | 25 % / 100 % / 100 % | 13 % / 23 % / 35 % |
+| 5 | 32,0 s | 37,0 s | 42,1 s | 35 % / 80 % / 85 % | 0 % / 20 % / 45 % |
+| 6 | 31,6 s | 37,3 s | 43,1 s | 60 % / 80 % / 95 % | 25 % / 40 % / 60 % |
+| 7 | 32,1 s | 36,2 s | 40,3 s | 55 % / 80 % / 80 % | 5 % / 20 % / 45 % |
+| 8 | 33,8 s | 37,4 s | 44,5 s | 35 % / 65 % / 100 % | 15 % / 35 % / 60 % |
+| 9 | 31,7 s | 34,3 s | 36,9 s | 18 % / 98 % / 98 % | 5 % / 15 % / 25 % |
+| 10 | 35,9 s | 40,1 s | 44,5 s | 50 % / 70 % / 95 % | 40 % / 55 % / 65 % |
+| 11 | 32,8 s | 36,2 s | 48,0 s | 25 % / 65 % / 100 % | 0 % / 15 % / 40 % |
+| 12 | 31 s | 33,5 s | 36,1 s | 23 % / 80 % / 90 % | 5 % / 15 % / 25 % |
 
-| N° | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
-|---|---|---|---|---|---|
-| 1 | 14,1 s | 14,6 s | 15,1 s | 10 % / 60 % / 90 % | 35 % / 50 % / 55 % |
-| 2 | 18,25 s | 18,8 s | 19,3 s | 25 % / 85 % / 90 % | 30 % / 45 % / 50 % |
-| 3 | 21,7 s | 22,2 s | 22,7 s | 25 % / 80 % / 90 % | 10 % / 30 % / 30 % |
-| 4 | 31,1 s | 31,8 s | 34,2 s | 15 % / 50 % / 85 % | 5 % / 10 % / 15 % |
-| 5 | 32,0 s | 33,0 s | 42,1 s | 20 % / 55 % / 80 % | 0 % / 20 % / 25 % |
-| 6 | 31,6 s | 35,2 s | 43,1 s | 10 % / 35 % / 80 % | 0 % / 5 % / 30 % |
-| 7 | 32,1 s | 34,5 s | 40,3 s | 25 % / 60 % / 85 % | 0 % / 5 % / 30 % |
-| 8 | 33,8 s | 37,4 s | 44,5 s | 15 % / 60 % / 95 % | 15 % / 30 % / 40 % |
-| 9 | 32,0 s | 32,5 s | 37,8 s | 15 % / 55 % / 75 % | 10 % / 30 % / 60 % |
-| 10 | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
-| 11 | 32,8 s | 33,4 s | 43,6 s | 15 % / 60 % / 85 % | 0 % / 10 % / 50 % |
-
-(20 essais par profil, 21/10 ; calibrage sur 40 essais.)
+Avec le pilote corrigé (plus fiable), les essais attentifs sont plus rapides qu'avant : l'or des
+N°5–8, 10 et 11 (non recalibrés) est atteint par 25–60 % des essais attentifs (cible 10–25 %). Un
+`--calibrate --trials 40 --write` niveau par niveau les remettrait dans la fenêtre (à décider : il
+change les temps cibles déjà affichés aux joueurs).
 
 ## Source de référence
 

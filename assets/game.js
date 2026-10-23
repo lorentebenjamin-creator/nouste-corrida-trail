@@ -1176,15 +1176,21 @@ function R(e, t) {
       if (aim < 0 && dc.dir === 1 && H.jumpAt < f && c.grounded && c.lock <= 0) {
         let walk = simRunner(c, 1, -1, 70, !0);
         if (!walk.safe) {
-          let lim = Math.min(45, Math.max(0, Math.min(walk.air >= 0 ? walk.air : 99, walk.dead >= 0 ? walk.dead : 99))),
+          // Fenêtre de sauts sûrs [k0, k1] : jusqu'au bord (walk.air) ou au danger (walk.dead). Revue du 23/10 :
+          // la fenêtre était plafonnée à 45 images et chaque saut simulé sur 85 images seulement, donc un saut
+          // tardif (encore en l'air à l'horizon) comptait « non sûr » : vue de loin (x≈800 du N°12, 110 px de
+          // ravin), la fenêtre se réduisait à son tout premier instant (atterrissage de justesse) et, avec la
+          // gigue, le pilote sautait trop tôt une fois sur deux. Plafond 70 images (horizon de `walk`) et
+          // horizon du saut = délai + 85 images.
+          let lim = Math.min(70, Math.max(0, Math.min(walk.air >= 0 ? walk.air : 99, walk.dead >= 0 ? walk.dead : 99))),
             k0 = -1, k1 = -1;
           for (let k2 = 0; k2 <= lim; k2++) {
-            let r2 = simRunner(c, 1, k2, 85, !0),
+            let r2 = simRunner(c, 1, k2, k2 + 85, !0),
               ok2 = r2.safe && r2.x > walk.dangerX + c.w; // un saut qui retombe avant le danger ne compte pas
             if (ok2) (k0 < 0 && (k0 = k2), (k1 = k2));
             else if (k0 >= 0) break;
           }
-          k0 >= 0 && (aim = Math.round((k0 + k1) / 2));
+          k0 >= 0 && (aim = Math.round(k0 + (k1 - k0) * H.opt.aimAt));
         }
       }
       // Rafales (v4) : un humain attentif « joue les accalmies » — il ne prend pas un saut au-dessus
@@ -1225,6 +1231,12 @@ function R(e, t) {
     }
     // 2) mains : exécutent la file
     H.q.has(f) && ((H.dir = H.q.get(f)), H.q.delete(f));
+    // Revue du 23/10 — « bloqué » : collé au bord d'une montée (N°11 x≈7550) parce que le recul de l'IA (60 images
+    // = 350 px) est refusé par une ronce derrière, le pilote attendait indéfiniment. Immobile au sol depuis 1,5 s :
+    // un humain recule un instant (0,4 s, seulement si c'est sûr) pour reprendre de l'élan.
+    H.still = e.grounded && Math.abs(e.vx) < 5 ? (H.still || 0) + 1 : 0;
+    if ((H.backF || 0) <= 0 && H.still > 90 && simRunner(e, -1, -1, 32, !0).safe) ((H.backF = 24), (H.still = 0), H.q.clear(), (H.jumpAt = -1));
+    if ((H.backF || 0) > 0) ((H.backF -= 1), (H.dir = -1), H.q.clear());
     let edge = f === H.jumpAt;
     edge && ((H.jumps += 1), (H.holdEnd = f + Math.round((H.opt.holdMin + (H.opt.holdMax - H.opt.holdMin) * H.rnd()) * 60)));
     return { left: H.dir < 0, right: H.dir > 0, jump: f <= H.holdEnd, down: !1, edge };
@@ -2030,7 +2042,7 @@ function R(e, t) {
       setAutopilot: (e, opt) => {
         autopilot = !!e;
         opt?.human
-          ? humanReset({ delayMin: 0.15, delayMax: 0.2, jitter: 0.045, holdMin: 0.28, holdMax: 0.55, calm: !0, hesitP: 0.2, pauseMin: 0.1, pauseMax: 0.4, ...opt.human })
+          ? humanReset({ delayMin: 0.15, delayMax: 0.2, jitter: 0.045, holdMin: 0.28, holdMax: 0.55, calm: !0, aimAt: 0.35, hesitP: 0.2, pauseMin: 0.1, pauseMax: 0.4, ...opt.human })
           : (hum = null);
       },
       // N pas de simulation par image affichée (0 = temps réel) : pour les essais en masse
