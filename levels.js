@@ -100,6 +100,17 @@ export const rafale = (x1, x2, period = 4.2, on = 0.4, phase = 0, warn = 1.0, sl
 //   ravin sous une rafale que l'on ne franchit qu'au calme (la rafale fait tomber).
 export const panneau = (x, yDuSol, text) => ({ x, y: yDuSol, text });
 
+// ---- Mécanique v5 ----------------------------------------------------------
+// motte(x, y, w, period=4.4, on=0.6, phase=0, warn=0.9) : MOTTE PLONGEANTE — passerelle (planche
+//   18 px, traversable par-dessous, ↓ pour descendre) de dessus `y`, posée sur l'eau d'une tourbière.
+//   Cycle de `period` s : à flot pendant la fraction `on` du cycle (au début du cycle, décalé par
+//   `phase` ∈ [0,1[), puis elle PLONGE (plus de sol : on tombe dans le ravin) et remonte au cycle
+//   suivant. Pendant les `warn` s qui précèdent la plongée, elle tremble, s'enfonce, fait des bulles
+//   et un panneau « bulles » clignote en haut de l'écran. À mettre dans `solids` (LEVELS.md §3e).
+export const motte = (x, y, w, period = 4.4, on = 0.6, phase = 0, warn = 0.9) => ({
+  x, y, w, h: 18, oneWay: true, kind: "plank", sink: { y0: y, period, on, phase, warn },
+});
+
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
 // On peut en ajouter ici (toutes les clés sont obligatoires) : le décor est
@@ -200,6 +211,21 @@ export const THEMES = {
     rock: "#a0abb6", rockDark: "#5f6b78",
     thorn: "#28303c", leaf: "#3f5a4c", berry: "#3f78c8",
     fog: "#142338",
+  },
+  tourbiere: {
+    // Niveau 12 : tourbière sous l'orage qui monte (ciel ardoise, lumière soufrée à l'horizon,
+    // laîches jaunes, tourbe brune, eau noire des gouilles, canneberges)
+    skyTop: "#262b3b", skyMid: "#6c7287", skyBot: "#dcc58a",
+    ridge: "#353c38", ridge2: "#646d5c",
+    pine: "#1f2d27", pine2: "#435747",
+    dirt: "#4b3a2b", dirtDark: "#2c2219",
+    grass: "#a39f4c", grassDark: "#6d6c33",
+    wood: "#7a5a3a", woodDark: "#4a3624",
+    rock: "#8e8f87", rockDark: "#5a5b55",
+    thorn: "#251f1b", leaf: "#5b6a38", berry: "#c23a2e",
+    fog: "#121510",
+    // Clés facultatives : eau de la tourbière au fond des ravins (décor), couleurs des mottes (v5).
+    water: "#36351f", waterHi: "#a9ab84", moss: "#86a84c", mossDark: "#55702f",
   },
 };
 
@@ -926,5 +952,77 @@ LEVELS.push((() => {
       { match: "ronce @4810: seulement 150 px avant le bord", reason: "Revue du 22/10 : ronce voulue sur la lèvre d'un sérac de 150 px (dent basse des Dents de la Marmotte), pour durcir le N°11 en profil pressé (98 % → 93 % sur 40 essais) ; la ronce se survole en descendant du sérac précédent (80 px plus haut, 160 px de crevasse) et il reste ≈ 90 px de sérac pour se recevoir et repartir vers la dent suivante, comme sur tous les séracs de 150 px du passage ; validé playtest auto (0 chute, rivaux 0 chute) et humain (attentif 100 %)." },
     ],
     medals: { auto: 32.3, gold: 32.8, silver: 36.2, bronze: 48 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 65 %, bronze 85 % ; pressés : or 5 %, argent 30 %, bronze 50 %)
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 12 — La Tourbière des Crapauds Ronfleurs (niveau du jour, 2026-10-23)
+// Niveau à mécaniques (règle d'alternance, après le N°11 classique) — nouveauté : une mécanique
+// inédite, les MOTTES PLONGEANTES (v5, `motte()`, LEVELS.md §3e) : des tapis de sphaigne qui
+// flottent sur les gouilles de la tourbière, puis plongent (plus de sol) et remontent, en cycle.
+// Annonce : la motte tremble, s'enfonce, fait des bulles et un panneau « bulles » clignote en haut
+// de l'écran ; plongée, sa silhouette et un contour pointillé restent visibles ; deux panneaux de
+// sentier expliquent la règle. Aucune autre mécanique (pas de combinaison). Nouvelle palette
+// `tourbiere` (tourbière sous l'orage qui monte).
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "tourbiere-crapauds", c = v(id);
+  c.line(140, 620, 370, 5); c.arc(680, 860, 380, 3, 40); c.arc(970, 1110, 350, 3, 40);
+  c.arc(1230, 1400, 330, 3, 40); c.arc(1490, 1610, 300, 3, 40); c.line(1960, 2440, 370, 4);
+  c.arc(2500, 2640, 380, 3, 40); c.line(2650, 2770, 370, 2); c.arc(2790, 2920, 380, 3, 40);
+  c.arc(3130, 3260, 370, 3, 40); c.arc(3500, 3660, 330, 3, 40); c.arc(3760, 3920, 290, 3, 40);
+  c.line(4240, 4660, 370, 4); c.arc(4710, 4850, 380, 3, 40); c.arc(4990, 5120, 370, 3, 40);
+  c.arc(5270, 5400, 370, 3, 40); c.arc(5600, 5720, 350, 3, 40); c.arc(5980, 6140, 330, 3, 40);
+  c.line(6180, 6480, 310, 3); c.arc(6540, 6670, 290, 3, 40); c.arc(6750, 6880, 240, 3, 40);
+  c.arc(7060, 7190, 330, 3, 40); c.line(7240, 7720, 370, 4); c.arc(7780, 7920, 380, 3, 40);
+  c.arc(8060, 8190, 350, 3, 40); c.arc(8340, 8470, 350, 3, 40); c.arc(8620, 8750, 380, 3, 40);
+  c.arc(9100, 9230, 370, 3, 40); c.arc(9420, 9580, 330, 3, 40); c.line(9600, 9900, 310, 3);
+  c.arc(9940, 10090, 330, 3, 40); c.arc(10260, 10420, 350, 3, 40); c.line(10480, 10900, 370, 4);
+  return {
+    id, name: "La Tourbière des Crapauds Ronfleurs",
+    blurb: "L'orage gronde sur la tourbière : les mottes de mousse flottent… puis plongent. Quand ça fait des bulles, attends qu'elles remontent !",
+    difficulty: "Bien engagé", theme: "tourbiere",
+    width: 11080, floor: 440, spawnX: 60,
+    solids: [
+      // Départ sur la lande tourbeuse, ressauts de laîches
+      p(0, 700, 440),
+      p(810, 470, 440), h(1020, 440),
+      p(1380, 400, 380),
+      p(1900, 600, 440),
+      // Première gouille : UNE motte plongeante, lente, seule (découverte ; panneau juste avant)
+      motte(2620, 440, 170, 4.4, 0.7, 0),
+      p(2910, 600, 440),
+      p(3640, 420, 380), g(3790, 380),
+      p(4190, 520, 440),
+      // Deuxième gouille : deux mottes, la seconde remonte 0,44 s après la première (petite vague)
+      motte(4830, 440, 160, 4.4, 0.6, 0), motte(5110, 420, 160, 4.4, 0.6, 0.9),
+      p(5390, 600, 440), h(5640, 440),
+      // Les buttes de sphaigne
+      p(6120, 420, 380),
+      p(6660, 400, 330),
+      p(7180, 600, 440),
+      // Passage clé : la RONDE DES CRAPAUDS — trois mottes (dont une plus haute) qui remontent et
+      // plongent en vague, chacune 0,44 s après la précédente : partir dès que la première remonte
+      motte(7900, 440, 160, 4.4, 0.6, 0), motte(8180, 400, 160, 4.4, 0.6, 0.9), motte(8460, 440, 160, 4.4, 0.6, 0.8),
+      p(8740, 700, 440),
+      // Sortie de la tourbière et sprint final
+      p(9560, 400, 380),
+      p(10080, 900, 440), g(10300, 440),
+    ],
+    hazards: [
+      _(1520, 64, 380),
+      _(3170, 64, 440),
+      _(6780, 64, 330),
+      _(9140, 64, 440),
+    ],
+    signs: [
+      panneau(2330, 440, "Tourbière :|mottes plongeantes"),
+      panneau(4560, 440, "Bulles : ça plonge|attends la remontée"),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 1920, 440, 1), y(id, 4210, 440, 2), y(id, 7200, 440, 3), y(id, 8760, 440, 4)],
+    finishX: 10650,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 30.9, gold: 31.2, silver: 32.3, bronze: 44.5 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 15 %, argent 50 %, bronze 85 % ; pressés : or 5 %, argent 30 %, bronze 48 %)
   };
 })());

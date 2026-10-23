@@ -376,7 +376,7 @@ function R(e, t) {
       }
     }
     for (let t of s.solids)
-      t.move
+      t.move || t.sink
         ? 0
         : t.kind === `ground`
         ? pe(n, t, e)
@@ -818,6 +818,7 @@ function R(e, t) {
     dogs = [],
     jets = [],
     gusts = [],
+    sinkers = [],
     waterGaps = [],
     flies = [],
     autopilot = !1,
@@ -915,6 +916,33 @@ function R(e, t) {
     for (let gu of gusts) if (cx >= gu.x1 && cx <= gu.x2 && gustState(gu, time).on) return gu.slow;
     return 1;
   }
+  // v5 — Mottes plongeantes (`motte()` de levels.js, LEVELS.md §3e) : passerelle (planche 18 px,
+  // traversable par-dessous) qui flotte pendant la fraction `on` du cycle, puis plonge sous la
+  // tourbière (plus de sol : on tombe) et remonte au cycle suivant. Annonce : pendant les `warn` s
+  // qui précèdent la plongée, elle tremble, s'enfonce de quelques px, des bulles montent et un panneau
+  // « bulles » clignote en haut de l'écran ; sous l'eau, sa silhouette et ses remous restent visibles.
+  // Physique : une motte plongée est simplement déplacée hors du monde (y = 5000), donc toutes les
+  // collisions existantes l'ignorent ; fonction déterministe du temps (l'IA la prévoit exactement).
+  function sinkState(sk, time) {
+    let t = ((((time / sk.period + (sk.phase || 0)) % 1) + 1) % 1) * sk.period,
+      upT = sk.on * sk.period;
+    if (t < upT) {
+      let toDown = upT - t;
+      return { up: !0, warn: toDown < sk.warn ? 1 - toDown / sk.warn : 0, since: t };
+    }
+    return { up: !1, warn: 0, toUp: sk.period - t, since: t - upT };
+  }
+  function setSinkers(time) {
+    for (let sd of sinkers) sd.y = sinkState(sd.sink, time).up ? sd.sink.y0 : 5000;
+  }
+  // Après une réception sur une motte, il faut qu'elle tienne encore un peu (le temps de repartir) :
+  // sinon le saut n'est pas « sûr » pour l'IA (rivaux, pilote auto, pilote humain).
+  function sinkSoon(c, time) {
+    let feet = c.y + c.h;
+    for (let sd of sinkers)
+      if (Math.abs(feet - sd.sink.y0) < 3 && c.x + c.w > sd.x && c.x < sd.x + sd.w && !sinkState(sd.sink, time + 0.45).up) return !0;
+    return !1;
+  }
   function dynHit(e, time) {
     for (let fl of falls) {
       let st = fallState(fl, time);
@@ -933,6 +961,9 @@ function R(e, t) {
     dogs = s.patrols || [];
     jets = s.jets || [];
     gusts = s.gusts || [];
+    sinkers = s.solids.filter((sd) => sd.sink);
+    for (let sd of sinkers) sd.wasUp = !0;
+    setSinkers(0);
     for (let fl of falls) fl.wasFalling = !1;
     for (let jt of jets) jt.wasOn = !1;
     // Rafales : touffes d'herbe (positions déterministes) sur les sols/passerelles fixes de la zone,
@@ -967,6 +998,11 @@ function R(e, t) {
       (on && !jt.wasOn && o !== `count` && Math.abs(jt.x - (v + b / 2)) < b * 0.6 && r.burst(0.5, 0.035, 0.5),
         (jt.wasOn = on));
     }
+    for (let sd of sinkers) {
+      let up = sinkState(sd.sink, _).up;
+      (!up && sd.wasUp && o !== `count` && sd.x < v + b * 1.1 && sd.x + sd.w > v - b * 0.1 && r.burst(0.35, 0.05, 0.45),
+        (sd.wasUp = up));
+    }
     for (let gu of gusts) {
       let on = gustState(gu, _).on;
       (on && !gu.wasOn && o !== `count` && gu.x1 < v + b * 1.1 && gu.x2 > v - b * 0.1 && (r.burst(0.9, 0.04, 0.35), r.burst(0.6, 0.02, 1.1)),
@@ -981,6 +1017,7 @@ function R(e, t) {
       dead = -1,
       invalid = !1,
       jetted = !1,
+      sunk = !1,
       left = !c.grounded,
       landed = -1,
       air = -1,
@@ -990,7 +1027,8 @@ function R(e, t) {
       fr > 0 &&
         ((c.lock = Math.max(0, c.lock - dt)),
         (c.stun = Math.max(0, (c.stun || 0) - dt)),
-        saved && setMovers(_ + fr * dt, [c]));
+        saved && setMovers(_ + fr * dt, [c]),
+        sinkers.length && setSinkers(_ + fr * dt));
       c.drop = Math.max(0, c.drop - dt);
       let dd = (c.stun || 0) > 0 ? 0 : Array.isArray(dir) ? dir[Math.min(fr, dir.length - 1)] : dir,
         acc = c.grounded ? M : ae;
@@ -1016,13 +1054,14 @@ function R(e, t) {
         break;
       }
       if (!c.grounded) ((left = !0), air < 0 && ((air = fr), (airX = c.x)));
-      else if (left && landed < 0) landed = fr;
+      else if (left && landed < 0) ((landed = fr), sinkers.length && sinkSoon(c, _ + fr * dt) && (sunk = !0));
       // après la réception, encore 6 images : se poser juste devant une ronce n'est pas « sûr »
       if (stopOnLand && landed >= 0 && fr - landed >= 6) break;
     }
     if (saved) movers.forEach((m, ix) => ((m.x = saved[ix][0]), (m.y = saved[ix][1])));
+    sinkers.length && setSinkers(_);
     // « sûr » = ni mort ni saut impossible, et on finit posé (pas en pleine chute à l'horizon)
-    return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, jetted, dangerX: dead >= 0 && (air < 0 || dead < air) ? c.x : air >= 0 ? airX : c.x, safe: dead < 0 && !invalid && !jetted && (c.grounded || landed >= 0) };
+    return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, jetted, dangerX: dead >= 0 && (air < 0 || dead < air) ? c.x : air >= 0 ? airX : c.x, safe: dead < 0 && !invalid && !jetted && !sunk && (c.grounded || landed >= 0) };
   }
   function aiDecide(e) {
     if ((e.stun || 0) > 0) return ((e.plan = null), { dir: 0, jump: !1 });
@@ -1129,7 +1168,7 @@ function R(e, t) {
     ex.invalid && (ex = simRunner(e, dirs, -1, D, !1)); // saut en file impossible (en l'air) : tampon moteur
     if (ex.dead < 0 && !ex.invalid) {
       let c = ex.st, t0 = _, sv = movers.map((m) => [m.x, m.y]);
-      ((c.plan = H.plan), (c.waitT = H.waitT), (c.backT = H.backT), (_ = t0 + D / 60), setMovers(_));
+      ((c.plan = H.plan), (c.waitT = H.waitT), (c.backT = H.backT), (_ = t0 + D / 60), setMovers(_), sinkers.length && setSinkers(_));
       let dc = aiDecide(c),
         aim = dc.jump ? 0 : -1;
       // Un humain ne saute pas « au dernier moment » : devant un trou ou une ronce, il vise le milieu
@@ -1168,7 +1207,7 @@ function R(e, t) {
         H.pauseTo = f + D + Math.round((H.opt.pauseMin + (H.opt.pauseMax - H.opt.pauseMin) * H.rnd()) * 60);
       H.cAir = !c.grounded;
       if (f + D < (H.pauseTo || 0) && aim < 0 && H.jumpAt < f && dc.dir === 1 && simRunner(c, 0, -1, 40, !1).safe) dc = { dir: 0, jump: !1 };
-      ((H.plan = c.plan), (H.waitT = c.waitT), (H.backT = c.backT), (_ = t0), movers.forEach((m, ix) => ((m.x = sv[ix][0]), (m.y = sv[ix][1]))));
+      ((H.plan = c.plan), (H.waitT = c.waitT), (H.backT = c.backT), (_ = t0), movers.forEach((m, ix) => ((m.x = sv[ix][0]), (m.y = sv[ix][1]))), sinkers.length && setSinkers(_));
       // saut prévu : on garde l'élan jusqu'à l'appel (pas de freinage de dernière seconde)
       H.q.set(f + D, H.jumpAt >= f + D || aim > 0 ? 1 : dc.dir);
       window.__humDebug && (window.__humLog ||= []).push([f, Math.round(e.x) + "," + Math.round(e.y), Math.round(e.vx), e.grounded, Math.round(c.x), dc.dir, dc.jump, aim, H.jumpAt, (H.waitT||0).toFixed(2), (H.backT||0).toFixed(2), c.grounded, Math.round(c.vx)].join(' '));
@@ -1290,6 +1329,7 @@ function R(e, t) {
       }
     }
     for (let jt of jets) drawJet(jt);
+    for (let sd of sinkers) drawSinker(sd, th);
     for (let sg of s.signs || []) drawSign(sg, th);
     for (let gu of gusts) drawGust(gu, th);
     for (let dg of dogs) {
@@ -1446,6 +1486,84 @@ function R(e, t) {
     lines.forEach((t, i) => n.fillText(t, sg.x, top + 16 + i * 16));
     n.restore();
   }
+  // v5 — Motte plongeante : à flot = tapis de sphaigne (mousse) bordé de tourbe ; annonce = elle
+  // tremble, s'enfonce de 6 px, des bulles montent et un panneau « bulles » clignote en haut de
+  // l'écran ; plongée = silhouette sombre sous l'eau, remous et contour en pointillés à sa place ;
+  // 0,6 s avant de remonter, le contour s'éclaircit et les bulles reprennent.
+  function drawSinker(sd, th) {
+    let sk = sd.sink, x0 = sd.x, w = sd.w, y0 = sk.y0;
+    if (x0 + w < v - 60 || x0 > v + b + 60) return;
+    let st = sinkState(sk, _),
+      moss = th.moss || th.grass,
+      mossDark = th.mossDark || th.grassDark,
+      wy = y0 + 58;
+    if (st.up) {
+      let k = st.warn,
+        rise = Math.max(0, 1 - st.since / 0.3),
+        dy = k * 6 + rise * 8,
+        jx = k > 0 ? Math.sin(_ * 46) * 1.6 * k : 0,
+        x = x0 + jx, yy = y0 + dy;
+      // reflet / ombre sur l'eau
+      ((n.fillStyle = `rgba(0,0,0,0.18)`), n.beginPath(), n.ellipse(x0 + w / 2, wy + 2, w * 0.55, 6, 0, 0, Math.PI * 2), n.fill());
+      // tourbe (dessous) puis mousse (dessus), bords arrondis
+      ((n.fillStyle = th.dirtDark), n.beginPath(),
+        n.roundRect ? n.roundRect(x, yy + 4, w, 16, 6) : n.rect(x, yy + 4, w, 16), n.fill());
+      ((n.fillStyle = moss), n.beginPath(),
+        n.roundRect ? n.roundRect(x, yy, w, 9, 5) : n.rect(x, yy, w, 9), n.fill());
+      n.fillStyle = mossDark;
+      for (let q = x + 8; q < x + w - 6; q += 14) n.fillRect(q, yy + 2 + ((q * 7) % 3), 5, 3);
+      // linaigrettes (pompons blancs) plantées sur la motte
+      n.fillStyle = `#f4f1e6`;
+      for (let q = 0; q < 3; q++) {
+        let px = x + w * (0.2 + q * 0.3), ph = Math.sin(_ * 2 + q + x0);
+        ((n.strokeStyle = mossDark), (n.lineWidth = 1.5), n.beginPath(), n.moveTo(px, yy + 1), n.lineTo(px + ph * 2, yy - 12), n.stroke());
+        (n.beginPath(), n.arc(px + ph * 2, yy - 14, 3.2, 0, Math.PI * 2), n.fill());
+      }
+      // plots orange aux deux bouts (comme les passerelles mobiles) : c'est un élément vivant
+      ((n.fillStyle = `#f26522`), n.fillRect(x + 4, yy + 9, 6, 6), n.fillRect(x + w - 10, yy + 9, 6, 6));
+      if (k > 0) {
+        // annonce : bulles qui montent autour, la motte noircit
+        ((n.fillStyle = `rgba(20,16,10,${0.35 * k})`), n.fillRect(x, yy, w, 20));
+        n.fillStyle = `rgba(230,240,225,0.85)`;
+        for (let q = 0; q < 7; q++) {
+          let ph = (_ * 1.8 + q / 7) % 1, bx = x0 + 6 + ((q * 37) % (w - 12));
+          (n.beginPath(), n.arc(bx, yy - 4 - ph * 34, 2 + (q % 3), 0, Math.PI * 2), n.fill());
+        }
+        if (Math.sin(_ * (8 + k * 18)) > -0.3) drawSinkSign(L(x0 + w / 2, v + 40, v + b - 40), 1);
+      }
+    } else {
+      // plongée : silhouette sous l'eau, remous et contour pointillé de l'emplacement
+      let back = st.toUp < 0.6 ? 1 - st.toUp / 0.6 : 0,
+        sinkY = wy + 10 - back * 14;
+      ((n.fillStyle = `rgba(30,24,16,${0.45 + back * 0.3})`), n.beginPath(),
+        n.roundRect ? n.roundRect(x0 + 6, sinkY, w - 12, 12, 5) : n.rect(x0 + 6, sinkY, w - 12, 12), n.fill());
+      ((n.strokeStyle = `rgba(243,237,226,${0.28 + back * 0.5})`), (n.lineWidth = 2), n.setLineDash([7, 7]),
+        n.strokeRect(x0 + 1, y0 + 1, w - 2, 16), n.setLineDash([]));
+      n.strokeStyle = `rgba(220,235,225,${0.5 * (1 - Math.min(1, st.since / 1.2)) + 0.25 * back})`;
+      for (let q = 0; q < 2; q++) {
+        let rr = ((st.since * 0.9 + q * 0.5) % 1) * w * 0.6;
+        (n.beginPath(), n.ellipse(x0 + w / 2, wy + 1, 10 + rr, 3 + rr * 0.08, 0, 0, Math.PI * 2), n.stroke());
+      }
+      if (back > 0 || st.since < 0.4) {
+        n.fillStyle = `rgba(230,240,225,0.85)`;
+        for (let q = 0; q < 5; q++) {
+          let ph = (_ * 2.2 + q / 5) % 1;
+          (n.beginPath(), n.arc(x0 + 10 + ((q * 41) % (w - 20)), wy - ph * 26, 2 + (q % 2), 0, Math.PI * 2), n.fill());
+        }
+      }
+    }
+  }
+  // Panneau « bulles » (rond brun, trois bulles et une vague) en haut de l'écran : la motte va plonger.
+  function drawSinkSign(cx, a) {
+    let ty = y + 74;
+    ((n.globalAlpha = a), (n.fillStyle = `#e7d9a8`), n.beginPath(), n.arc(cx, ty, 18, 0, Math.PI * 2), n.fill(),
+      (n.strokeStyle = `#3a2a18`), (n.lineWidth = 2.5), n.stroke(),
+      n.beginPath(), n.moveTo(cx - 12, ty + 7),
+      n.quadraticCurveTo(cx - 6, ty + 2, cx, ty + 7), n.quadraticCurveTo(cx + 6, ty + 12, cx + 12, ty + 7), n.stroke(),
+      (n.lineWidth = 2), n.beginPath(), n.arc(cx - 5, ty - 2, 3, 0, Math.PI * 2), n.stroke(),
+      n.beginPath(), n.arc(cx + 4, ty - 6, 4, 0, Math.PI * 2), n.stroke(),
+      n.beginPath(), n.arc(cx - 1, ty - 12, 2, 0, Math.PI * 2), n.stroke(), (n.globalAlpha = 1));
+  }
   function drawJet(jt) {
     let st = jetState(jt, _),
       top = Math.max(jt.top, y - 60),
@@ -1526,7 +1644,7 @@ function R(e, t) {
   }
   function Ve(e) {
     if (o === `menu` || o === `pause`) return;
-    if (((_ += e), setMovers(_, u), tickDynamicSounds(), o === `count`)) {
+    if (((_ += e), setMovers(_, u), sinkers.length && setSinkers(_), tickDynamicSounds(), o === `count`)) {
       if (((V -= e), V <= 0)) {
         ((V = 0), (U = 0.9), (q = !1), Z(`play`), t.onCount(0), r.go(), we());
         return;

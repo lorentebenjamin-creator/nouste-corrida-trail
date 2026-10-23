@@ -242,6 +242,35 @@ LEVELS.forEach((L, idx) => {
       }
     }
   });
+  // Mottes plongeantes (v5, LEVELS.md §3e) : passerelles qui plongent périodiquement (plus de sol)
+  const sinks = L.solids.filter((sd) => sd.sink).sort((a, b) => a.x - b.x);
+  sinks.forEach((sd, si) => {
+    const sk = sd.sink, tagk = `motte @${sd.x}`, upT = sk.period * sk.on, downT = sk.period - upT;
+    if (sd.kind !== "plank" || !sd.oneWay || sd.move) err(tag, `${tagk}: doit être une passerelle fixe (helper motte())`);
+    if (sk.y0 !== sd.y) err(tag, `${tagk}: y0 ≠ y (utiliser motte(x, y, w, …))`);
+    if (!(sk.period >= 3 && sk.period <= 7)) err(tag, `${tagk}: period ${sk.period} hors 3–7 s`);
+    if (!(sk.on >= 0.4 && sk.on <= 0.8)) err(tag, `${tagk}: on ${sk.on} hors 0,4–0,8`);
+    if (upT < 1.8) err(tag, `${tagk}: à flot ${upT.toFixed(2)} s < 1,8 s (passage trop serré)`);
+    if (downT < 1) err(tag, `${tagk}: plongée ${downT.toFixed(2)} s < 1 s (illisible)`);
+    if (!(sk.warn >= 0.6 && sk.warn <= upT - 0.8)) err(tag, `${tagk}: warn ${sk.warn} s hors [0,6 ; à flot − 0,8] (la plongée doit être annoncée assez tôt)`);
+    if (sd.w < 140) warn(tag, `${tagk}: largeur ${sd.w} < 140 (on n'a pas le temps de s'y poser et repartir)`);
+    if (sd.y < 120 || sd.y > 600) err(tag, `${tagk}: hauteur hors [120, 600]`);
+    if (L.hazards.some((hz) => hz.x < sd.x + sd.w && hz.x + hz.w > sd.x && hz.y + hz.h === sd.y)) err(tag, `${tagk}: pas de ronce sur une motte`);
+    if (L.solids.some((o) => o !== sd && !o.sink && o.x < sd.x + sd.w && o.x + o.w > sd.x && o.y > sd.y && o.y - sd.y < 200 && (o.kind === "ground" || o.kind === "plank")))
+      warn(tag, `${tagk}: un sol/passerelle juste dessous (la plongée ne fait pas tomber : mécanique illisible)`);
+    for (const cp of L.checkpoints) if (cp.x + 60 > sd.x - 120 && cp.x < sd.x + sd.w + 60) err(tag, `${tagk}: trop près du fanion @${cp.x}`);
+    if (sd.x < L.spawnX + 600) err(tag, `${tagk}: trop près du départ`);
+    if (movers.some((m) => { const e = env(m); return e.x2 > sd.x - 300 && e.x1 < sd.x + sd.w + 300; }) || (L.jets || []).some((jt) => jt.x + jt.w > sd.x - 300 && jt.x < sd.x + sd.w + 300) || (L.gusts || []).some((gu) => gu.x2 > sd.x - 300 && gu.x1 < sd.x + sd.w + 300))
+      warn(tag, `${tagk}: autre mécanique à moins de 300 px (combinaison peu lisible)`);
+    // première motte d'une suite : une plateforme fixe ≥ 150 px juste avant, pour attendre la remontée
+    const prev = walk.filter((o) => !o.sink && o.x + o.w <= sd.x + 2).pop();
+    if (!si || sinks[si - 1].x + sinks[si - 1].w < (prev ? prev.x : 0)) {
+      if (!prev || prev.w < 150 || sd.x - (prev.x + prev.w) > 160) warn(tag, `${tagk}: pas de plateforme fixe ≥ 150 px juste avant pour attendre la remontée`);
+      const sg = (L.signs || []).find((sn) => sn.x <= sd.x && sn.x >= sd.x - 1500);
+      if (si === 0 && !sg) warn(tag, `${tagk}: première motte sans panneau de sentier dans les 1500 px avant (annonce de la mécanique)`);
+    }
+  });
+  if (sinks.length) info(tag, `${sinks.length} motte(s) plongeante(s) : passages chronométrés, à valider avec tools/playtest.mjs --human`);
   // Panneaux de sentier (facultatifs, décor) : posés sur un sol, texte court
   if (L.signs != null && !Array.isArray(L.signs)) err(tag, `signs doit être un tableau (ou absent)`);
   for (const sn of L.signs || []) {
@@ -253,7 +282,7 @@ LEVELS.forEach((L, idx) => {
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
   for (const a of accepting) if (!a.used) warn(tag, `acceptedWarnings obsolète : "${a.match}" ne correspond plus à aucun avertissement (le retirer)`);
   accepting = [];
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);

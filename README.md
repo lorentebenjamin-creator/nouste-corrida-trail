@@ -23,13 +23,14 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 8 | Le Gué des Lucioles | Très engagé | 956 m | trail **de nuit** (nouvelle palette, liseré clair sur les sols, gave visible, lucioles) et **jet + radeau** : la cascade tombe sur l'embarcadère d'un radeau mobile, deux cycles à lire ensemble |
 | 9 | La Hêtraie des Palombes | Endurance | 1120 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) en **hêtraie d'automne** (nouvelle palette) ; passage clé : la **palombière**, des **ronces posées sur les passerelles** perchées au-dessus du vide (jusqu'ici toujours au sol) |
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | mécanique inédite : les **rafales de vent de face** — annoncées par les **herbes qui se couchent**, la manche à air qui se lève et un panneau « vent », elles font courir au ralenti et **raccourcissent les sauts** ; passages clés : la **Crête des Bérets**, trois sauts de 140 px au-dessus du vide à prendre pendant le calme, et (revue du 21/10) le **Ravin du Béret**, 185 px, annoncé par un panneau « Ravin : saute au calme » — la rafale y fait **tomber** ; nouvelle palette **lande** |
-| 11 | Le Névé des Marmottes Frileuses *(niveau du jour)* | Haute montagne | 1145 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur un **névé au soleil de midi** (nouvelle palette `neve`) ; passage clé : les **Dents de la Marmotte**, sept séracs étroits (150 px) **en dents de scie** — on monte, on redescend, on remonte plus haut (60 → 90 px) ; jusqu'ici les suites de sauts montaient ou descendaient toujours dans le même sens |
+| 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur un **névé au soleil de midi** (nouvelle palette `neve`) ; passage clé : les **Dents de la Marmotte**, sept séracs étroits (150 px) **en dents de scie** — on monte, on redescend, on remonte plus haut (60 → 90 px) ; jusqu'ici les suites de sauts montaient ou descendaient toujours dans le même sens |
+| 12 | La Tourbière des Crapauds Ronfleurs *(niveau du jour)* | Bien engagé | 1065 m | mécanique inédite : les **mottes plongeantes** — des tapis de sphaigne qui flottent sur les gouilles de la tourbière puis **plongent** (plus de sol) et remontent, en cycle ; annoncées par la motte qui **tremble, s'enfonce et fait des bulles**, un panneau « bulles » qui clignote en haut de l'écran et deux panneaux de sentier (« Tourbière : mottes plongeantes », « Bulles : ça plonge, attends la remontée ») ; plongée, sa silhouette reste visible sous l'eau ; passage clé : la **Ronde des Crapauds**, trois mottes qui remontent en vague ; nouvelle palette **tourbiere** (orage sur la tourbière) |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
 Alternance : après la série 5–8 à mécaniques, **le N°9 est un sentier classique** (rythme /
 endurance, modèle N°4, une seule nouveauté) ; le N°10 est de nouveau à mécaniques (rafales de
-vent, mécanique inédite) ; le N°11 est classique (Névé des Marmottes Frileuses) ; **le N°12 sera de nouveau à mécaniques**, puis on alterne. Chaque nouveau sentier passe le pilote « humain »
+vent, mécanique inédite) ; le N°11 est classique (Névé des Marmottes Frileuses) ; le N°12 est à mécaniques (mottes plongeantes, mécanique inédite) ; **le N°13 sera classique**, puis on alterne. Chaque nouveau sentier passe le pilote « humain »
 (`playtest --human`, deux profils) et doit respecter la courbe de difficulté.
 
 Difficulté mesurée (pilote « humain », 20 essais, réussite / chutes moyennes, 21/10/2026 ; profil attentif
@@ -48,12 +49,14 @@ revu le 21/10 : hésitations et attente du calme ; profil pressé inchangé, `--
 | 9 | 100 % / 0,55 | 90 % / 1,65 |
 | 10 | 100 % / 0,25 | 80 % / 2,65 |
 | 11 | 100 % / 0,40 | 100 % / 2,25 |
+| 12 | 100 % / 0,65 | 85 % / 2,55 |
 
 Détails et méthode : LEVELS.md §8. Sur 40 essais, N°10 en profil pressé : 75 % / 2,92, entre le
 N°7 (80 %) et le N°8 (75 %). N°11 (classique) sur 40 essais : attentif 100 % / 0,42, pressé 98 % / 2,13
 (plus de chutes que le N°9, 88 % / 2,00, mais pas de ronce sur passerelle : réussite plus haute).
 **Revue du 22/10** : ronce ajoutée sur un sérac du N°11 ; sur 40 essais, attentif 100 % / 0,63,
 pressé **93 % / 2,40**, désormais un cran au-dessus du N°9 en chutes et proche en réussite.
+N°12 (mottes plongeantes) sur 40 essais : attentif 100 % / 0,72, pressé 85 % / 2,42, au niveau du N°10.
 
 ## Médailles
 
@@ -88,6 +91,7 @@ avec la règle pressée ; parts sur 40 essais pour ces niveaux, détails LEVELS.
 | 9 | 32,0 s | 32,9 s | 37,8 s | 20 % / 60 % / 85 % | 5 % / 30 % / 50 % |
 | 10 | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
 | 11 | 32,8 s | 36,2 s | 48,0 s | 18 % / 65 % / 85 % | 5 % / 30 % / 50 % |
+| 12 | 31,2 s | 32,3 s | 44,5 s | 15 % / 50 % / 85 % | 5 % / 30 % / 48 % |
 
 | N° | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
 |---|---|---|---|---|---|

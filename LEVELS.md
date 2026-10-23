@@ -233,6 +233,49 @@ de vent, sur une plateforme courte (< ~330 px de sol derrière). Si la rafale to
 collée à la ronce et ne peut ni sauter sans élan ni reculer (elle tomberait) : essai « bloqué ».
 Mettre plutôt un rocher (on peut s'arrêter devant sans risque), ou la ronce sur un long sol.
 
+## 3e. Mécanique v5 : mottes plongeantes (`motte`, niveau 12)
+
+```js
+motte(x, y, w, period = 4.4, on = 0.6, phase = 0, warn = 0.9)
+// → { x, y, w, h: 18, oneWay: true, kind: "plank", sink: { y0: y, period, on, phase, warn } }
+motte(2620, 440, 170, 4.4, 0.7, 0),   // niveau 12, première gouille (découverte)
+```
+
+Une **motte** est une passerelle (planche, `oneWay`, on la traverse par-dessous) posée sur une
+gouille de tourbière, qui **plonge** puis **remonte** en cycle. Cycle déterministe de `period` s
+(fonction du temps du monde, comme les autres mécaniques) : **émergée** pendant la fraction `on`
+du cycle (au début du cycle, décalé par `phase` ∈ [0,1[), puis **plongée** (le solide est
+déplacé à y = 5000 : plus de sol, on tombe dans l'eau, chute mortelle). Rester sur une motte
+quand elle plonge = chute ; on attend donc la remontée sur la plateforme d'appel, puis on
+traverse pendant qu'elle flotte. Sans motte, le moteur est strictement inchangé (boucles vides).
+
+Annonce (les `warn` s avant la plongée, `warn` ≥ 0,6 s) :
+* la motte **tremble**, s'enfonce de 6 px, s'assombrit et fait des **bulles** ;
+* un **panneau « bulles »** clignote en haut de l'écran (`drawSinkSign`) ;
+* plongée, sa **silhouette sombre** reste visible sous l'eau avec des ronds et un **contour
+  pointillé**, qui s'éclaire 0,6 s avant la remontée ; « plop » sonore à la plongée ;
+* au moins un **panneau de sentier** (`signs`, `panneau()`) dans les 1500 px avant la première
+  motte (N°12 : « Tourbière :|mottes plongeantes » puis « Bulles : ça plonge|attends la remontée »).
+Dessin : linaigrette (touffes blanches) et piquets orange aux deux bouts ; couleurs facultatives de
+palette `moss` / `mossDark` (défaut vert mousse).
+
+IA : `simRunner` (rivaux, pilote auto, pilote humain) rejoue les mottes image par image
+(`setSinkers(t)`) ; un saut qui se reçoit sur une motte qui ne tiendra pas encore **0,45 s**
+(`sinkSoon`) n'est pas « sûr », donc l'IA attend la remontée au bord. Le pilote humain extrapole
+les mottes au temps de sa décision.
+
+Validation (`tools/check-levels.mjs`) : planche `oneWay` non mobile, `y` = `sink.y0` (120–600),
+`period` 3–7 s, `on` 0,4–0,8, émergée ≥ 1,8 s, plongée ≥ 1 s, `warn` entre 0,6 s et émergée −
+0,8 s, largeur ≥ 140 px (avertissement), pas de ronce sur une motte, pas de sol à moins de 200 px
+sous elle (avertissement : la chute doit être vraie), loin des fanions et ≥ 600 px du départ, pas
+d'autre mécanique à moins de 300 px (avertissement : une mécanique à la fois), plateforme fixe
+≥ 150 px avant chaque chaîne de mottes (aire d'attente), panneau dans les 1500 px avant la
+première. Chaque niveau à mottes est signalé en `info` : le valider avec `tools/playtest.mjs --human`.
+
+Recette (N°12) : une motte seule et lente d'abord (`on` 0,7), puis deux, puis la passe clé à trois
+mottes décalées (`phase` 0 / 0,9 / 0,8 : chacune remonte ≈ 0,44 s après la précédente) ; écarts
+de 120 px entre sol et motte, mottes de 160–170 px.
+
 ## 4. Thèmes
 
 Le décor est **100 % procédural** (dégradé de ciel, crêtes, sapins, sol, ronces) : un thème
@@ -244,7 +287,9 @@ Réutiliser un thème existant est toujours sûr. Palettes ajoutées : `breche` 
 crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier sous l'orage), `cascade` (niv. 7, gorges moussues), `nuit` (niv. 8, trail de nuit au clair de lune),
 `hetraie` (niv. 9, hêtraie d'automne au petit matin, sapins roux = hêtres), `lande` (niv. 10,
 lande ventée du plateau, bruyère mauve, clé facultative `tuft` pour les touffes d'herbe du vent),
-`neve` (niv. 11, névé d'altitude au soleil de midi, neige éblouissante, crevasses bleu nuit).
+`neve` (niv. 11, névé d'altitude au soleil de midi, neige éblouissante, crevasses bleu nuit),
+`tourbiere` (niv. 12, tourbière sous l'orage qui monte, eau brune `water`/`waterHi`, clés
+facultatives `moss`/`mossDark` pour les mottes plongeantes §3e).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -312,7 +357,7 @@ chute, un humain peut passer.
    * `rivals` : vitesses ~1.0 / 0.92 / 0.85 (baisser pour un niveau plus facile) ;
    * optionnel : `rockfalls`, `patrols`, passerelles `mp(...)` (§3b) — 1 à 2 types par niveau suffisent.
 3. **Règle « 1 nouveauté par niveau »** : chaque nouveau niveau doit introduire **au moins une
-   mécanique inédite** (§3b/§3c/§3d, ou une nouvelle à coder) **ou au moins un passage clé jamais
+   mécanique inédite** (§3b/§3c/§3d/§3e, ou une nouvelle à coder) **ou au moins un passage clé jamais
    vu** (une combinaison ou une mise en page qui n'existe dans aucun niveau précédent : ex. jet
    au-dessus d'un bac mobile, patou sur une passerelle haute, cheminée sous les pierres…).
    Le dire dans un commentaire `// Passage clé : …` au-dessus de l'élément concerné **et** dans la
@@ -329,7 +374,8 @@ chute, un humain peut passer.
    du niveau (`// Niveau classique (règle d'alternance) — nouveauté : …`).
    Suite : N°9 classique, N°10 à mécaniques (rafales de vent, §3d) → **le N°11 DOIT être
    classique** (une seule nouveauté ; il peut utiliser une seule mécanique existante, rafales
-   comprises, avec parcimonie), puis N°12 à mécaniques, etc.
+   comprises, avec parcimonie), puis N°12 à mécaniques (mottes plongeantes, §3e) → **le N°13
+   DOIT être classique**, puis N°14 à mécaniques, etc.
 4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement non justifié**
    (dernière ligne : `… 0 erreur(s), 0 avertissement(s) non justifié(s), N accepté(s)`).
    Un avertissement du nouveau niveau se **corrige dans la géométrie** ; on ne l'accepte
@@ -481,6 +527,12 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   après certaines réceptions (`hesitP` 0,2, `pauseMin`/`pauseMax` 0,1–0,4 s), sans aucun effet sur
   le pilote auto ni les rivaux ; temps cibles de médaille affichés au centième si besoin (`WT`) ;
   correction de l'affichage des dixièmes (`W(14.1)` affichait 14.0).
+* **v5 (23/10)** : mottes plongeantes (`motte`, §3e) — `sinkState` / `setSinkers` / `sinkSoon`
+  (solide déplacé à y = 5000 quand la motte est plongée ; appliqué dans la boucle principale, dans
+  `simRunner` image par image et dans le pilote humain), dessin `drawSinker` (mousse, linaigrette,
+  tremblement, bulles, silhouette et contour pointillé sous l'eau), panneau `drawSinkSign`, « plop »
+  dans `tickDynamicSounds` ; `De()` ne dessine pas les mottes (dynamiques). Niveaux sans motte :
+  inchangés (temps autopilote des N°1–11 identiques au dixième après la modification).
 * `assets/routes-x3PbsDEU.css` : URLs des polices relatives. `custom.css` : liste de niveaux
   défilante, badge, bouton ↓, médailles (disques CSS, sans emoji).
 * Médailles (revue du 20/10) : `medalTargets` / `medalOf` / `medalNext` dans `assets/game.js` lisent
@@ -489,7 +541,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–11)
+## 8. Courbe de difficulté (niveaux 1–12)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -504,6 +556,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 9 | La Hêtraie des Palombes | Endurance | 1120 m | 19 | 8 (dont **2 sur des passerelles**) | — (classique) | 1 / 0.93 / 0.86 | 31,6 s |
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | 14 | 4 | **5 zones de rafales de vent** (8 sauts sous le vent, dont **1 ravin au calme**, le Ravin du Béret, avec panneau) | 1 / 0.93 / 0.86 | 30,8 s |
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | 22 | 7 (dont **1 sur un sérac**, revue du 22/10) | — (classique ; passage clé : **7 séracs en dents de scie**) | 1 / 0.93 / 0.86 | 32,3 s |
+| 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | 19 (dont 9 autour des mottes) | 4 | **6 mottes plongeantes** (1 seule, puis 2, puis la **Ronde des Crapauds** à 3), 2 panneaux | 1 / 0.93 / 0.86 | 30,9 s |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -522,6 +575,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 9 | La Hêtraie des Palombes | 31,6 s | 32,0 s | **32,9 s** | 37,8 s | 20 % / 60 % / 85 % | 5 % / 30 % / 50 % |
 | 10 | Le Plateau des Bérets Envolés | 30,8 s | 35,9 s | 40,1 s | 44,5 s | 20 % / 50 % / 90 % | 25 % / 40 % / 45 % |
 | 11 | Le Névé des Marmottes Frileuses | 32,3 s | 32,8 s | 36,2 s | 48,0 s | 18 % / 65 % / 85 % | 5 % / 30 % / 50 % |
+| 12 | La Tourbière des Crapauds Ronfleurs | 30,9 s | 31,2 s | 32,3 s | 44,5 s | 15 % / 50 % / 85 % | 5 % / 30 % / 48 % |
 
 N°11 : ligne de la **revue du 22/10** (après la ronce du sérac, cible d'argent pressée), sur
 **40 essais** par profil ; avant : or 32,8 / argent 33,4 / bronze 43,6 s, soit 18 % / 50 % / 85 %
@@ -560,7 +614,9 @@ sur le modèle du 4 (règle d'alternance, §6 étape 3b) : un peu plus long et u
 (ronces sur les passerelles de la palombière), nettement en dessous des niveaux à mécaniques.
 10 = **rafales de vent de face** (mécanique v4 inédite, §3d), entre le 7 et le 8 en profil pressé.
 11 = **classique** (névé, séracs en dents de scie), un cran au-dessus du 9 en chutes.
-**Prochain niveau (N°12) : à mécaniques**, puis alternance 1 à mécaniques / 1 classique.
+12 = **mottes plongeantes** (mécanique v5 inédite, §3e), tourbière sous l'orage ; en profil pressé au
+niveau du 10 (85 % sur 40 essais), un cran au-dessus en chutes de l'attentif.
+**Prochain niveau (N°13) : classique**, puis alternance 1 à mécaniques / 1 classique.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
@@ -668,6 +724,15 @@ pressé 98 % / 2,13 → **93 % / 2,40** (3 essais à 6 chutes, aucun blocage), N
 de 40–70 px sur la réception du dernier ravin (95–98 %), ronce de 30–45 px sur le sérac (93–95 %
 dont 1–2 blocages du pilote), ronce de 40 px sur le dernier sérac (attentif 50 % : injouable).
 Points chauds pressés après : x≈10700:14, x≈3300:13, x≈4900:9 (la nouvelle ronce).
+
+N°12 (mesuré le 23/10, mêmes réglages) : mécanique v5 (mottes plongeantes), étiquette « Bien
+engagé » comme le 10. Sur 20 essais : attentif 100 % / 0,65, pressé 85 % / 2,55 ; sur **40 essais**
+(calibrage des médailles) : attentif 100 % / 0,72, pressé 85 % / 2,42 (N°10 : 75 % / 2,92 ; N°11 :
+93 % / 2,40). Points chauds en profil pressé : x≈1500 (ronce sur le ressaut), x≈5000 (deuxième
+gouille, deux mottes) et x≈6800 (ronce des buttes) ; x≈800 (premier ravin) ressort surtout avec
+une graine (artefact du pilote : fenêtre de saut plafonnée + gigue). En attentif : x≈8000 (Ronde des
+Crapauds). Premier jet : première motte à `on` 0,6 → 8 chutes attentives sur la découverte
+(x≈2700) : passée à 0,7. Autopilote 30,9 s, rivaux 0 chute ; N°1–11 inchangés au dixième.
 
 Revue du 20/10 (géométrie N°3 et N°8, §6b), mêmes réglages, avant → après :
 N°3 attentif 100 % / 0,10 → 100 % / 0,05, pressé 100 % / 0,95 → 100 % / 0,85 ;
