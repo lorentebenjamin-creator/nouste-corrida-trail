@@ -267,7 +267,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1880, 430, 1), y(id, 3640, 430, 2)],
     finishX: 4980,
     rivals: [{ speed: 0.93 }, { speed: 0.84 }, { speed: 0.74 }],
-    medals: { auto: 13.9, gold: 14, silver: 15.2, bronze: 16.4 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 25 %, argent 100 %, bronze 100 % ; pressés : or 35 %, argent 45 %, bronze 48 %)
+    medals: { auto: 13.9, gold: 14.4, silver: 15.6, bronze: 16.8 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 75 %, argent 100 %, bronze 100 % ; pressés : or 45 %, argent 45 %, bronze 57 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ronce @2140 trop près du fanion @1880", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : ronce à 260 px du fanion, rivaux lents (≤ 0,93)." },
@@ -298,7 +298,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1400, 356, 1), y(id, 2580, 430, 2), y(id, 3780, 430, 3)],
     finishX: 6460,
     rivals: [{ speed: 0.97 }, { speed: 0.88 }, { speed: 0.78 }],
-    medals: { auto: 18.1, gold: 18.2, silver: 19.7, bronze: 21.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 8 %, argent 93 %, bronze 98 % ; pressés : or 13 %, argent 40 %, bronze 60 %)
+    medals: { auto: 18.1, gold: 18.7, silver: 20.2, bronze: 21.7 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 78 %, argent 98 %, bronze 100 % ; pressés : or 35 %, argent 48 %, bronze 65 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ronce @360 trop près du départ", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : première ronce d'apprentissage, le compte à rebours ne verrouille pas les rivaux comme une réapparition." },
@@ -340,7 +340,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1240, 380, 1), y(id, 2860, 440, 2), y(id, 5080, 380, 3)],
     finishX: 7620,
     rivals: [{ speed: 0.99 }, { speed: 0.9 }, { speed: 0.82 }],
-    medals: { auto: 21.6, gold: 21.6, silver: 23.4, bronze: 25.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 23 %, argent 90 %, bronze 93 % ; pressés : or 10 %, argent 25 %, bronze 30 %)
+    medals: { auto: 21.6, gold: 22.3, silver: 24.1, bronze: 25.9 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 80 %, argent 93 %, bronze 100 % ; pressés : or 20 %, argent 30 %, bronze 38 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ground@4520→ground@5000: montée 60 px avec écart 140 px", reason: "Niveau d'origine (bundle), validé par le playtest humain (≥ 95 % en profil pressé) : seule montée longue du niveau, pilote pressé sans chute à cet endroit." },
@@ -426,7 +426,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2650, 440, 1), y(id, 4230, 440, 2), y(id, 6020, 260, 3), y(id, 8370, 440, 4)],
     finishX: 10900,
     rivals: [{ speed: 1.0 }, { speed: 0.92 }, { speed: 0.85 }],
-    medals: { auto: 30.8, gold: 30.9, silver: 33.4, bronze: 35.9 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 25 %, argent 100 %, bronze 100 % ; pressés : or 13 %, argent 23 %, bronze 35 %)
+    medals: { auto: 30.8, gold: 31.8, silver: 34.4, bronze: 37 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 100 %, argent 100 %, bronze 100 % ; pressés : or 20 %, argent 30 %, bronze 43 %)
   };
 })());
 
@@ -497,7 +497,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2080, 440, 1), y(id, 3960, 380, 2), y(id, 6040, 440, 3), y(id, 7320, 440, 4), y(id, 8580, 440, 5)],
     finishX: 9400,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.8, gold: 32, silver: 37, bronze: 42.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 68 %, bronze 85 % ; pressés : or 5 %, argent 20 %, bronze 28 %)
+    medals: { auto: 31.8, gold: 32.8, silver: 36.9, bronze: 41 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 65 %, argent 83 %, bronze 85 % ; pressés : or 10 %, argent 15 %, bronze 28 %)
   };
 })());
 
@@ -579,7 +579,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1040, 380, 1), y(id, 2320, 170, 2), y(id, 3780, 440, 3), y(id, 5580, 230, 4), y(id, 7000, 440, 5), y(id, 9460, 440, 6)],
     finishX: 10300,
     rivals: [{ speed: 1.0 }, { speed: 0.94 }, { speed: 0.88 }],
-    medals: { auto: 29.4, gold: 31.6, silver: 37.3, bronze: 43.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 60 %, bronze 85 % ; pressés : or 0 %, argent 13 %, bronze 33 %)
+    medals: { auto: 29.4, gold: 30.3, silver: 33.8, bronze: 37.4 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 50 %, argent 75 %, bronze 88 % ; pressés : or 8 %, argent 25 %, bronze 35 %)
   };
 })());
 
@@ -646,7 +646,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 3060, 440, 1), y(id, 4490, 440, 2), y(id, 5810, 300, 3), y(id, 6890, 440, 4), y(id, 8410, 440, 5)],
     finishX: 9500,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.7, gold: 32.1, silver: 36.2, bronze: 40.3 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 20 %, argent 60 %, bronze 85 % ; pressés : or 3 %, argent 18 %, bronze 35 %)
+    medals: { auto: 31.7, gold: 32.7, silver: 36.5, bronze: 40.4 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 65 %, argent 80 %, bronze 85 % ; pressés : or 10 %, argent 23 %, bronze 43 %)
   };
 })());
 
@@ -802,7 +802,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2640, 440, 1), y(id, 5100, 440, 2), y(id, 7050, 250, 3), y(id, 9570, 440, 4)],
     finishX: 11200,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 31.6, gold: 31.7, silver: 34.3, bronze: 36.9 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 98 %, bronze 98 % ; pressés : or 5 %, argent 15 %, bronze 25 %)
+    medals: { auto: 31.6, gold: 32.6, silver: 35.3, bronze: 38 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 98 %, argent 98 %, bronze 98 % ; pressés : or 15 %, argent 20 %, bronze 35 %)
   };
 })());
 
@@ -964,7 +964,7 @@ LEVELS.push((() => {
     acceptedWarnings: [
       { match: "ronce @4810: seulement 150 px avant le bord", reason: "Revue du 22/10 : ronce voulue sur la lèvre d'un sérac de 150 px (dent basse des Dents de la Marmotte), pour durcir le N°11 en profil pressé (98 % → 93 % sur 40 essais) ; la ronce se survole en descendant du sérac précédent (80 px plus haut, 160 px de crevasse) et il reste ≈ 90 px de sérac pour se recevoir et repartir vers la dent suivante, comme sur tous les séracs de 150 px du passage ; validé playtest auto (0 chute, rivaux 0 chute) et humain (attentif 100 %)." },
     ],
-    medals: { auto: 32.3, gold: 32.8, silver: 36.2, bronze: 48 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 18 %, argent 65 %, bronze 85 % ; pressés : or 5 %, argent 30 %, bronze 50 %)
+    medals: { auto: 32.3, gold: 33.3, silver: 36.5, bronze: 39.7 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 73 %, argent 78 %, bronze 88 % ; pressés : or 5 %, argent 13 %, bronze 20 %)
   };
 })());
 
@@ -1036,7 +1036,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1920, 440, 1), y(id, 4210, 440, 2), y(id, 7200, 440, 3), y(id, 8760, 440, 4)],
     finishX: 10650,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 30.9, gold: 31, silver: 33.5, bronze: 36.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 23 %, argent 80 %, bronze 90 % ; pressés : or 5 %, argent 15 %, bronze 25 %)
+    medals: { auto: 30.9, gold: 31.9, silver: 34.5, bronze: 37.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 73 %, argent 80 %, bronze 93 % ; pressés : or 15 %, argent 15 %, bronze 28 %)
   };
 })());
 
@@ -1082,8 +1082,9 @@ LEVELS.push((() => {
       m(3140, 200, 160),
       p(3420, 440, 190), h(3560, 190),
       // Passage clé : la GRANDE DÉGRINGOLADE — sept terrasses de 130 px qui descendent du chai
-      // (190 → 230 → 270 → 305 → 340 → 375 → 405 → 440), ravins de 160 px
-      p(4020, 130, 230), p(4310, 130, 270), p(4600, 130, 305),
+      // (190 → 230 → 270 → 305 → 340 → 375 → 405 → 440), ravins de 160 px (150 px avant la 3e terrasse,
+      // revue du 24/10 : elle commence à 4580, 150 px de large, pour étaler le point chaud x≈4600)
+      p(4020, 130, 230), p(4310, 130, 270), p(4580, 150, 305),
       p(4890, 130, 340), p(5180, 130, 375), p(5470, 130, 405),
       p(5760, 850, 440), h(6300, 440),
       // Les rangs de vigne : passerelles au-dessus de la combe
@@ -1101,25 +1102,29 @@ LEVELS.push((() => {
     hazards: [
       _(480, 70, 440),
       _(1640, 64, 370),
-      // Passage clé : ronces de 45–55 px sur la lèvre des 3e, 5e et 6e terrasses — un saut lâché trop tôt
+      // Passage clé : ronces de 45–55 px sur la lèvre des 3e, 5e et 6e terrasses (revue du 24/10 : 6e
+      // passée de 45 à 55 px, 3e avancée avec sa terrasse ; pressé 85 % → 88 %, chutes 24/14/12 → 15/14/16) — un saut lâché trop tôt
       // retombe dedans ; un saut complet les survole (≈ 50 px de terrasse pour se recevoir et relancer).
-      _(4600, 45, 305),
+      _(4580, 45, 305),
       _(5180, 55, 375),
-      _(5470, 45, 405),
+      _(5470, 55, 405),
       _(8440, 64, 380),
       _(10450, 70, 440),
       _(11400, 74, 440),
     ],
     coins: c.list,
+    // Panneau avant la Grande Dégringolade (revue du 24/10) : annonce la descente d'un coup et les ronces
+    // de lèvre (point chaud x≈4600 en profil pressé : saut lâché trop tôt).
+    signs: [panneau(3470, 190, "Dégringolade :|saute à fond")],
     checkpoints: [y(id, 2640, 250, 1), y(id, 5790, 440, 2), y(id, 8870, 310, 3), y(id, 10040, 440, 4)],
     finishX: 11650,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 32.9, gold: 33.1, silver: 36.8, bronze: 40.6 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 15 %, argent 73 %, bronze 85 % ; pressés : or 0 %, argent 15 %, bronze 30 %)
+    medals: { auto: 32.9, gold: 33.9, silver: 38.3, bronze: 42.8 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 53 %, argent 60 %, bronze 85 % ; pressés : or 3 %, argent 18 %, bronze 30 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
-      { match: "ronce @4600: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2)." },
-      { match: "ronce @5180: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2)." },
-      { match: "ronce @5470: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2)." },
+      { match: "ronce @4580: seulement 150 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 150 px (3e terrasse, ravin de 150 px avant), survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2). Revue du 24/10 : 3e terrasse à 4580 (150 px, ravin 150 px), ronce de la 6e à 55 px, panneau avant la descente ; humain 40 essais : attentif 100 % / 0,45, pressé 88 % / 2,90 (chutes x≈5500:16, 4600:15, 5200:14)." },
+      { match: "ronce @5180: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2). Revue du 24/10 : 3e terrasse à 4580 (150 px, ravin 150 px), ronce de la 6e à 55 px, panneau avant la descente ; humain 40 essais : attentif 100 % / 0,45, pressé 88 % / 2,90 (chutes x≈5500:16, 4600:15, 5200:14)." },
+      { match: "ronce @5470: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2). Revue du 24/10 : 3e terrasse à 4580 (150 px, ravin 150 px), ronce de la 6e à 55 px, panneau avant la descente ; humain 40 essais : attentif 100 % / 0,45, pressé 88 % / 2,90 (chutes x≈5500:16, 4600:15, 5200:14)." },
     ],
   };
 })());

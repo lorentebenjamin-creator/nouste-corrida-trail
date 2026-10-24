@@ -58,6 +58,9 @@ LEVELS.forEach((L, idx) => {
     const md = L.medals, okNum = (x) => typeof x === "number" && isFinite(x) && x > 0;
     if (![md.auto, md.gold, md.silver, md.bronze].every(okNum)) err(tag, `medals : auto, gold, silver et bronze doivent être des nombres > 0`);
     else if (!(md.auto <= md.gold && md.gold < md.silver && md.silver < md.bronze)) err(tag, `medals : il faut auto ≤ or < argent < bronze`);
+    // Or ≥ auto × 1,03 (revue du 24/10) : un or à 0,1–0,2 s du pilote auto n'est atteignable que par un essai
+    // parfait (quasi jamais en profil pressé) : recalibrer (tools/medals.mjs --calibrate) ou justifier.
+    else if (md.gold < md.auto * 1.03 - 1e-9) warn(tag, `medals : or ${md.gold} s à moins de 3 % au-dessus du pilote auto ${md.auto} s (+${((md.gold / md.auto - 1) * 100).toFixed(1)} %, viser ≥ ${(Math.ceil(md.auto * 1.03 * 10 - 1e-6) / 10).toFixed(1)} s)`);
     // Écart relatif or → argent (revue du 23/10) : argent ≥ or × 1,08. En dessous, l'argent « colle » à l'or
     // (quelques dixièmes = le jitter d'une image) : recalibrer (tools/medals.mjs --calibrate) ou justifier.
     else if (md.silver < md.gold * 1.08 - 1e-9) warn(tag, `medals : argent ${md.silver} s à moins de 8 % au-dessus de l'or ${md.gold} s (+${((md.silver / md.gold - 1) * 100).toFixed(1)} %, viser ≥ ${(Math.ceil(md.gold * 1.08 * 10 - 1e-6) / 10).toFixed(1)} s)`);

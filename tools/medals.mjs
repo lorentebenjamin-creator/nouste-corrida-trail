@@ -13,8 +13,8 @@
 //    les deux profils, attentif et pressé, et choisit, au DIXIÈME de seconde (or au 0,05 s si aucun
 //    dixième ne tombe dans la fenêtre : temps très groupés ; le jeu l'affiche alors au centième), les temps cibles tels
 //    qu'une part donnée des essais ATTENTIFS (ratés compris, comptés sans médaille) les atteigne :
-//      or ≈ 17,5 % (fenêtre visée 10–25 %), argent ≈ 50 %, bronze ≈ 85 %,
-//    avec or ≥ auto, argent ≥ or + 0,5 s, bronze ≥ argent + 0,5 s (paliers progressivement plus faciles).
+//      or ≈ 40 % (fenêtre visée 30–50 %, revue du 24/10 ; avant 17,5 % / 10–25 %), argent ≈ 50 %, bronze ≈ 85 %,
+//    avec or ≥ auto × 1,03 (revue du 24/10 : sinon l'or n'est atteignable que par un essai parfait), argent ≥ or + 0,5 s, bronze ≥ argent + 0,5 s (paliers progressivement plus faciles).
 //    Cible d'argent sur le profil PRESSÉ (revue du 22/10) : l'argent est en plus relevé, si besoin,
 //    jusqu'au temps atteint par ≈ 30 % des essais pressés, sans dépasser le MILIEU de l'intervalle
 //    or–bronze (règle d'espacement : l'argent ne colle plus à l'or quand le bronze est loin, et ne
@@ -40,7 +40,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const levelsPath = join(here, '..', 'levels.js');
 export const COEF = { gold: 1.15, silver: 1.35, bronze: 1.6 };
-export const TARGET = { gold: 0.175, goldMin: 0.10, goldMax: 0.25, silver: 0.5, silverPressed: 0.3, bronze: 0.85, gap: 0.5, silverMin: 1.08 };
+export const TARGET = { gold: 0.40, goldMin: 0.30, goldMax: 0.50, goldAuto: 1.03, silver: 0.5, silverPressed: 0.3, bronze: 0.85, gap: 0.5, silverMin: 1.08 };
 export const PROFILES = {
   attentif: [],
   'pressé': ['--delay', '180-250', '--jitter', '80', '--hold', '0.18-0.5', '--calm', '0', '--hesit', '0'],
@@ -60,17 +60,21 @@ function quantileUp(times, q, lo) {
 // times = essais attentifs ; pressed = essais pressés (facultatif) — null = raté
 export function calibrate(auto, times, pressed) {
   const lo = Math.ceil(auto * 10 - 1e-6) / 10;
-  // or : seuil au dixième dont la part d'essais attentifs est la plus proche de 17,5 % (fenêtre 10–25 %)
-  const cands = [...new Set([lo, ...times.filter((x) => x != null && x >= lo).map((x) => Math.ceil(x * 10 - 1e-6) / 10)])].sort((a, b) => a - b);
+  // or ≥ auto × 1,03 (revue du 24/10) : un or à 0,1–0,2 s du pilote auto n'est atteignable que par un essai
+  // parfait (quasi jamais en profil pressé). Plancher arrondi au dixième supérieur.
+  const loGold = Math.max(lo, Math.ceil(auto * TARGET.goldAuto * 10 - 1e-6) / 10);
+  // or : seuil au dixième dont la part d'essais attentifs est la plus proche de 40 % (fenêtre 30–50 %,
+  // revue du 24/10 ; avant : 17,5 %, fenêtre 10–25 %), jamais sous auto × 1,03
+  const cands = [...new Set([loGold, ...times.filter((x) => x != null && x >= loGold).map((x) => Math.ceil(x * 10 - 1e-6) / 10)])].sort((a, b) => a - b);
   let gold = cands[0], best = Infinity;
   const pick = (cs) => { for (const c of cs) {
     const sh = share(times, c), d = Math.abs(sh - TARGET.gold) + (sh < TARGET.goldMin || sh > TARGET.goldMax ? 1 : 0);
     if (d < best - 1e-9) { best = d; gold = c; }
   } };
   pick(cands);
-  // temps très groupés (aucun dixième dans la fenêtre 10–25 %) : on s'autorise le 0,05 s
+  // temps très groupés (aucun dixième dans la fenêtre 30–50 %) : on s'autorise le 0,05 s
   // (le jeu affiche alors ce temps cible au centième)
-  if (best >= 1) pick([...new Set(times.filter((x) => x != null && x >= lo).map((x) => Math.ceil(x * 20 - 1e-6) / 20))].sort((a, b) => a - b));
+  if (best >= 1) pick([...new Set(times.filter((x) => x != null && x >= loGold).map((x) => Math.ceil(x * 20 - 1e-6) / 20))].sort((a, b) => a - b));
   let silver = r1(Math.max(gold + TARGET.gap, quantileUp(times, TARGET.silver, lo)));
   const bronze0 = r1(Math.max(silver + TARGET.gap, quantileUp(times, TARGET.bronze, lo)));
   // cible pressée (≈ 30 % des essais pressés), plafonnée au milieu de l'intervalle or–bronze
@@ -165,7 +169,7 @@ for (const L of list) {
     row[prof + 'Ok'] = ts.filter((x) => x != null).length / (ts.length || 1);
     txt += `\n    ${prof.padEnd(8)} (${ts.length} essais, réussite ${pct(row[prof + 'Ok'])}) : or ${pct(row[prof][0])}, argent ${pct(row[prof][1])}, bronze ${pct(row[prof][2])}`;
   }
-  if (calib) { const g = row.attentif[0]; if (g < TARGET.goldMin || g > TARGET.goldMax) txt += `\n    ⚠ or hors de la fenêtre 10–25 % (temps attentifs trop groupés)`; }
+  if (calib) { const g = row.attentif[0]; if (g < TARGET.goldMin || g > TARGET.goldMax) txt += `\n    ⚠ or hors de la fenêtre ${TARGET.goldMin * 100}–${TARGET.goldMax * 100} % (temps attentifs trop groupés, ou plancher auto × ${TARGET.goldAuto})`; }
   console.log(txt);
   rows.push(row);
   if (!write || !lineTxt) continue;

@@ -25,7 +25,7 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | mécanique inédite : les **rafales de vent de face** — annoncées par les **herbes qui se couchent**, la manche à air qui se lève et un panneau « vent », elles font courir au ralenti et **raccourcissent les sauts** ; passages clés : la **Crête des Bérets**, trois sauts de 140 px au-dessus du vide à prendre pendant le calme, et (revue du 21/10) le **Ravin du Béret**, 185 px, annoncé par un panneau « Ravin : saute au calme » — la rafale y fait **tomber** ; nouvelle palette **lande** |
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur un **névé au soleil de midi** (nouvelle palette `neve`) ; passage clé : les **Dents de la Marmotte**, sept séracs étroits (150 px) **en dents de scie** — on monte, on redescend, on remonte plus haut (60 → 90 px) ; jusqu'ici les suites de sauts montaient ou descendaient toujours dans le même sens |
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | mécanique inédite : les **mottes plongeantes** — des tapis de sphaigne qui flottent sur les gouilles de la tourbière puis **plongent** (plus de sol) et remontent, en cycle ; annoncées par la motte qui **tremble, s'enfonce et fait des bulles**, un panneau « bulles » qui clignote en haut de l'écran et deux panneaux de sentier (« Tourbière : mottes plongeantes », « Bulles : ça plonge, attends la remontée ») ; plongée, sa silhouette reste visible sous l'eau ; passage clé : la **Ronde des Crapauds**, trois mottes qui remontent en vague ; nouvelle palette **tourbiere** (orage sur la tourbière) |
-| 13 | Les Coteaux des Vendangeurs Assoiffés *(niveau du jour)* | Grand raid | 1165 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur des **coteaux de vignes au coucher du soleil** (nouvelle palette `vignes`) ; passage clé : la **Grande Dégringolade**, sept terrasses étroites (130 px) qui **descendent d'un coup** du chai perché jusqu'au pied du coteau (35–40 px plus bas à chaque saut, ravins de 160 px), dont trois avec une **ronce sur la lèvre** : on les enchaîne sans s'arrêter ; jusqu'ici les descentes faisaient deux marches au plus |
+| 13 | Les Coteaux des Vendangeurs Assoiffés *(niveau du jour)* | Grand raid | 1165 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur des **coteaux de vignes au coucher du soleil** (nouvelle palette `vignes`) ; passage clé : la **Grande Dégringolade**, sept terrasses étroites (130–150 px), annoncées par un panneau, qui **descendent d'un coup** du chai perché jusqu'au pied du coteau (35–40 px plus bas à chaque saut, ravins de 150–160 px), dont trois avec une **ronce sur la lèvre** : on les enchaîne sans s'arrêter ; jusqu'ici les descentes faisaient deux marches au plus |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
@@ -54,20 +54,23 @@ ceux des revues précédentes (20/22 oct., fenêtre tronquée), **ne pas les com
 | 10 | 100 % / 0,03 | 95 % / 1,98 |
 | 11 | 100 % / 0,23 | 85 % / 3,20 |
 | 12 | 100 % / 0,20 | 95 % / 2,45 |
-| 13 | 100 % / 0,30 | 85 % / 3,00 |
+| 13 | 100 % / 0,45 | 88 % / 2,90 |
 
 Détails et méthode : LEVELS.md §8. N°12 (mottes plongeantes) : pressé 95 % / 2,45 sur 40 essais
 (graines 1–40), 85 % / 2,60 sur 40 autres (graines 41–80) soit 90 % / 2,53 sur 80 ; N°10 : 95 % / 1,98
 puis 93 % / 2,38 (94 % sur 80). **Le N°12 est donc bien au niveau du N°10 (« Bien engagé »)**, avec un cran
 de chutes en plus : pas de durcissement nécessaire (LEVELS.md §8, revue du 23/10).
-N°13 (24/10, classique) : 40 essais par profil, au niveau du N°11 (85 % / 3,2), un cran au-dessus du N°12.
+N°13 (24/10, classique, après la revue du 24/10 : panneau avant la Grande Dégringolade, 3e terrasse
+avancée, ronce de la 6e à 55 px) : 40 essais, attentif 100 % / 0,45, pressé 88 % / 2,90 (avant 85 % / 3,00),
+au niveau du N°11 (85 % / 3,2) ; étiquette « Grand raid » conservée (règle d'attribution : LEVELS.md §8).
 
 ## Médailles
 
 Chaque sentier a trois temps cibles, **calibrés sur le pilote « humain »** (revue du 21/10) :
 `node tools/medals.mjs <url> last --calibrate --trials 40 --write` lance le pilote automatique
 (temps `auto`) puis 40 essais dans chacun des deux profils, attentif et pressé, et choisit les
-temps pour qu'environ **17,5 % des essais attentifs décrochent l'or** (fenêtre 10–25 %), ≈ 50 %
+temps pour qu'environ **40 % des essais attentifs décrochent l'or** (fenêtre 30–50 % depuis la revue
+du 24/10 ; avant 17,5 %, fenêtre 10–25 %) avec **or ≥ auto × 1,03**, ≈ 50 %
 l'argent et ≈ 85 % le bronze (au dixième, or au 0,05 s si les temps sont très groupés ; or ≥ auto,
 paliers espacés d'au moins 0,5 s). Depuis la revue du 22/10, l'argent vise aussi **≈ 30 % des
 essais pressés**, sans dépasser le milieu de l'intervalle or–bronze (il ne colle plus à l'or quand
@@ -80,31 +83,31 @@ médaille de ton record (enregistré dans le navigateur) et les trois temps cibl
 d'arrivée affiche la médaille de la course, ton record et le temps à battre pour la médaille
 suivante. Un sentier sans champ `medals` s'affiche sans médailles (LEVELS.md §6 étape 5b).
 
-Temps cibles actuels (or / argent / bronze). **Revue du 23/10** : N°1, 2, 3, 4, 9 et 12
-recalibrés (40 essais, nouveau pilote) pour respecter la règle **argent ≥ or × 1,08** ; parts sur 40
-essais pour ces six niveaux, sur 20 essais (pilote du 23/10) pour les autres, dont les temps
-sont **inchangés** (LEVELS.md §8) :
+Temps cibles actuels (or / argent / bronze). **Revue du 24/10** : règle **or ≥ auto × 1,03** (un or à
+0,1–0,2 s du pilote auto n'était atteignable que par un essai parfait) ; 11 niveaux recalibrés (tous sauf
+N°8 et 10, qui respectent la règle et dont l'or est déjà dans la fenêtre 30–50 %). Parts sur 40 essais
+par profil (pilote du 23/10) :
 
 | N° | Or | Argent | Bronze | Attentif or / argent / bronze | Pressé or / argent / bronze |
 |---|---|---|---|---|---|
-| 1 | 14 s | 15,2 s | 16,4 s | 25 % / 100 % / 100 % | 35 % / 45 % / 48 % |
-| 2 | 18,2 s | 19,7 s | 21,2 s | 8 % / 93 % / 98 % | 13 % / 40 % / 60 % |
-| 3 | 21,6 s | 23,4 s | 25,2 s | 23 % / 90 % / 93 % | 10 % / 25 % / 30 % |
-| 4 | 30,9 s | 33,4 s | 35,9 s | 25 % / 100 % / 100 % | 13 % / 23 % / 35 % |
-| 5 | 32,0 s | 37,0 s | 42,1 s | 35 % / 80 % / 85 % | 0 % / 20 % / 45 % |
-| 6 | 31,6 s | 37,3 s | 43,1 s | 60 % / 80 % / 95 % | 25 % / 40 % / 60 % |
-| 7 | 32,1 s | 36,2 s | 40,3 s | 55 % / 80 % / 80 % | 5 % / 20 % / 45 % |
-| 8 | 33,8 s | 37,4 s | 44,5 s | 35 % / 65 % / 100 % | 15 % / 35 % / 60 % |
-| 9 | 31,7 s | 34,3 s | 36,9 s | 18 % / 98 % / 98 % | 5 % / 15 % / 25 % |
-| 10 | 35,9 s | 40,1 s | 44,5 s | 50 % / 70 % / 95 % | 40 % / 55 % / 65 % |
-| 11 | 32,8 s | 36,2 s | 48,0 s | 25 % / 65 % / 100 % | 0 % / 15 % / 40 % |
-| 12 | 31 s | 33,5 s | 36,1 s | 23 % / 80 % / 90 % | 5 % / 15 % / 25 % |
-| 13 | 33,1 s | 36,8 s | 40,6 s | 15 % / 73 % / 85 % | 0 % / 15 % / 30 % |
+| 1 | 14,4 s | 15,6 s | 16,8 s | 75 % / 100 % / 100 % | 45 % / 45 % / 57 % |
+| 2 | 18,7 s | 20,2 s | 21,7 s | 78 % / 98 % / 100 % | 35 % / 48 % / 65 % |
+| 3 | 22,3 s | 24,1 s | 25,9 s | 80 % / 93 % / 100 % | 20 % / 30 % / 38 % |
+| 4 | 31,8 s | 34,4 s | 37,0 s | 100 % / 100 % / 100 % | 20 % / 30 % / 43 % |
+| 5 | 32,8 s | 36,9 s | 41,0 s | 65 % / 83 % / 85 % | 10 % / 15 % / 28 % |
+| 6 | 30,3 s | 33,8 s | 37,4 s | 50 % / 75 % / 88 % | 8 % / 25 % / 35 % |
+| 7 | 32,7 s | 36,5 s | 40,4 s | 65 % / 80 % / 85 % | 10 % / 23 % / 43 % |
+| 8 | 33,8 s | 37,4 s | 44,5 s | 40 % / 75 % / 100 % | 10 % / 28 % / 55 % |
+| 9 | 32,6 s | 35,3 s | 38,0 s | 98 % / 98 % / 98 % | 15 % / 20 % / 35 % |
+| 10 | 35,9 s | 40,1 s | 44,5 s | 33 % / 55 % / 95 % | 35 % / 57 % / 68 % |
+| 11 | 33,3 s | 36,5 s | 39,7 s | 73 % / 78 % / 88 % | 5 % / 13 % / 20 % |
+| 12 | 31,9 s | 34,5 s | 37,1 s | 73 % / 80 % / 93 % | 15 % / 15 % / 28 % |
+| 13 | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
 
-Avec le pilote corrigé (plus fiable), les essais attentifs sont plus rapides qu'avant : l'or des
-N°5–8, 10 et 11 (non recalibrés) est atteint par 25–60 % des essais attentifs (cible 10–25 %). Un
-`--calibrate --trials 40 --write` niveau par niveau les remettrait dans la fenêtre (à décider : il
-change les temps cibles déjà affichés aux joueurs).
+Le plancher auto × 1,03 l'emporte sur la fenêtre 30–50 % : sur les niveaux sans attente (temps
+attentifs groupés à moins de 3 % du pilote auto), l'or est atteint par 65–100 % des essais attentifs
+(N°4 et 9 : ≈ 100 %). Seuls N°6, 8, 10 et 13 (53 %) sont dans la fenêtre ou tout près. Détails et
+tableau avant/après : LEVELS.md §8.
 
 ## Source de référence
 
