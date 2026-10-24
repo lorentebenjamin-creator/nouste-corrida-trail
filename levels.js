@@ -227,6 +227,19 @@ export const THEMES = {
     // Clés facultatives : eau de la tourbière au fond des ravins (décor), couleurs des mottes (v5).
     water: "#36351f", waterHi: "#a9ab84", moss: "#86a84c", mossDark: "#55702f",
   },
+  vignes: {
+    // Niveau 13 : coteaux de vignes au coucher du soleil (ciel rose et or, argile rouge,
+    // feuilles de vigne rousses de fin de vendange, grappes violettes)
+    skyTop: "#2b1d4a", skyMid: "#c4607a", skyBot: "#f7c27a",
+    ridge: "#4a2f52", ridge2: "#8a5068",
+    pine: "#2f3a22", pine2: "#6b7a2e",
+    dirt: "#7a4a30", dirtDark: "#4e2e1e",
+    grass: "#b59a3e", grassDark: "#7d6a2a",
+    wood: "#8a5634", woodDark: "#55331f",
+    rock: "#c2a98e", rockDark: "#7e6a58",
+    thorn: "#2a1c1e", leaf: "#a8452c", berry: "#5a2a6a",
+    fog: "#1e1220",
+  },
 };
 
 // =====================================================================
@@ -1024,5 +1037,89 @@ LEVELS.push((() => {
     finishX: 10650,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
     medals: { auto: 30.9, gold: 31, silver: 33.5, bronze: 36.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 23 %, argent 80 %, bronze 90 % ; pressés : or 5 %, argent 15 %, bronze 25 %)
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 13 — Les Coteaux des Vendangeurs Assoiffés (niveau du jour, 2026-10-24)
+// Niveau classique (règle d'alternance, après le N°12 à mécaniques) — nouveauté : un seul passage
+// clé inédit, la GRANDE DÉGRINGOLADE, sept terrasses de vigne étroites (130 px) qui DESCENDENT
+// d'un coup du chai perché (y = 190) jusqu'au pied du coteau (y = 440), 35–40 px plus bas à chaque
+// saut, ravins de 160 px : on les enchaîne sans s'arrêter (on se reçoit loin sur la terrasse,
+// il faut relancer aussitôt). Jusqu'ici les descentes faisaient 2 marches au plus. Aucune mécanique
+// v2/v3/v4/v5 : sols, ravins, ronces, rochers, troncs (barriques), passerelles fixes et fanions,
+// sur le modèle du niveau 4. Nouvelle palette `vignes` (coteaux au coucher du soleil).
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "coteaux-vendangeurs", c = v(id);
+  c.line(160, 400, 370, 3); c.arc(780, 960, 330, 3, 40); c.line(1200, 1340, 370, 2);
+  c.arc(1360, 1530, 290, 3, 40); c.line(1700, 1880, 300, 2); c.arc(1910, 2080, 230, 3, 40);
+  c.line(2280, 2460, 240, 2); c.arc(2480, 2640, 180, 3, 40); c.line(2700, 2980, 180, 3);
+  c.arc(3000, 3160, 140, 3, 40); c.arc(3280, 3440, 100, 3, 40); c.line(3460, 3540, 120, 2);
+  c.line(3660, 3820, 120, 2);
+  c.arc(3860, 4020, 120, 3, 40); c.arc(4150, 4310, 160, 3, 40); c.arc(4440, 4600, 195, 3, 40);
+  c.arc(4730, 4890, 230, 3, 40); c.arc(5020, 5180, 265, 3, 40); c.arc(5310, 5470, 295, 3, 40);
+  c.arc(5600, 5760, 330, 3, 40); c.line(5900, 6200, 370, 4);
+  c.arc(6600, 6740, 330, 3, 40); c.arc(6910, 7040, 250, 3, 40); c.arc(7200, 7340, 250, 3, 40);
+  c.arc(7510, 7650, 290, 3, 40); c.line(7700, 7860, 370, 2); c.arc(8150, 8300, 290, 3, 40);
+  c.line(8320, 8420, 310, 2); c.arc(8720, 8850, 230, 3, 40); c.line(8900, 9200, 240, 4);
+  c.arc(9270, 9420, 260, 3, 40); c.line(9440, 9560, 300, 2); c.arc(9860, 10010, 330, 3, 40);
+  c.line(10060, 10380, 370, 4); c.arc(10710, 10860, 330, 3, 40); c.line(10900, 11040, 370, 2);
+  c.line(11250, 11640, 370, 4);
+  return {
+    id, name: "Les Coteaux des Vendangeurs Assoiffés",
+    blurb: "Coucher de soleil sur les vignes : grimpe jusqu'au chai perché, puis dévale les terrasses sans rater une marche.",
+    difficulty: "Grand raid", theme: "vignes",
+    width: 12060, floor: 440, spawnX: 60,
+    solids: [
+      // Départ au pied des vignes, puis ressauts vers le coteau
+      p(0, 800, 440),
+      p(940, 440, 440), h(1100, 440),
+      p(1510, 420, 370),
+      p(2060, 440, 310), g(2190, 310),
+      // Montée au chai perché
+      p(2620, 400, 250),
+      m(3140, 200, 160),
+      p(3420, 440, 190), h(3560, 190),
+      // Passage clé : la GRANDE DÉGRINGOLADE — sept terrasses de 130 px qui descendent du chai
+      // (190 → 230 → 270 → 305 → 340 → 375 → 405 → 440), ravins de 160 px
+      p(4020, 130, 230), p(4310, 130, 270), p(4600, 130, 305),
+      p(4890, 130, 340), p(5180, 130, 375), p(5470, 130, 405),
+      p(5760, 850, 440), h(6300, 440),
+      // Les rangs de vigne : passerelles au-dessus de la combe
+      m(6740, 400, 170), m(7040, 360, 160), m(7340, 400, 170),
+      p(7650, 520, 440), g(7900, 440),
+      // Montée au pressoir
+      p(8300, 420, 380),
+      p(8850, 420, 310),
+      // Descente vers la cave
+      p(9420, 440, 370), h(9600, 370),
+      p(10010, 700, 440),
+      // Dernier sprint entre les barriques jusqu'à l'arche
+      p(10860, 1100, 440), g(11100, 440),
+    ],
+    hazards: [
+      _(480, 70, 440),
+      _(1640, 64, 370),
+      // Passage clé : ronces de 45–55 px sur la lèvre des 3e, 5e et 6e terrasses — un saut lâché trop tôt
+      // retombe dedans ; un saut complet les survole (≈ 50 px de terrasse pour se recevoir et relancer).
+      _(4600, 45, 305),
+      _(5180, 55, 375),
+      _(5470, 45, 405),
+      _(8440, 64, 380),
+      _(10450, 70, 440),
+      _(11400, 74, 440),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2640, 250, 1), y(id, 5790, 440, 2), y(id, 8870, 310, 3), y(id, 10040, 440, 4)],
+    finishX: 11650,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 32.9, gold: 33.1, silver: 36.8, bronze: 40.6 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 15 %, argent 73 %, bronze 85 % ; pressés : or 0 %, argent 15 %, bronze 30 %)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "ronce @4600: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2)." },
+      { match: "ronce @5180: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2)." },
+      { match: "ronce @5470: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2)." },
+    ],
   };
 })());

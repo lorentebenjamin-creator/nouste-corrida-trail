@@ -24,13 +24,14 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 9 | La Hêtraie des Palombes | Endurance | 1120 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) en **hêtraie d'automne** (nouvelle palette) ; passage clé : la **palombière**, des **ronces posées sur les passerelles** perchées au-dessus du vide (jusqu'ici toujours au sol) |
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | mécanique inédite : les **rafales de vent de face** — annoncées par les **herbes qui se couchent**, la manche à air qui se lève et un panneau « vent », elles font courir au ralenti et **raccourcissent les sauts** ; passages clés : la **Crête des Bérets**, trois sauts de 140 px au-dessus du vide à prendre pendant le calme, et (revue du 21/10) le **Ravin du Béret**, 185 px, annoncé par un panneau « Ravin : saute au calme » — la rafale y fait **tomber** ; nouvelle palette **lande** |
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur un **névé au soleil de midi** (nouvelle palette `neve`) ; passage clé : les **Dents de la Marmotte**, sept séracs étroits (150 px) **en dents de scie** — on monte, on redescend, on remonte plus haut (60 → 90 px) ; jusqu'ici les suites de sauts montaient ou descendaient toujours dans le même sens |
-| 12 | La Tourbière des Crapauds Ronfleurs *(niveau du jour)* | Bien engagé | 1065 m | mécanique inédite : les **mottes plongeantes** — des tapis de sphaigne qui flottent sur les gouilles de la tourbière puis **plongent** (plus de sol) et remontent, en cycle ; annoncées par la motte qui **tremble, s'enfonce et fait des bulles**, un panneau « bulles » qui clignote en haut de l'écran et deux panneaux de sentier (« Tourbière : mottes plongeantes », « Bulles : ça plonge, attends la remontée ») ; plongée, sa silhouette reste visible sous l'eau ; passage clé : la **Ronde des Crapauds**, trois mottes qui remontent en vague ; nouvelle palette **tourbiere** (orage sur la tourbière) |
+| 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | mécanique inédite : les **mottes plongeantes** — des tapis de sphaigne qui flottent sur les gouilles de la tourbière puis **plongent** (plus de sol) et remontent, en cycle ; annoncées par la motte qui **tremble, s'enfonce et fait des bulles**, un panneau « bulles » qui clignote en haut de l'écran et deux panneaux de sentier (« Tourbière : mottes plongeantes », « Bulles : ça plonge, attends la remontée ») ; plongée, sa silhouette reste visible sous l'eau ; passage clé : la **Ronde des Crapauds**, trois mottes qui remontent en vague ; nouvelle palette **tourbiere** (orage sur la tourbière) |
+| 13 | Les Coteaux des Vendangeurs Assoiffés *(niveau du jour)* | Grand raid | 1165 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur des **coteaux de vignes au coucher du soleil** (nouvelle palette `vignes`) ; passage clé : la **Grande Dégringolade**, sept terrasses étroites (130 px) qui **descendent d'un coup** du chai perché jusqu'au pied du coteau (35–40 px plus bas à chaque saut, ravins de 160 px), dont trois avec une **ronce sur la lèvre** : on les enchaîne sans s'arrêter ; jusqu'ici les descentes faisaient deux marches au plus |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
 Alternance : après la série 5–8 à mécaniques, **le N°9 est un sentier classique** (rythme /
 endurance, modèle N°4, une seule nouveauté) ; le N°10 est de nouveau à mécaniques (rafales de
-vent, mécanique inédite) ; le N°11 est classique (Névé des Marmottes Frileuses) ; le N°12 est à mécaniques (mottes plongeantes, mécanique inédite) ; **le N°13 sera classique**, puis on alterne. Chaque nouveau sentier passe le pilote « humain »
+vent, mécanique inédite) ; le N°11 est classique (Névé des Marmottes Frileuses) ; le N°12 est à mécaniques (mottes plongeantes, mécanique inédite) ; le N°13 est classique (Coteaux des Vendangeurs Assoiffés) ; **le N°14 sera à mécaniques**, puis on alterne. Chaque nouveau sentier passe le pilote « humain »
 (`playtest --human`, deux profils) et doit respecter la courbe de difficulté.
 
 Difficulté mesurée (pilote « humain », **40 essais**, réussite / chutes moyennes, **23/10/2026** ; profil
@@ -53,11 +54,13 @@ ceux des revues précédentes (20/22 oct., fenêtre tronquée), **ne pas les com
 | 10 | 100 % / 0,03 | 95 % / 1,98 |
 | 11 | 100 % / 0,23 | 85 % / 3,20 |
 | 12 | 100 % / 0,20 | 95 % / 2,45 |
+| 13 | 100 % / 0,30 | 85 % / 3,00 |
 
 Détails et méthode : LEVELS.md §8. N°12 (mottes plongeantes) : pressé 95 % / 2,45 sur 40 essais
 (graines 1–40), 85 % / 2,60 sur 40 autres (graines 41–80) soit 90 % / 2,53 sur 80 ; N°10 : 95 % / 1,98
 puis 93 % / 2,38 (94 % sur 80). **Le N°12 est donc bien au niveau du N°10 (« Bien engagé »)**, avec un cran
 de chutes en plus : pas de durcissement nécessaire (LEVELS.md §8, revue du 23/10).
+N°13 (24/10, classique) : 40 essais par profil, au niveau du N°11 (85 % / 3,2), un cran au-dessus du N°12.
 
 ## Médailles
 
@@ -96,6 +99,7 @@ sont **inchangés** (LEVELS.md §8) :
 | 10 | 35,9 s | 40,1 s | 44,5 s | 50 % / 70 % / 95 % | 40 % / 55 % / 65 % |
 | 11 | 32,8 s | 36,2 s | 48,0 s | 25 % / 65 % / 100 % | 0 % / 15 % / 40 % |
 | 12 | 31 s | 33,5 s | 36,1 s | 23 % / 80 % / 90 % | 5 % / 15 % / 25 % |
+| 13 | 33,1 s | 36,8 s | 40,6 s | 15 % / 73 % / 85 % | 0 % / 15 % / 30 % |
 
 Avec le pilote corrigé (plus fiable), les essais attentifs sont plus rapides qu'avant : l'or des
 N°5–8, 10 et 11 (non recalibrés) est atteint par 25–60 % des essais attentifs (cible 10–25 %). Un

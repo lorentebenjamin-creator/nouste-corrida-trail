@@ -289,7 +289,8 @@ crépuscule), `estive` (niv. 5, pâturage d'été), `pierrier` (niv. 6, pierrier
 lande ventée du plateau, bruyère mauve, clé facultative `tuft` pour les touffes d'herbe du vent),
 `neve` (niv. 11, névé d'altitude au soleil de midi, neige éblouissante, crevasses bleu nuit),
 `tourbiere` (niv. 12, tourbière sous l'orage qui monte, eau brune `water`/`waterHi`, clés
-facultatives `moss`/`mossDark` pour les mottes plongeantes §3e).
+facultatives `moss`/`mossDark` pour les mottes plongeantes §3e), `vignes` (niv. 13, coteaux de vignes au coucher
+du soleil, argile rouge, feuilles de vigne rousses).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -546,7 +547,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–12)
+## 8. Courbe de difficulté (niveaux 1–13)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -562,6 +563,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | 14 | 4 | **5 zones de rafales de vent** (8 sauts sous le vent, dont **1 ravin au calme**, le Ravin du Béret, avec panneau) | 1 / 0.93 / 0.86 | 30,8 s |
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | 22 | 7 (dont **1 sur un sérac**, revue du 22/10) | — (classique ; passage clé : **7 séracs en dents de scie**) | 1 / 0.93 / 0.86 | 32,3 s |
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | 19 (dont 9 autour des mottes) | 4 | **6 mottes plongeantes** (1 seule, puis 2, puis la **Ronde des Crapauds** à 3), 2 panneaux | 1 / 0.93 / 0.86 | 30,9 s |
+| 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 1165 m | 22 (dont 7 dans la Dégringolade) | 8 (dont **3 sur la lèvre des terrasses**) | — (classique ; passage clé : la **Grande Dégringolade**, 7 terrasses de 130 px en descente) | 1 / 0.93 / 0.86 | 32,9 s |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -581,6 +583,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 10 | Le Plateau des Bérets Envolés | 30,8 s | 35,9 s | 40,1 s | 44,5 s | 50 % / 70 % / 95 % | 40 % / 55 % / 65 % |
 | 11 | Le Névé des Marmottes Frileuses | 32,3 s | 32,8 s | 36,2 s | 48,0 s | 25 % / 65 % / 100 % | 0 % / 15 % / 40 % |
 | 12 | La Tourbière des Crapauds Ronfleurs | 30,9 s | 31 s | 33,5 s | 36,1 s | 23 % / 80 % / 90 % | 5 % / 15 % / 25 % |
+| 13 | Les Coteaux des Vendangeurs Assoiffés | 32,9 s | 33,1 s | 36,8 s | 40,6 s | 15 % / 73 % / 85 % (40 essais) | 0 % / 15 % / 30 % (40 essais) |
 
 **Tableau à jour au 23/10** (temps : N°1, 2, 3, 4, 9, 12 recalibrés le 23/10, voir plus bas ; les autres inchangés depuis
 les 21–22/10). Parts : 40 essais pour les six niveaux recalibrés, 20 essais (pilote corrigé du 23/10, temps
@@ -626,7 +629,8 @@ sur le modèle du 4 (règle d'alternance, §6 étape 3b) : un peu plus long et u
 11 = **classique** (névé, séracs en dents de scie), un cran au-dessus du 9 en chutes.
 12 = **mottes plongeantes** (mécanique v5 inédite, §3e), tourbière sous l'orage ; avec le pilote corrigé
 (23/10), en profil pressé au niveau du 10 (≈ 90–95 % sur 80 essais), un peu plus de chutes (2,5 contre 2,2).
-**Prochain niveau (N°13) : classique**, puis alternance 1 à mécaniques / 1 classique.
+13 = **classique** (coteaux de vignes, la Grande Dégringolade), au niveau du 11 en profil pressé, un cran au-dessus du 12.
+**Prochain niveau (N°14) : à mécaniques**, puis alternance 1 classique / 1 à mécaniques.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
@@ -711,6 +715,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 100 % | 0,03 | 38,8 s | 95 % | 1,98 | 39,8 s |
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 100 % | 0,23 | 34,7 s | 85 % | 3,20 | 51,7 s |
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 100 % | 0,20 | 32,7 s | 95 % | 2,45 | 44,5 s |
+| 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 100 % | 0,30 | 35,8 s | 85 % | 3,00 | 49,0 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le
@@ -771,6 +776,14 @@ pressé 98 % / 2,13 → **93 % / 2,40** (3 essais à 6 chutes, aucun blocage), N
 de 40–70 px sur la réception du dernier ravin (95–98 %), ronce de 30–45 px sur le sérac (93–95 %
 dont 1–2 blocages du pilote), ronce de 40 px sur le dernier sérac (attentif 50 % : injouable).
 Points chauds pressés après : x≈10700:14, x≈3300:13, x≈4900:9 (la nouvelle ronce).
+
+N°13 (mesuré le 24/10, ligne ajoutée au tableau du 23/10, mêmes réglages, 40 essais) : classique,
+étiquette « Grand raid » (sous les niveaux à mécaniques). Attentif 100 % / 0,30, pressé 85 % / 3,00
+(N°11 : 85 % / 3,20 ; N°12 : 95 % / 2,45). Premiers jets : terrasses de 150 px puis 130 px sans ronce,
+pressé 100 % / 1,8 (la descente seule ne fait pas tomber) ; une ronce de 45 px sur la 3e terrasse :
+95 % / 2,13 ; ronces sur les 3e, 5e et 6e terrasses (45/55/45 px, avertissements acceptés §6b) :
+85 % / 3,00. Points chauds pressés : x≈4600:24, x≈5200:14, x≈5500:12 (les trois ronces de la
+Dégringolade), puis x≈900 (premier ravin). Autopilote 32,9 s, rivaux 0 chute.
 
 N°12 (mesuré le 23/10) : mécanique v5 (mottes plongeantes), étiquette « Bien engagé » comme le 10.
 **Avant la revue du 23/10** (ancien pilote), sur 40 essais : attentif 100 % / 0,72, pressé 85 % / 2,42
