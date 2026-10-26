@@ -284,7 +284,11 @@ Colonne d'air chaud au-dessus d'un ravin, en cycle de `period` s (actif pendant 
 est multipliée par `lift` et la vitesse de chute plafonnée à `fall` : on **plane** (≈ 417 px de portée à
 plat avec lift 0,4 / fall 360 contre ≈ 321 px pour un saut normal ; 388 px pour un rival à 0,86).
 Moteur : `thermState` / `thermOf` / `fallStep` (gravité commune à la boucle principale et à `simRunner`,
-donc l'IA attend au bord que l'ascendance soit active). Annonce : voile doré et traînées qui montent,
+donc l'IA attend au bord que l'ascendance soit active). Annonce (rendu revu le 26/10 : l'ancien voile doré
+à 22 % et ses traînées blanches disparaissaient sur le ciel crème) : **active** = colonne orange vive
+(voile 30–45 %, bords ondulants cernés de brun), traînées orange cernées de brun sombre et chevrons « ^ »
+qui montent ; **annonce** = la même colonne qui se remplit ; **repos** = trois volutes pâles au ras du
+ravin, rien d'autre ;
 feuilles et duvet en spirale, **fanion rouge et blanc** sur un mât au bord (pend au repos, se dresse quand
 ça monte), deux vautours qui tournent, panneau « spirale » en haut de l'écran (clignote pendant `warn` s
 avant et pendant les `fade` dernières secondes, fixe quand c'est actif). `getState().thermTime`.
@@ -297,6 +301,12 @@ sans l'ascendance ou sans aire d'attente sûre de 150 px. Erreurs : zone ≥ 200
 fall 250–450, ≥ 300 px du départ, pas de chevauchement. Avertissements : fanion dans la zone, pas de sol
 pour le mât, autre mécanique dans la zone, pas de panneau contenant « ascendance » dans les 1500 px
 avant la première.
+
+Décor (revue du 26/10) : une palette qui définit `canyon: { wall, wallDark, strata, back, deep, river,
+riverHi }` (seule `falaise`, N°14) dessine ses ravins en **gorge calcaire** (`drawCanyon` dans `game.js` :
+parois en V à strates horizontales, gauche éclairée / droite à l'ombre, ombre portée, fond dégradé jusqu'au
+presque noir, filet de rivière au fond) au lieu du voile de brouillard ; décor seul, la chute reste
+mortelle à y = 700. Les autres palettes ne changent pas.
 
 Recette (N°14) : ravins de 330–340 px (au-delà d'un saut normal, en deçà du plané du rival lent),
 réception à la même hauteur, une ascendance seule d'abord, puis deux enchaînées décalées, puis le passage
@@ -621,7 +631,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 11 | Le Névé des Marmottes Frileuses | 32,3 s | 33,3 s | 36,5 s | 39,7 s | 73 % / 78 % / 88 % | 5 % / 13 % / 20 % |
 | 12 | La Tourbière des Crapauds Ronfleurs | 30,9 s | 31,9 s | 34,5 s | 37,1 s | 73 % / 80 % / 93 % | 15 % / 15 % / 28 % |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | 32,9 s | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
-| 14 | Les Gorges des Vautours Fainéants | 32,3 s | 35,0 s | 39,4 s | 43,9 s | 40 % / 60 % / 85 % | 3 % / 23 % / 40 % |
+| 14 | Les Gorges des Vautours Fainéants | 32,3 s | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -692,7 +702,28 @@ sur le modèle du 4 (règle d'alternance, §6 étape 3b) : un peu plus long et u
 (23/10), en profil pressé au niveau du 10 (≈ 90–95 % sur 80 essais), un peu plus de chutes (2,5 contre 2,2).
 13 = **classique** (coteaux de vignes, la Grande Dégringolade), au niveau du 11 en profil pressé, un cran au-dessus du 12.
 14 = **ascendances thermiques** (mécanique v6 inédite, §3f), gorges calcaires ; « Technique » comme le 5
-(introduction d'une mécanique) : pressé 90 % (20 essais) / 85 % (40 essais), dans la bande des niveaux à mécaniques.
+(introduction d'une mécanique) : après la revue du 26/10, attentif 100 % / 0,33 chute, pressé 95 % (40 essais).
+
+**Revue du 26/10 (N°14)** — 0,78 chute moyenne attentive, la plus haute des 14. Points chauds (40 essais
+par profil, `playtest --human --verbose`, trois premiers points listés, x ≈ chutes) :
+
+| Profil | Avant (fall 360) | Après (fall 300) |
+|---|---|---|
+| Attentif | 100 % — 0,78 chute — x≈5000 : 8, x≈7700 : 7, x≈2900 : 6 | 100 % — 0,33 chute — x≈5600 : 5, x≈10000 : 5, x≈5000 : 2 |
+| Pressé | 85 % — 2,60 chutes — x≈7700 : 15, x≈2900 : 14, x≈5000 : 14 | 95 % — 2,17 chutes — x≈5000 : 13, x≈5600 : 13, x≈2900 : 11 |
+
+Biais du pilote ? Il gère l'attente de l'ascendance (l'IA la prévoit exactement ; appui long `--hold
+0.5-0.55` → **0 chute** sur 40, donc ni l'attente ni le moment ne sont en cause). Toutes les chutes sont
+des **réceptions courtes** (≈ 30 px avant le bord : x 2940 pour 2970, 5035 pour 5065, 7740 pour 7770) :
+la fenêtre de sauts sûrs est calculée en saut complet, le pilote vise à 35 % de cette fenêtre (donc
+tôt, loin du bord) et un appui de 0,28–0,35 s perd 12–45 px de plané. `--jitter 0` : 0,80 (inchangé) ;
+`--aim 0.5` : 0,38 ; `--aim 0.15` : 2,48. Pilote non modifié (même modèle sur les 14 niveaux) : c'est le
+niveau qui est adouci. Correction : chute plafonnée à **300 px/s** au lieu de 360 dans les cinq
+ascendances (portée ≈ 464 px au lieu de 417 en saut complet, 352 px avec un appui de 0,18 s ; vol
+74 images < 78). Essai intermédiaire (300 seulement aux trois ascendances chaudes 2440, 4530, 7230) :
+attentif 0,42, pressé 95 % — retenu : les cinq, plus lisible (« les ascendances portent pareil »).
+Médailles N°14 recalibrées : 35,0 / 39,4 / 43,9 s → **33,3 / 36,8 / 40,3 s** (or = auto × 1,03 ;
+attentif 43 / 63 / 85 %, pressé 3 / 8 / 20 %).
 **Prochain niveau (N°15) : classique**, puis alternance 1 classique / 1 à mécaniques.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
@@ -779,7 +810,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 100 % | 0,23 | 34,7 s | 85 % | 3,20 | 51,7 s |
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 100 % | 0,20 | 32,7 s | 95 % | 2,45 | 44,5 s |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 100 % | 0,45 | 37,1 s | 88 % | 2,90 | 49,0 s |
-| 14 | Les Gorges des Vautours Fainéants | Technique | 100 % | 0,78 | 38,1 s | 85 % | 2,60 | 48,0 s |
+| 14 | Les Gorges des Vautours Fainéants | Technique | 100 % | 0,33 | 36,4 s | 95 % | 2,17 | 47,7 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le

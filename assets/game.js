@@ -338,6 +338,68 @@ function R(e, t) {
   function Ee(e, n = 1.5) {
     ((W = e ? n : 0), t.onToast(e));
   }
+  // v6.1 — Ravin de falaise calcaire (décor seul, palettes qui définissent `canyon`, N°14) : fond sombre
+  // et profond (dégradé), paroi du fond striée, deux parois en V à strates horizontales (gauche éclairée,
+  // droite à l'ombre), ombre portée de la paroi gauche sur le fond, filet de rivière tout au fond.
+  // La chute reste mortelle à y = 700 comme ailleurs : rien ne change au jeu.
+  function drawCanyon(n, cy, x0, w, yL, yR) {
+    let top = Math.min(yL, yR), H = 780, x1 = x0 + w,
+      ry = Math.min(Math.max(yL, yR) + 125, 572),
+      rnd = de(Math.round(x0) + 7),
+      wl = (yy) => 10 + Math.min(w * 0.3, 90) * ((yy - yL) / (ry - yL + 1)) ** 0.8,
+      wr = (yy) => 10 + Math.min(w * 0.3, 90) * ((yy - yR) / (ry - yR + 1)) ** 0.8;
+    // fond : dégradé du brun chaud au presque noir
+    let gd = n.createLinearGradient(0, top, 0, ry + 40);
+    (gd.addColorStop(0, cy.back), gd.addColorStop(1, cy.deep));
+    ((n.fillStyle = gd), n.fillRect(x0, top, w, H - top));
+    // strates de la paroi du fond
+    ((n.strokeStyle = `rgba(0,0,0,0.18)`), (n.lineWidth = 2));
+    for (let yy = top + 16; yy < ry; yy += 15 + rnd() * 8) {
+      n.beginPath();
+      for (let xx = x0; xx <= x1; xx += 24) n.lineTo(xx, yy + Math.sin(xx * 0.05 + yy) * 2);
+      n.stroke();
+    }
+    // ombre portée de la paroi gauche (soleil à gauche) sur le fond
+    n.fillStyle = `rgba(20,12,8,0.35)`;
+    n.beginPath();
+    n.moveTo(x0, yL);
+    for (let yy = yL; yy <= ry; yy += 10) n.lineTo(x0 + wl(yy) + w * 0.22 * (1 - (yy - yL) / (ry - yL + 1)), yy);
+    (n.lineTo(x0, ry), n.closePath(), n.fill());
+    // rivière au fond, entre les pieds des parois
+    ((n.fillStyle = cy.river), n.fillRect(x0, ry, w, H - ry));
+    ((n.fillStyle = cy.riverHi), (n.globalAlpha = 0.85), n.fillRect(x0 + wl(ry) - 4, ry, w - wl(ry) - wr(ry) + 8, 2));
+    for (let q = 0; q < Math.max(2, w / 70); q++) n.fillRect(x0 + wl(ry) + rnd() * (w - wl(ry) - wr(ry) - 20), ry + 8 + rnd() * 18, 10 + rnd() * 14, 2);
+    n.globalAlpha = 1;
+    // parois en V : gauche (éclairée) et droite (à l'ombre), bord irrégulier
+    for (let side = 0; side < 2; side++) {
+      let y0 = side ? yR : yL, f = side ? wr : wl, pts = [];
+      for (let yy = y0; yy <= H; yy += 12) {
+        let ww = f(Math.min(yy, ry)) + (rnd() - 0.5) * 8;
+        pts.push([side ? x1 - ww : x0 + ww, yy]);
+      }
+      n.beginPath();
+      n.moveTo(side ? x1 : x0, y0);
+      for (let [px, py] of pts) n.lineTo(px, py);
+      (n.lineTo(side ? x1 : x0, H), n.closePath());
+      n.save();
+      n.clip();
+      ((n.fillStyle = side ? cy.wallDark : cy.wall), n.fillRect(x0, y0, w, H - y0));
+      // strates horizontales (bancs calcaires) : traits sombres + liseré clair
+      for (let yy = y0 + 10, k = 0; yy < H; yy += 13 + ((k * 7) % 9), k++) {
+        ((n.fillStyle = cy.strata), n.fillRect(x0, yy, w, 3));
+        ((n.fillStyle = side ? `rgba(255,240,210,0.08)` : `rgba(255,244,220,0.35)`), n.fillRect(x0, yy + 3, w, 1));
+      }
+      // assombrissement vers le fond
+      let sh = n.createLinearGradient(0, y0, 0, ry + 20);
+      (sh.addColorStop(0, `rgba(20,12,8,0)`), sh.addColorStop(1, `rgba(20,12,8,0.55)`));
+      ((n.fillStyle = sh), n.fillRect(x0, y0, w, H - y0));
+      n.restore();
+      // arête de la paroi
+      ((n.strokeStyle = `rgba(40,26,16,0.6)`), (n.lineWidth = 2), n.beginPath(), n.moveTo(side ? x1 : x0, y0));
+      for (let [px, py] of pts) n.lineTo(px, py);
+      n.stroke();
+    }
+  }
   function De() {
     let e = T[s.theme],
       t = document.createElement(`canvas`);
@@ -356,6 +418,11 @@ function R(e, t) {
       if (s < 8) continue;
       // v2 : face à une falaise (> 100 px), le brouillard part du bord le plus bas
       let c = (Math.abs(i.y - a.y) > 100 ? Math.max(i.y, a.y) : Math.min(i.y, a.y)) + 8;
+      // v6.1 (revue 26/10) — palette à `canyon` (N°14 seulement) : vrai ravin calcaire au lieu du voile.
+      if (e.canyon) {
+        drawCanyon(n, e.canyon, o, s, i.y, a.y);
+        continue;
+      }
       ((n.fillStyle = e.fog),
         (n.globalAlpha = 0.72),
         n.fillRect(o, c, s, 780 - c),
@@ -1533,22 +1600,71 @@ function R(e, t) {
       zw = tm.x2 - tm.x1,
       top = y + 40,
       bot = Math.min(tm.base, y + E + 40);
-    // voile d'air chaud (léger dégradé doré qui monte du fond)
+    // v6.1 (revue 26/10) — lisibilité : l'ancien voile doré (22 %) et ses traînées blanches disparaissaient
+    // sur le ciel crème et les falaises blondes. Désormais : ACTIVE = colonne orange vive (voile 30–45 %,
+    // bords ondulants cernés de brun), traînées orange cernées de brun sombre et chevrons « ^ » qui
+    // montent vite ; ANNONCE = la même colonne qui se remplit progressivement ; REPOS = trois volutes
+    // pâles qui tournent lentement au fond du ravin, rien de plus (impossible de confondre les deux).
+    if (a < 0.02) {
+      n.lineCap = `round`;
+      for (let q = 0; q < 3; q++) {
+        let cx = tm.x1 + ((q + 0.5) * zw) / 3,
+          cy = bot - 150 - ((q * 53) % 60) + Math.sin(_ * 0.8 + q) * 8;
+        if (cx < v - 40 || cx > v + b + 40) continue;
+        for (let pass = 0; pass < 2; pass++) {
+          ((n.strokeStyle = pass ? `rgba(252,246,232,0.75)` : `rgba(120,96,70,0.3)`), (n.lineWidth = pass ? 2 : 4));
+          n.beginPath();
+          for (let k = 0; k <= 18; k++) {
+            let an = _ * 1.2 + q * 2 + k * 0.5, rr = 4 + k * 1.1;
+            let px = cx + Math.cos(an) * rr, py = cy - k * 1.6 + Math.sin(an) * rr * 0.4;
+            k ? n.lineTo(px, py) : n.moveTo(px, py);
+          }
+          n.stroke();
+        }
+      }
+      n.lineCap = `butt`;
+    }
     if (a > 0.02) {
       let gd = n.createLinearGradient(0, bot, 0, top);
-      (gd.addColorStop(0, `rgba(255,214,140,${0.22 * a})`), gd.addColorStop(1, `rgba(255,236,190,0)`));
-      ((n.fillStyle = gd), n.fillRect(tm.x1, top, zw, bot - top));
-      // colonnes ondulantes qui montent
-      n.strokeStyle = `rgba(255,248,225,${0.5 * a})`;
-      n.lineWidth = 2;
-      for (let q = 0; q < 9; q++) {
-        let cx = tm.x1 + ((q + 0.5) * zw) / 9,
-          sy = bot - ((_ * 300 + q * 137) % (bot - top)),
-          ln = 40 + (q % 3) * 16;
-        if (cx < v - 20 || cx > v + b + 20) continue;
-        (n.beginPath(), n.moveTo(cx + Math.sin(sy * 0.05 + q) * 6, sy),
-          n.quadraticCurveTo(cx + Math.sin(sy * 0.05 + q + 1) * 10, sy - ln * 0.5, cx + Math.sin(sy * 0.05 + q + 2) * 6, sy - ln), n.stroke());
+      (gd.addColorStop(0, `rgba(240,110,20,${0.45 * a})`), gd.addColorStop(0.55, `rgba(250,150,40,${0.32 * a})`), gd.addColorStop(1, `rgba(255,190,90,${0.12 * a})`));
+      n.fillStyle = gd;
+      n.beginPath();
+      for (let k = 0; k <= 16; k++) n.lineTo(tm.x1 + Math.sin(_ * 3 + k * 0.9) * 8, bot - ((bot - top) * k) / 16);
+      for (let k = 16; k >= 0; k--) n.lineTo(tm.x2 + Math.sin(_ * 3 + k * 0.9 + 1.5) * 8, bot - ((bot - top) * k) / 16);
+      n.closePath();
+      n.fill();
+      // bords de la colonne : liserés brun-orangé ondulants
+      ((n.strokeStyle = `rgba(150,60,10,${0.55 * a})`), (n.lineWidth = 2.5));
+      for (let ex of [tm.x1, tm.x2]) {
+        if (ex < v - 20 || ex > v + b + 20) continue;
+        n.beginPath();
+        for (let k = 0; k <= 16; k++) n.lineTo(ex + Math.sin(_ * 3 + k * 0.9 + (ex === tm.x2 ? 1.5 : 0)) * 8, bot - ((bot - top) * k) / 16);
+        n.stroke();
       }
+      // traînées qui montent : trait orange vif cerné de brun sombre
+      n.lineCap = `round`;
+      for (let q = 0; q < 10; q++) {
+        let cx = tm.x1 + ((q + 0.5) * zw) / 10,
+          sy = bot - ((_ * 320 + q * 137) % (bot - top)),
+          ln = 46 + (q % 3) * 18;
+        if (cx < v - 20 || cx > v + b + 20) continue;
+        for (let pass = 0; pass < 2; pass++) {
+          ((n.strokeStyle = pass ? `rgba(255,150,40,${0.95 * a})` : `rgba(110,40,8,${0.75 * a})`), (n.lineWidth = pass ? 3 : 6));
+          (n.beginPath(), n.moveTo(cx + Math.sin(sy * 0.05 + q) * 6, sy),
+            n.quadraticCurveTo(cx + Math.sin(sy * 0.05 + q + 1) * 10, sy - ln * 0.5, cx + Math.sin(sy * 0.05 + q + 2) * 6, sy - ln), n.stroke());
+        }
+      }
+      // chevrons « ^ » qui montent au milieu de la colonne
+      for (let q = 0; q < 5; q++) {
+        let cx = tm.x1 + zw * (0.2 + 0.6 * ((q * 0.37) % 1)),
+          cy = bot - ((_ * 200 + q * ((bot - top) / 5)) % (bot - top));
+        if (cx < v - 20 || cx > v + b + 20) continue;
+        for (let pass = 0; pass < 2; pass++) {
+          ((n.strokeStyle = pass ? `rgba(255,214,120,${0.95 * a})` : `rgba(110,40,8,${0.7 * a})`), (n.lineWidth = pass ? 3 : 6));
+          (n.beginPath(), n.moveTo(cx - 12, cy + 8), n.lineTo(cx, cy - 4), n.lineTo(cx + 12, cy + 8), n.stroke());
+        }
+      }
+      n.lineCap = `butt`;
     }
     // feuilles et duvet qui montent en spirale (quelques-uns dès l'annonce)
     let nl = st.on ? 16 : Math.round(st.warn * 9);
@@ -2161,6 +2277,7 @@ function R(e, t) {
       getYaw: () => 0,
       getVy: () => d?.vy ?? 0,
       getMode: () => o,
+      getClock: () => _, // horloge des mécaniques (passerelles, mottes, ascendances…) : captures
       setAutopilot: (e, opt) => {
         autopilot = !!e;
         opt?.human

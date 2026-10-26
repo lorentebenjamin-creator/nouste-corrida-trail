@@ -266,6 +266,8 @@ export const THEMES = {
     rock: "#e2d3b4", rockDark: "#a8936e",
     thorn: "#2e3a1e", leaf: "#c98a2e", berry: "#b23a2a",
     fog: "#5a4a3a",
+    // décor des ravins (revue 26/10, game.js drawCanyon) : parois calcaires striées, fond profond, rivière
+    canyon: { wall: "#d8c29a", wallDark: "#9c8360", strata: "rgba(110,80,50,0.45)", back: "#7a6248", deep: "#22180f", river: "#3f7f8c", riverHi: "#c8eef0" },
   },
 };
 
@@ -1215,13 +1217,16 @@ LEVELS.push((() => {
       _(5900, 64, 440),
       _(9380, 64, 440),
     ],
+    // Revue du 26/10 : chute plafonnée à 300 px/s (au lieu de 360) — on plane plus loin (≈ 464 px au lieu
+    // de 417 en saut complet, 74 images de vol) : toutes les chutes du 24/10 étaient des réceptions courtes
+    // (≈ 30 px avant le bord) sur des sauts pris tôt et/ou appui bref (LEVELS.md §8).
     thermals: [
-      thermique(2440, 3120, 5, 0.6, 0),
-      thermique(4530, 5215, 5, 0.55, 0),
-      thermique(5240, 5805, 5, 0.55, 0.76),
+      thermique(2440, 3120, 5, 0.6, 0, 1.0, 0.4, 300),
+      thermique(4530, 5215, 5, 0.55, 0, 1.0, 0.4, 300),
+      thermique(5240, 5805, 5, 0.55, 0.76, 1.0, 0.4, 300),
       // Passage clé : ascendance courte du Grand Plané
-      thermique(7230, 7920, 5, 0.45, 0.3),
-      thermique(9540, 10170, 5, 0.55, 0.5),
+      thermique(7230, 7920, 5, 0.45, 0.3, 1.0, 0.4, 300),
+      thermique(9540, 10170, 5, 0.55, 0.5, 1.0, 0.4, 300),
     ],
     signs: [
       panneau(2230, 440, "Ascendance :|saute quand ça monte"),
@@ -1231,6 +1236,6 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1960, 440, 1), y(id, 4250, 440, 2), y(id, 6850, 440, 3), y(id, 9010, 440, 4)],
     finishX: 10900,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 32.3, gold: 35, silver: 39.4, bronze: 43.9 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 40 %, argent 60 %, bronze 85 % ; pressés : or 3 %, argent 23 %, bronze 40 %)
+    medals: { auto: 32.3, gold: 33.3, silver: 36.8, bronze: 40.3 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 43 %, argent 63 %, bronze 85 % ; pressés : or 3 %, argent 8 %, bronze 20 %)
   };
 })());
