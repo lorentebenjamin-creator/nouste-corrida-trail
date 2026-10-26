@@ -25,7 +25,8 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 10 | Le Plateau des Bérets Envolés | Bien engagé | 1000 m | mécanique inédite : les **rafales de vent de face** — annoncées par les **herbes qui se couchent**, la manche à air qui se lève et un panneau « vent », elles font courir au ralenti et **raccourcissent les sauts** ; passages clés : la **Crête des Bérets**, trois sauts de 140 px au-dessus du vide à prendre pendant le calme, et (revue du 21/10) le **Ravin du Béret**, 185 px, annoncé par un panneau « Ravin : saute au calme » — la rafale y fait **tomber** ; nouvelle palette **lande** |
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur un **névé au soleil de midi** (nouvelle palette `neve`) ; passage clé : les **Dents de la Marmotte**, sept séracs étroits (150 px) **en dents de scie** — on monte, on redescend, on remonte plus haut (60 → 90 px) ; jusqu'ici les suites de sauts montaient ou descendaient toujours dans le même sens |
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | mécanique inédite : les **mottes plongeantes** — des tapis de sphaigne qui flottent sur les gouilles de la tourbière puis **plongent** (plus de sol) et remontent, en cycle ; annoncées par la motte qui **tremble, s'enfonce et fait des bulles**, un panneau « bulles » qui clignote en haut de l'écran et deux panneaux de sentier (« Tourbière : mottes plongeantes », « Bulles : ça plonge, attends la remontée ») ; plongée, sa silhouette reste visible sous l'eau ; passage clé : la **Ronde des Crapauds**, trois mottes qui remontent en vague ; nouvelle palette **tourbiere** (orage sur la tourbière) |
-| 13 | Les Coteaux des Vendangeurs Assoiffés *(niveau du jour)* | Grand raid | 1165 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur des **coteaux de vignes au coucher du soleil** (nouvelle palette `vignes`) ; passage clé : la **Grande Dégringolade**, sept terrasses étroites (130–150 px), annoncées par un panneau, qui **descendent d'un coup** du chai perché jusqu'au pied du coteau (35–40 px plus bas à chaque saut, ravins de 150–160 px), dont trois avec une **ronce sur la lèvre** : on les enchaîne sans s'arrêter ; jusqu'ici les descentes faisaient deux marches au plus |
+| 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 1165 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur des **coteaux de vignes au coucher du soleil** (nouvelle palette `vignes`) ; passage clé : la **Grande Dégringolade**, sept terrasses étroites (130–150 px), annoncées par un panneau, qui **descendent d'un coup** du chai perché jusqu'au pied du coteau (35–40 px plus bas à chaque saut, ravins de 150–160 px), dont trois avec une **ronce sur la lèvre** : on les enchaîne sans s'arrêter ; jusqu'ici les descentes faisaient deux marches au plus |
+| 14 | Les Gorges des Vautours Fainéants *(niveau du jour)* | Technique | 1090 m | mécanique inédite : les **ascendances thermiques** — au-dessus de certains ravins trop larges pour un saut normal (330–340 px), une colonne d'air chaud monte par intervalles ; sautée au bon moment, elle fait **planer** le coureur jusqu'à l'autre bord ; annoncées par un voile doré et des traînées qui montent, des feuilles en spirale, un **fanion qui se dresse**, des vautours qui tournent, un panneau « spirale » qui clignote en haut de l'écran et deux panneaux de sentier (« Ascendance : saute quand ça monte », « Ça faiblit ? attends la suivante ») ; passages clés : la **Valse des Vautours** (deux ascendances enchaînées) et le **Grand Plané** (ascendance courte) ; nouvelle palette **falaise** (gorges calcaires) |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
@@ -55,6 +56,7 @@ ceux des revues précédentes (20/22 oct., fenêtre tronquée), **ne pas les com
 | 11 | 100 % / 0,23 | 85 % / 3,20 |
 | 12 | 100 % / 0,20 | 95 % / 2,45 |
 | 13 | 100 % / 0,45 | 88 % / 2,90 |
+| 14 | 100 % / 0,78 | 85 % / 2,60 |
 
 Détails et méthode : LEVELS.md §8. N°12 (mottes plongeantes) : pressé 95 % / 2,45 sur 40 essais
 (graines 1–40), 85 % / 2,60 sur 40 autres (graines 41–80) soit 90 % / 2,53 sur 80 ; N°10 : 95 % / 1,98
@@ -103,6 +105,7 @@ par profil (pilote du 23/10) :
 | 11 | 33,3 s | 36,5 s | 39,7 s | 73 % / 78 % / 88 % | 5 % / 13 % / 20 % |
 | 12 | 31,9 s | 34,5 s | 37,1 s | 73 % / 80 % / 93 % | 15 % / 15 % / 28 % |
 | 13 | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
+| 14 | 35,0 s | 39,4 s | 43,9 s | 40 % / 60 % / 85 % | 3 % / 23 % / 40 % |
 
 Le plancher auto × 1,03 l'emporte sur la fenêtre 30–50 % : sur les niveaux sans attente (temps
 attentifs groupés à moins de 3 % du pilote auto), l'or est atteint par 65–100 % des essais attentifs

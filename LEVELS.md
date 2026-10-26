@@ -276,6 +276,32 @@ Recette (N°12) : une motte seule et lente d'abord (`on` 0,7), puis deux, puis l
 mottes décalées (`phase` 0 / 0,9 / 0,8 : chacune remonte ≈ 0,44 s après la précédente) ; écarts
 de 120 px entre sol et motte, mottes de 160–170 px.
 
+## 3f. Mécanique v6 : ascendances thermiques (`thermals`, niveau 14)
+
+`thermals: [thermique(x1, x2, period=5, on=0.55, phase=0, warn=1.0, lift=0.4, fall=360, fade=0.7)]`.
+Colonne d'air chaud au-dessus d'un ravin, en cycle de `period` s (actif pendant `on`×period, décalé de
+`phase` s). Active, dans [x1, x2], une fois le sommet du saut passé (vy > −110) et en l'air, la gravité
+est multipliée par `lift` et la vitesse de chute plafonnée à `fall` : on **plane** (≈ 417 px de portée à
+plat avec lift 0,4 / fall 360 contre ≈ 321 px pour un saut normal ; 388 px pour un rival à 0,86).
+Moteur : `thermState` / `thermOf` / `fallStep` (gravité commune à la boucle principale et à `simRunner`,
+donc l'IA attend au bord que l'ascendance soit active). Annonce : voile doré et traînées qui montent,
+feuilles et duvet en spirale, **fanion rouge et blanc** sur un mât au bord (pend au repos, se dresse quand
+ça monte), deux vautours qui tournent, panneau « spirale » en haut de l'écran (clignote pendant `warn` s
+avant et pendant les `fade` dernières secondes, fixe quand c'est actif). `getState().thermTime`.
+
+Contrôles (`tools/check-levels.mjs`) : un ravin > softGap dans une ascendance est un **saut
+d'ascendance** (erreur si la montée est trop haute, si l'écart dépasse la portée du rival le plus lent
++ 30 − 40, ou si le vol dépasse 78 images — horizon de l'IA 85) ; avertissement s'il est franchissable
+sans l'ascendance ou sans aire d'attente sûre de 150 px. Erreurs : zone ≥ 200 px, period 3–7, on
+0,35–0,7, actif ≥ 1,8 s, repos ≥ 1,2 s, warn 0,6–(repos − 0,3), fade 0,4–(actif − 1), lift 0,3–0,6,
+fall 250–450, ≥ 300 px du départ, pas de chevauchement. Avertissements : fanion dans la zone, pas de sol
+pour le mât, autre mécanique dans la zone, pas de panneau contenant « ascendance » dans les 1500 px
+avant la première.
+
+Recette (N°14) : ravins de 330–340 px (au-delà d'un saut normal, en deçà du plané du rival lent),
+réception à la même hauteur, une ascendance seule d'abord, puis deux enchaînées décalées, puis le passage
+clé à ascendance courte (`on` 0,45) annoncé par un panneau.
+
 ## 4. Thèmes
 
 Le décor est **100 % procédural** (dégradé de ciel, crêtes, sapins, sol, ronces) : un thème
@@ -290,7 +316,8 @@ lande ventée du plateau, bruyère mauve, clé facultative `tuft` pour les touff
 `neve` (niv. 11, névé d'altitude au soleil de midi, neige éblouissante, crevasses bleu nuit),
 `tourbiere` (niv. 12, tourbière sous l'orage qui monte, eau brune `water`/`waterHi`, clés
 facultatives `moss`/`mossDark` pour les mottes plongeantes §3e), `vignes` (niv. 13, coteaux de vignes au coucher
-du soleil, argile rouge, feuilles de vigne rousses).
+du soleil, argile rouge, feuilles de vigne rousses), `falaise` (niv. 14, gorges calcaires l'après-midi,
+falaises crème, pins d'Alep).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -376,7 +403,7 @@ chute, un humain peut passer.
    Suite : N°9 classique, N°10 à mécaniques (rafales de vent, §3d) → **le N°11 DOIT être
    classique** (une seule nouveauté ; il peut utiliser une seule mécanique existante, rafales
    comprises, avec parcimonie), puis N°12 à mécaniques (mottes plongeantes, §3e) → **le N°13
-   DOIT être classique**, puis N°14 à mécaniques, etc.
+   DOIT être classique**, puis N°14 à mécaniques (ascendances, 26/10), N°15 classique, etc.
 4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement non justifié**
    (dernière ligne : `… 0 erreur(s), 0 avertissement(s) non justifié(s), N accepté(s)`).
    Un avertissement du nouveau niveau se **corrige dans la géométrie** ; on ne l'accepte
@@ -543,6 +570,11 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   tremblement, bulles, silhouette et contour pointillé sous l'eau), panneau `drawSinkSign`, « plop »
   dans `tickDynamicSounds` ; `De()` ne dessine pas les mottes (dynamiques). Niveaux sans motte :
   inchangés (temps autopilote des N°1–11 identiques au dixième après la modification).
+* **v6 (26/10)** : ascendances thermiques (`thermals`, §3f) — `thermState` / `thermOf` / `fallStep`
+  (remplace les lignes de gravité dans la boucle principale et dans `simRunner`), dessin `drawThermal`
+  (voile, traînées, feuilles, fanion, vautours, panneau « spirale »), souffle dans `tickDynamicSounds`,
+  `getState().thermTime`. Niveaux sans ascendance : inchangés (temps autopilote des N°1–13 identiques
+  au dixième après la modification).
 * `assets/routes-x3PbsDEU.css` : URLs des polices relatives. `custom.css` : liste de niveaux
   défilante, badge, bouton ↓, médailles (disques CSS, sans emoji).
 * Médailles (revue du 20/10) : `medalTargets` / `medalOf` / `medalNext` dans `assets/game.js` lisent
@@ -551,7 +583,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–13)
+## 8. Courbe de difficulté (niveaux 1–14)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -568,6 +600,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | 22 | 7 (dont **1 sur un sérac**, revue du 22/10) | — (classique ; passage clé : **7 séracs en dents de scie**) | 1 / 0.93 / 0.86 | 32,3 s |
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | 19 (dont 9 autour des mottes) | 4 | **6 mottes plongeantes** (1 seule, puis 2, puis la **Ronde des Crapauds** à 3), 2 panneaux | 1 / 0.93 / 0.86 | 30,9 s |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 1165 m | 22 (dont 7 dans la Dégringolade) | 8 (dont **3 sur la lèvre des terrasses**) | — (classique ; passage clé : la **Grande Dégringolade**, 7 terrasses de 130–150 px en descente, 1 panneau) | 1 / 0.93 / 0.86 | 32,9 s |
+| 14 | Les Gorges des Vautours Fainéants | Technique | 1090 m | 14 (dont **5 sauts d'ascendance** de 330–340 px) | 3 | **5 ascendances thermiques** (1 seule, puis la **Valse des Vautours** à 2, puis le **Grand Plané**, ascendance courte), 2 panneaux | 1 / 0.93 / 0.86 | 32,3 s |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -588,6 +621,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 11 | Le Névé des Marmottes Frileuses | 32,3 s | 33,3 s | 36,5 s | 39,7 s | 73 % / 78 % / 88 % | 5 % / 13 % / 20 % |
 | 12 | La Tourbière des Crapauds Ronfleurs | 30,9 s | 31,9 s | 34,5 s | 37,1 s | 73 % / 80 % / 93 % | 15 % / 15 % / 28 % |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | 32,9 s | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
+| 14 | Les Gorges des Vautours Fainéants | 32,3 s | 35,0 s | 39,4 s | 43,9 s | 40 % / 60 % / 85 % | 3 % / 23 % / 40 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -657,7 +691,9 @@ sur le modèle du 4 (règle d'alternance, §6 étape 3b) : un peu plus long et u
 12 = **mottes plongeantes** (mécanique v5 inédite, §3e), tourbière sous l'orage ; avec le pilote corrigé
 (23/10), en profil pressé au niveau du 10 (≈ 90–95 % sur 80 essais), un peu plus de chutes (2,5 contre 2,2).
 13 = **classique** (coteaux de vignes, la Grande Dégringolade), au niveau du 11 en profil pressé, un cran au-dessus du 12.
-**Prochain niveau (N°14) : à mécaniques**, puis alternance 1 classique / 1 à mécaniques.
+14 = **ascendances thermiques** (mécanique v6 inédite, §3f), gorges calcaires ; « Technique » comme le 5
+(introduction d'une mécanique) : pressé 90 % (20 essais) / 85 % (40 essais), dans la bande des niveaux à mécaniques.
+**Prochain niveau (N°15) : classique**, puis alternance 1 classique / 1 à mécaniques.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
@@ -743,6 +779,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 100 % | 0,23 | 34,7 s | 85 % | 3,20 | 51,7 s |
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 100 % | 0,20 | 32,7 s | 95 % | 2,45 | 44,5 s |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 100 % | 0,45 | 37,1 s | 88 % | 2,90 | 49,0 s |
+| 14 | Les Gorges des Vautours Fainéants | Technique | 100 % | 0,78 | 38,1 s | 85 % | 2,60 | 48,0 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le

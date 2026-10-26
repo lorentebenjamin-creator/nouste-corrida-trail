@@ -27,6 +27,17 @@ function jumpReach(slow = 1, up = 0) {
   }
   return x;
 }
+// v6 (LEVELS.md §3f) : portée d'un saut complet DANS une ascendance active pendant tout le vol
+// (gravité × lift dès l'apex, chute plafonnée à `fall`), course à 352 × speed. Renvoie [portée, images].
+function thermReach(speed, lift, fall, up = 0) {
+  let vx = 352 * speed, vy = -770, x = 0, yy = 0; const dt = 1 / 60;
+  for (let f = 0; f < 300; f++) {
+    let gr = vy < 0 ? 2100 : 4700; if (Math.abs(vy) < 110) gr = 1200;
+    const th = vy > -110; vy = Math.min(th ? fall : 1080, vy + gr * (th ? lift : 1) * dt);
+    x += vx * dt; yy += vy * dt; if (vy > 0 && yy >= -up) return [x, f + 1];
+  }
+  return [x, 300];
+}
 let errors = 0, warnings = 0;
 const err = (l, m) => { errors++; console.log(`ERREUR  [${l}] ${m}`); };
 // Avertissements acceptés : champ `acceptedWarnings: [{ match: "début du message", reason: "pourquoi" }]`
@@ -78,7 +89,7 @@ LEVELS.forEach((L, idx) => {
   else L.rivals.forEach((r, i) => { if (!(r.speed > 0.5 && r.speed <= 1.05)) err(tag, `rivals[${i}].speed hors bornes (0.5–1.05)`); });
   if (L.width > LIMITS.maxWidth) err(tag, `width ${L.width} > ${LIMITS.maxWidth}`);
   for (const k of ["solids", "hazards", "coins", "checkpoints"]) if (!Array.isArray(L[k])) err(tag, `${k} doit être un tableau`);
-  for (const k of ["rockfalls", "patrols", "jets", "gusts"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
+  for (const k of ["rockfalls", "patrols", "jets", "gusts", "thermals"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
   if (errors > errorsBefore) return;
 
   const movers = L.solids.filter(s => s.move);
@@ -140,6 +151,24 @@ LEVELS.forEach((L, idx) => {
     const w = `${a.kind}@${a.x}→${b.kind}@${b.x}`;
     const br = bridged(a, b);
     if (br) { br.forEach(pb => err(tag, `${w} (via passerelles mobiles): ${pb}`)); if (!br.length) console.log(`info    [${tag}] ${w}: franchi par passerelle(s) mobile(s) — à valider avec tools/playtest.mjs`); continue; }
+    // Saut d'ascendance (v6, §3f) : ravin trop large pour un saut normal, franchi en planant dans une
+    // ascendance thermique qui couvre l'appel et la réception.
+    const tmz = (L.thermals || []).find((t) => t.x1 <= a.x + a.w - 40 && t.x2 >= b.x + 40);
+    if (tmz && gap > LIMITS.softGap) {
+      const sMin = Math.min(...(L.rivals || []).map((r) => r.speed)), edge = a.x + a.w;
+      const [rS] = thermReach(sMin, tmz.lift, tmz.fall, up), [rP, fP] = thermReach(1, tmz.lift, tmz.fall, up);
+      const rNorm = jumpReach(1, up) + 30 + 0.11 * 352;
+      if (up > LIMITS.maxUp) err(tag, `${w}: montée ${up} px > ${LIMITS.maxUp} (l'ascendance ne porte qu'à la descente)`);
+      if (gap > rS + 30 - 40) err(tag, `${w}: saut d'ascendance ${gap} px trop long (rival le plus lent ${sMin} : portée ≈ ${Math.round(rS + 30)} px, marge < 40)`);
+      if (fP > 78) err(tag, `${w}: vol d'ascendance trop long (${fP} images > 78 : l'IA ne le voit pas finir ; éviter les réceptions plus basses)`);
+      if (gap < rNorm) warn(tag, `${w}: saut d'ascendance de ${gap} px franchissable sans elle (portée normale ≈ ${Math.round(rNorm)} px) : mécanique sans effet`);
+      if (a.w < 150) warn(tag, `${w}: plateforme d'appel ${a.w} px < 150 pour attendre l'ascendance`);
+      const wx1 = edge - 150, hit = (x1, x2) => x2 > wx1 && x1 < edge;
+      if (L.hazards.some((hz) => hit(hz.x, hz.x + hz.w)) || L.solids.some((sd) => (sd.kind === "rock" || sd.kind === "log") && hit(sd.x, sd.x + sd.w)) || (L.rockfalls || []).some((fl) => hit(fl.x, fl.x + fl.size)) || (L.patrols || []).some((dg) => hit(dg.x1, dg.x2)))
+        warn(tag, `${w}: saut d'ascendance sans aire d'attente sûre (150 px sans danger avant le bord)`);
+      info(tag, `${w}: SAUT D'ASCENDANCE (écart ${gap} px, montée ${up} ; portée en planant ≈ ${Math.round(rP + 30)} px joueur / ${Math.round(rS + 30)} px rival ${sMin}, ${fP} images ; sans ascendance ≈ ${Math.round(rNorm)} px) — valider avec tools/playtest.mjs --human`);
+      continue;
+    }
     if (up > LIMITS.maxUp) err(tag, `${w}: montée ${up} px > ${LIMITS.maxUp}`);
     if (gap > LIMITS.maxGap) err(tag, `${w}: écart ${gap} px > ${LIMITS.maxGap}`);
     else if (gap > LIMITS.softGap) warn(tag, `${w}: écart ${gap} px (rivaux lents en difficulté)`);
@@ -248,6 +277,29 @@ LEVELS.forEach((L, idx) => {
       }
     }
   });
+  // Ascendances thermiques (v6, LEVELS.md §3f)
+  const tms = (L.thermals || []).slice().sort((a, b) => a.x1 - b.x1);
+  tms.forEach((tm, ti) => {
+    const tagt = `ascendance ${tm.x1}–${tm.x2}`, onT = tm.period * tm.on, off = tm.period - onT;
+    if (!(tm.x2 - tm.x1 >= 200)) err(tag, `${tagt}: zone trop étroite (< 200 px)`);
+    if (!(tm.period >= 3 && tm.period <= 7)) err(tag, `${tagt}: period ${tm.period} hors 3–7 s`);
+    if (!(tm.on >= 0.35 && tm.on <= 0.7)) err(tag, `${tagt}: on ${tm.on} hors 0,35–0,7`);
+    if (onT < 1.8) err(tag, `${tagt}: ascendance ${onT.toFixed(2)} s < 1,8 s (un vol dure ≈ 1,2 s)`);
+    if (off < 1.2) err(tag, `${tagt}: repos ${off.toFixed(2)} s < 1,2 s (illisible)`);
+    if (!(tm.warn >= 0.6 && tm.warn <= off - 0.3)) err(tag, `${tagt}: warn ${tm.warn} s hors [0,6 ; repos − 0,3] (l'ascendance doit être annoncée assez tôt)`);
+    if (!(tm.fade >= 0.4 && tm.fade <= onT - 1)) err(tag, `${tagt}: fade ${tm.fade} s hors [0,4 ; ascendance − 1]`);
+    if (!(tm.lift >= 0.3 && tm.lift <= 0.6)) err(tag, `${tagt}: lift ${tm.lift} hors 0,3–0,6`);
+    if (!(tm.fall >= 250 && tm.fall <= 450)) err(tag, `${tagt}: fall ${tm.fall} hors 250–450 px/s`);
+    if (tm.x1 < L.spawnX + 300) err(tag, `${tagt}: trop près du départ`);
+    if (tm.x2 > L.width) err(tag, `${tagt}: sort du monde`);
+    if (ti && tm.x1 < tms[ti - 1].x2) err(tag, `${tagt}: chevauche l'ascendance ${tms[ti - 1].x1}–${tms[ti - 1].x2}`);
+    for (const cp of L.checkpoints) if (cp.x + 60 > tm.x1 && cp.x < tm.x2) warn(tag, `${tagt}: fanion @${cp.x} dans la zone`);
+    if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && tm.x1 - 14 >= sd.x && tm.x1 - 14 <= sd.x + sd.w)) warn(tag, `${tagt}: pas de sol à x1−14 pour la flamme (annonce moins lisible)`);
+    if (movers.some((m) => { const e = env(m); return e.x2 > tm.x1 && e.x1 < tm.x2; }) || (L.jets || []).some((jt) => jt.x + jt.w > tm.x1 && jt.x < tm.x2) || (L.gusts || []).some((gu) => gu.x2 > tm.x1 && gu.x1 < tm.x2) || L.solids.some((sd) => sd.sink && sd.x < tm.x2 && sd.x + sd.w > tm.x1))
+      warn(tag, `${tagt}: autre mécanique dans la zone (combinaison peu lisible)`);
+    if (ti === 0 && !(L.signs || []).some((sn) => sn.x <= tm.x1 && sn.x >= tm.x1 - 1500 && /ascendance/i.test(sn.text || ""))) warn(tag, `${tagt}: première ascendance sans panneau (texte « ascendance ») dans les 1500 px avant`);
+  });
+  if (tms.length) info(tag, `${tms.length} ascendance(s) thermique(s) : passages chronométrés, à valider avec tools/playtest.mjs --human`);
   // Mottes plongeantes (v5, LEVELS.md §3e) : passerelles qui plongent périodiquement (plus de sol)
   const sinks = L.solids.filter((sd) => sd.sink).sort((a, b) => a.x - b.x);
   sinks.forEach((sd, si) => {
@@ -288,7 +340,7 @@ LEVELS.forEach((L, idx) => {
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.thermals || []).length && `${L.thermals.length} ascendance(s)`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
   for (const a of accepting) if (!a.used) warn(tag, `acceptedWarnings obsolète : "${a.match}" ne correspond plus à aucun avertissement (le retirer)`);
   accepting = [];
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);

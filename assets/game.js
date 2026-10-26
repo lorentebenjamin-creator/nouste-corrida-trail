@@ -724,10 +724,8 @@ function R(e, t) {
         e.you && r.jump()),
       (e.buffer = Math.max(0, e.buffer - t)),
       e.you && !a && e.vy < 0 && !e.cut && ((e.vy *= 0.48), (e.cut = !0)));
-    let o = e.vy < 0 ? te : A;
     if (
-      (Math.abs(e.vy) < re && (o = ne),
-      (e.vy = Math.min(ie, e.vy + o * t)),
+      (fallStep(e, t, _) && (e.thermT = (e.thermT || 0) + t), // v6 : ascendance (plane)
       jetTouch(e, _),
       Re(e, t),
       e.grounded
@@ -819,6 +817,7 @@ function R(e, t) {
     jets = [],
     gusts = [],
     sinkers = [],
+    thermals = [],
     waterGaps = [],
     flies = [],
     autopilot = !1,
@@ -943,6 +942,34 @@ function R(e, t) {
       if (Math.abs(feet - sd.sink.y0) < 3 && c.x + c.w > sd.x && c.x < sd.x + sd.w && !sinkState(sd.sink, time + 0.45).up) return !0;
     return !1;
   }
+  // v6 — Ascendances thermiques (`thermique()` de levels.js, LEVELS.md §3f) : zone [x1, x2] où, pendant
+  // la fraction `on` du cycle, l'air chaud monte du fond du ravin. Active, elle PORTE le coureur en l'air :
+  // dès l'apex du saut (vy > −110) la gravité est multipliée par `lift` et la vitesse de chute plafonnée
+  // à `fall` px/s : on plane, le saut s'allonge (≈ 420 px à plat au lieu de 250). Au sol et à la montée
+  // du saut, rien ne change. Annonce `warn` s avant (feuilles et duvet qui montent en spirale, flamme
+  // qui se dresse, panneau « spirale » en haut de l'écran) ; l'ascendance qui faiblit (dernières
+  // `fade` s) fait clignoter le panneau. Fonction déterministe du temps : l'IA la prévoit exactement.
+  function thermState(tm, time) {
+    let t = ((((time / tm.period + (tm.phase || 0)) % 1) + 1) % 1) * tm.period,
+      onT = tm.on * tm.period;
+    if (t < onT) return { on: !0, k: t / onT, since: t, left: onT - t, warn: 0 };
+    let toOn = tm.period - t;
+    return { on: !1, k: 0, since: -1, left: 0, toOn, warn: toOn < tm.warn ? 1 - toOn / tm.warn : 0 };
+  }
+  function thermOf(e, time) {
+    if (!thermals.length) return null;
+    let cx = e.x + e.w * 0.5;
+    for (let tm of thermals) if (cx >= tm.x1 && cx <= tm.x2 && thermState(tm, time).on) return tm;
+    return null;
+  }
+  // gravité et chute max, ascendance comprise (moteur et simulation de l'IA)
+  function fallStep(e, dt, time) {
+    let gr = e.vy < 0 ? te : A;
+    Math.abs(e.vy) < re && (gr = ne);
+    let tm = thermals.length && !e.grounded && e.vy > -re ? thermOf(e, time) : null;
+    if (tm) return ((e.vy = Math.min(tm.fall, e.vy + gr * tm.lift * dt)), !0);
+    return ((e.vy = Math.min(ie, e.vy + gr * dt)), !1);
+  }
   function dynHit(e, time) {
     for (let fl of falls) {
       let st = fallState(fl, time);
@@ -963,6 +990,15 @@ function R(e, t) {
     gusts = s.gusts || [];
     sinkers = s.solids.filter((sd) => sd.sink);
     for (let sd of sinkers) sd.wasUp = !0;
+    thermals = s.thermals || [];
+    for (let tm of thermals) {
+      tm.wasOn = !1;
+      let px = tm.x1 - 14,
+        pole = s.solids.find((sd) => !sd.move && sd.kind === `ground` && px >= sd.x && px <= sd.x + sd.w);
+      tm.pole = pole ? { x: px, y: pole.y } : null;
+      // fond de l'ascendance : le plus bas des sols de la zone (on dessine les remontées depuis là)
+      tm.base = Math.max(480, ...s.solids.filter((sd) => !sd.move && sd.x < tm.x2 && sd.x + sd.w > tm.x1).map((sd) => sd.y + 120));
+    }
     setSinkers(0);
     for (let fl of falls) fl.wasFalling = !1;
     for (let jt of jets) jt.wasOn = !1;
@@ -1002,6 +1038,11 @@ function R(e, t) {
       let up = sinkState(sd.sink, _).up;
       (!up && sd.wasUp && o !== `count` && sd.x < v + b * 1.1 && sd.x + sd.w > v - b * 0.1 && r.burst(0.35, 0.05, 0.45),
         (sd.wasUp = up));
+    }
+    for (let tm of thermals) {
+      let on = thermState(tm, _).on;
+      (on && !tm.wasOn && o !== `count` && tm.x1 < v + b * 1.1 && tm.x2 > v - b * 0.1 && (r.burst(1.1, 0.03, 0.25), r.burst(0.5, 0.015, 0.9)),
+        (tm.wasOn = on));
     }
     for (let gu of gusts) {
       let on = gustState(gu, _).on;
@@ -1047,8 +1088,7 @@ function R(e, t) {
         }
         ((c.vy = j), (c.grounded = !1), (c.coyote = 0), (c.lock = c.you ? 0 : 0.28), (left = !0));
       }
-      let gr = c.vy < 0 ? te : A;
-      (Math.abs(c.vy) < re && (gr = ne), (c.vy = Math.min(ie, c.vy + gr * dt)), jetPush(c, _ + fr * dt) && (jetted = !0), Re(c, dt));
+      (fallStep(c, dt, _ + fr * dt), jetPush(c, _ + fr * dt) && (jetted = !0), Re(c, dt));
       if (c.y > se || s.hazards.some((hz) => fe(c, hz)) || dynHit(c, _ + fr * dt)) {
         dead = fr;
         break;
@@ -1344,6 +1384,7 @@ function R(e, t) {
     for (let sd of sinkers) drawSinker(sd, th);
     for (let sg of s.signs || []) drawSign(sg, th);
     for (let gu of gusts) drawGust(gu, th);
+    for (let tm of thermals) drawThermal(tm, th);
     for (let dg of dogs) {
       let rc = dogRect(dg, _),
         st = Math.sin(_ * 16) * 4;
@@ -1477,6 +1518,87 @@ function R(e, t) {
         n.moveTo(cx + 12, ty + 7), n.lineTo(cx - 4, ty + 7), n.arc(cx - 4, ty + 3, 4, Math.PI / 2, Math.PI, !1),
         n.stroke(),
         (n.globalAlpha = 1));
+    }
+  }
+  // v6 — Ascendance thermique : colonnes d'air chaud qui ondulent au-dessus du ravin, feuilles et duvet
+  // qui montent en spirale, flamme rouge et blanche sur un mât au bord (pendante au repos, dressée
+  // pendant l'annonce et l'ascendance), deux vautours qui tournent dedans, panneau « spirale » en haut
+  // de l'écran : clignote pendant l'annonce, fixe pendant l'ascendance, clignote à nouveau quand elle
+  // faiblit (dernières `fade` s : on ne part plus).
+  function drawThermal(tm, th) {
+    if (tm.x2 < v - 120 || tm.x1 > v + b + 120) return;
+    let st = thermState(tm, _),
+      fade = tm.fade || 0.7,
+      a = st.on ? Math.min(1, st.since / 0.3) * (st.left < fade ? 0.35 + 0.65 * (st.left / fade) : 1) : st.warn * 0.45,
+      zw = tm.x2 - tm.x1,
+      top = y + 40,
+      bot = Math.min(tm.base, y + E + 40);
+    // voile d'air chaud (léger dégradé doré qui monte du fond)
+    if (a > 0.02) {
+      let gd = n.createLinearGradient(0, bot, 0, top);
+      (gd.addColorStop(0, `rgba(255,214,140,${0.22 * a})`), gd.addColorStop(1, `rgba(255,236,190,0)`));
+      ((n.fillStyle = gd), n.fillRect(tm.x1, top, zw, bot - top));
+      // colonnes ondulantes qui montent
+      n.strokeStyle = `rgba(255,248,225,${0.5 * a})`;
+      n.lineWidth = 2;
+      for (let q = 0; q < 9; q++) {
+        let cx = tm.x1 + ((q + 0.5) * zw) / 9,
+          sy = bot - ((_ * 300 + q * 137) % (bot - top)),
+          ln = 40 + (q % 3) * 16;
+        if (cx < v - 20 || cx > v + b + 20) continue;
+        (n.beginPath(), n.moveTo(cx + Math.sin(sy * 0.05 + q) * 6, sy),
+          n.quadraticCurveTo(cx + Math.sin(sy * 0.05 + q + 1) * 10, sy - ln * 0.5, cx + Math.sin(sy * 0.05 + q + 2) * 6, sy - ln), n.stroke());
+      }
+    }
+    // feuilles et duvet qui montent en spirale (quelques-uns dès l'annonce)
+    let nl = st.on ? 16 : Math.round(st.warn * 9);
+    for (let q = 0; q < nl; q++) {
+      let sp = st.on ? 240 : 110,
+        h0 = (_ * sp + q * 97) % (bot - top),
+        ly = bot - h0,
+        lx = tm.x1 + ((q * 211) % zw) + Math.sin(_ * 3 + q * 1.7) * 18;
+      if (lx < v - 10 || lx > v + b + 10) continue;
+      n.fillStyle = q % 3 ? th.leaf : `#f4f1e6`;
+      q % 3 ? n.fillRect(lx, ly, 5, 3) : (n.beginPath(), n.arc(lx, ly, 2.4, 0, Math.PI * 2), n.fill());
+    }
+    // flamme sur un mât au bord d'appel : pendante au repos, se dresse à l'annonce, flotte vers le haut
+    if (tm.pole) {
+      let px = tm.pole.x, py = tm.pole.y,
+        ext = st.on ? (st.left < fade ? 0.55 + 0.45 * (st.left / fade) : 1) : st.warn,
+        ang = Math.PI / 2 - ext * (Math.PI - 0.25) + (ext > 0.5 ? Math.sin(_ * 12) * 0.08 : Math.sin(_ * 2) * 0.04);
+      ((n.fillStyle = th.woodDark), n.fillRect(px - 2, py - 92, 4, 92));
+      n.save();
+      n.translate(px, py - 88);
+      n.rotate(ang); // π/2 = pend vers le bas (repos) ; ≈ −π/2 = dressée vers le ciel (l'air monte)
+      for (let q = 0; q < 4; q++) {
+        let x0 = q * 12, r0 = 7 - q * 1.4, r1 = 7 - (q + 1) * 1.4;
+        ((n.fillStyle = q % 2 ? `#f3ede2` : `#d6312b`), n.beginPath(), n.moveTo(x0, -r0), n.lineTo(x0 + 12, -r1), n.lineTo(x0 + 12, r1), n.lineTo(x0, r0), n.fill());
+      }
+      n.restore();
+    }
+    // deux vautours qui tournent dans l'ascendance (plus haut quand elle porte)
+    for (let q = 0; q < 2; q++) {
+      let ph = _ * (st.on ? 0.9 : 0.5) + q * Math.PI,
+        vx = tm.x1 + zw * 0.5 + Math.cos(ph) * zw * 0.35,
+        vy = y + 120 + q * 30 - a * 40 + Math.sin(ph) * 16,
+        sc = 0.8 + 0.2 * Math.sin(ph);
+      if (vx < v - 40 || vx > v + b + 40) continue;
+      ((n.strokeStyle = `rgba(40,28,22,0.85)`), (n.lineWidth = 3), (n.lineCap = `round`), n.beginPath(),
+        n.moveTo(vx - 22 * sc, vy - 4), n.quadraticCurveTo(vx - 10 * sc, vy - 10, vx, vy), n.quadraticCurveTo(vx + 10 * sc, vy - 10, vx + 22 * sc, vy - 4), n.stroke());
+      ((n.fillStyle = `#f0e6d2`), n.beginPath(), n.arc(vx + (Math.cos(ph) < 0 ? 4 : -4), vy - 1, 2.2, 0, Math.PI * 2), n.fill());
+    }
+    // panneau « spirale » en haut de l'écran
+    let blink = (st.warn > 0 && Math.sin(_ * (8 + st.warn * 16)) > -0.3) || (st.on && (st.left >= fade || Math.sin(_ * 22) > -0.2));
+    if (blink) {
+      let cx = L(v + b * 0.62, tm.x1 + 30, tm.x2 - 30),
+        ty = y + 74;
+      ((n.globalAlpha = st.on && st.left >= fade ? 0.8 : 1), (n.fillStyle = `#fbe7b5`), n.beginPath(), n.arc(cx, ty, 18, 0, Math.PI * 2), n.fill(),
+        (n.strokeStyle = `#5a2e14`), (n.lineWidth = 2.5), n.stroke(), n.beginPath());
+      for (let q = 0; q <= 24; q++) {
+        let an = q * 0.55, rr = 2 + q * 0.42;
+        q ? n.lineTo(cx + Math.cos(an) * rr, ty + 4 + Math.sin(an) * rr * 0.45 - q * 0.45) : n.moveTo(cx + 2, ty + 4);
+      }
+      (n.stroke(), n.beginPath(), n.moveTo(cx - 5, ty - 8), n.lineTo(cx, ty - 14), n.lineTo(cx + 5, ty - 8), n.stroke(), (n.globalAlpha = 1));
     }
   }
   // Panneau de sentier (champ facultatif `signs`, helper panneau() de levels.js) : poteau et
@@ -2064,6 +2186,7 @@ function R(e, t) {
         deaths: d?.deaths ?? 0,
         jetHits: d?.jetHits ?? 0,
         gustTime: d?.gustT ?? 0, // temps passé ralenti par une rafale (v4)
+        thermTime: d?.thermT ?? 0, // temps passé à planer dans une ascendance (v6)
         deathXs: d?.deathXs ?? [],
       }),
       getRunners: () =>

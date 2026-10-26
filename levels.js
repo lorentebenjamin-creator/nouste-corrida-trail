@@ -111,6 +111,20 @@ export const motte = (x, y, w, period = 4.4, on = 0.6, phase = 0, warn = 0.9) =>
   x, y, w, h: 18, oneWay: true, kind: "plank", sink: { y0: y, period, on, phase, warn },
 });
 
+// ---- Mécanique v6 ----------------------------------------------------------
+// thermique(x1, x2, period=5, on=0.55, phase=0, warn=1.0, lift=0.4, fall=360, fade=0.7) : ASCENDANCE
+//   THERMIQUE — zone [x1, x2] (toute la hauteur) où l'air chaud monte du fond d'un ravin. Cycle de
+//   `period` s : active pendant la fraction `on` du cycle (au début du cycle, décalé par `phase`),
+//   puis repos. Active, elle PORTE en l'air : dès l'apex du saut la gravité est multipliée par `lift`
+//   et la chute plafonnée à `fall` px/s → on plane et le saut s'allonge (≈ 420 px à plat au lieu de
+//   250) : un ravin trop large pour un saut normal se franchit PENDANT l'ascendance. Si elle s'arrête
+//   en plein vol, on retombe normalement (dans le ravin). Annonce `warn` s avant (duvet et feuilles qui
+//   montent, flamme qui se dresse, panneau « spirale ») ; dans les `fade` dernières s elle faiblit
+//   (le panneau clignote : trop tard pour partir). À mettre dans le tableau `thermals` (LEVELS.md §3f).
+export const thermique = (x1, x2, period = 5, on = 0.55, phase = 0, warn = 1.0, lift = 0.4, fall = 360, fade = 0.7) => ({
+  x1, x2, period, on, phase, warn, lift, fall, fade,
+});
+
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
 // On peut en ajouter ici (toutes les clés sont obligatoires) : le décor est
@@ -239,6 +253,19 @@ export const THEMES = {
     rock: "#c2a98e", rockDark: "#7e6a58",
     thorn: "#2a1c1e", leaf: "#a8452c", berry: "#5a2a6a",
     fog: "#1e1220",
+  },
+  falaise: {
+    // Niveau 14 : falaises calcaires d'un canyon en plein après-midi (ciel chaud, roche blonde,
+    // buis et chênes verts, ravins profonds où l'air chaud monte)
+    skyTop: "#3f7fc0", skyMid: "#8fc1e3", skyBot: "#f3dfae",
+    ridge: "#9a8a74", ridge2: "#c9b796",
+    pine: "#3e5a2c", pine2: "#6f8a3c",
+    dirt: "#c9a46e", dirtDark: "#8a6a42",
+    grass: "#8fa84a", grassDark: "#5f7630",
+    wood: "#8a6238", woodDark: "#553a20",
+    rock: "#e2d3b4", rockDark: "#a8936e",
+    thorn: "#2e3a1e", leaf: "#c98a2e", berry: "#b23a2a",
+    fog: "#5a4a3a",
   },
 };
 
@@ -1126,5 +1153,84 @@ LEVELS.push((() => {
       { match: "ronce @5180: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2). Revue du 24/10 : 3e terrasse à 4580 (150 px, ravin 150 px), ronce de la 6e à 55 px, panneau avant la descente ; humain 40 essais : attentif 100 % / 0,45, pressé 88 % / 2,90 (chutes x≈5500:16, 4600:15, 5200:14)." },
       { match: "ronce @5470: seulement 130 px avant le bord", reason: "Passage clé de la Grande Dégringolade (24/10) : ronce voulue sur la lèvre d'une terrasse de 130 px, survolée par un saut complet depuis la terrasse précédente (35–40 px plus haut, ravin de 160 px) ; un saut lâché trop tôt retombe dedans. Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 %, pressé 85 % / 3,0 chutes (N°11 : 85 % / 3,2). Revue du 24/10 : 3e terrasse à 4580 (150 px, ravin 150 px), ronce de la 6e à 55 px, panneau avant la descente ; humain 40 essais : attentif 100 % / 0,45, pressé 88 % / 2,90 (chutes x≈5500:16, 4600:15, 5200:14)." },
     ],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 14 — Les Gorges des Vautours Fainéants (niveau du jour, 2026-10-26)
+// Niveau à mécaniques (règle d'alternance, après le N°13 classique) — nouveauté : mécanique v6
+// inédite, les ASCENDANCES THERMIQUES (`thermals`, helper thermique(), LEVELS.md §3f). Cinq
+// ravins de 330–340 px, trop larges pour un saut normal (≈ 320 px au mieux), se franchissent en
+// PLANANT : on saute quand l'air chaud monte (duvet et feuilles qui montent en spirale, flamme
+// dressée, panneau « spirale ») et l'on se pose loin, comme les vautours. Si l'ascendance s'arrête
+// en plein vol, on retombe dans les gorges : quand elle faiblit (panneau qui clignote), on attend la
+// suivante. Pas d'autre mécanique : sols, ravins, ronces, rochers, troncs, fanions.
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "gorges-vautours", c = v(id);
+  c.line(160, 600, 370, 4); c.arc(1290, 1390, 380, 3, 40); c.arc(1830, 1930, 330, 3, 40);
+  c.line(2000, 2400, 370, 3);
+  c.arc(2660, 2950, 360, 5, 70);
+  c.arc(3580, 3680, 350, 3, 40); c.line(3720, 3780, 330, 2); c.arc(4120, 4220, 340, 3, 40);
+  c.line(4280, 4520, 370, 3);
+  c.arc(4750, 5050, 360, 5, 70); c.arc(5340, 5640, 340, 5, 70);
+  c.line(5700, 5860, 350, 2); c.arc(6185, 6290, 320, 3, 40); c.arc(6710, 6820, 300, 3, 40);
+  c.line(6900, 7220, 370, 3);
+  c.arc(7450, 7750, 360, 5, 70);
+  c.line(7850, 8250, 370, 3); c.arc(8340, 8440, 330, 3, 40); c.arc(8880, 8980, 320, 3, 40);
+  c.line(9060, 9300, 370, 3);
+  c.arc(9710, 10000, 360, 5, 70); c.line(10100, 10800, 370, 5);
+  return {
+    id, name: "Les Gorges des Vautours Fainéants",
+    blurb: "Les vautours ne battent jamais des ailes : ils attendent que l'air chaud monte. Fais comme eux pour planer au-dessus des gorges !",
+    difficulty: "Technique", theme: "falaise",
+    width: 11320, floor: 440, spawnX: 60,
+    solids: [
+      // Départ sur le causse, ressauts calcaires
+      p(0, 700, 440),
+      p(820, 460, 440), h(1000, 440),
+      p(1400, 420, 380),
+      p(1940, 700, 440),
+      // Première gorge : UNE ascendance longue (3 s), la découverte ; panneau et flamme avant le bord
+      p(2970, 600, 440),
+      p(3690, 420, 400), g(3800, 400),
+      p(4230, 500, 440),
+      // La Valse des Vautours : deux gorges de suite, l'îlot du milieu (260 px) et une seconde
+      // ascendance qui se lève 1,2 s après la première (on enchaîne sans traîner)
+      p(5065, 260, 440),
+      p(5655, 520, 440),
+      // Les vires de la falaise
+      p(6300, 400, 380),
+      p(6830, 600, 440),
+      // Passage clé : le GRAND PLANÉ — la gorge la plus large (340 px) sous une ascendance courte
+      // (2,25 s, dont 0,7 s où elle faiblit) : partir dès qu'elle se lève, sinon attendre la suivante
+      p(7770, 560, 440),
+      p(8450, 420, 380), h(8600, 380),
+      p(8990, 700, 440),
+      // Dernière gorge puis sprint jusqu'à l'arche
+      p(10020, 1200, 440), g(10300, 440),
+    ],
+    hazards: [
+      _(1560, 64, 380),
+      _(5900, 64, 440),
+      _(9380, 64, 440),
+    ],
+    thermals: [
+      thermique(2440, 3120, 5, 0.6, 0),
+      thermique(4530, 5215, 5, 0.55, 0),
+      thermique(5240, 5805, 5, 0.55, 0.76),
+      // Passage clé : ascendance courte du Grand Plané
+      thermique(7230, 7920, 5, 0.45, 0.3),
+      thermique(9540, 10170, 5, 0.55, 0.5),
+    ],
+    signs: [
+      panneau(2230, 440, "Ascendance :|saute quand ça monte"),
+      panneau(7000, 440, "Ça faiblit ?|attends la suivante"),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 1960, 440, 1), y(id, 4250, 440, 2), y(id, 6850, 440, 3), y(id, 9010, 440, 4)],
+    finishX: 10900,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 32.3, gold: 35, silver: 39.4, bronze: 43.9 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 40 %, argent 60 %, bronze 85 % ; pressés : or 3 %, argent 23 %, bronze 40 %)
   };
 })());
