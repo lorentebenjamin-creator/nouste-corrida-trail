@@ -27,7 +27,7 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | mécanique inédite : les **mottes plongeantes** — des tapis de sphaigne qui flottent sur les gouilles de la tourbière puis **plongent** (plus de sol) et remontent, en cycle ; annoncées par la motte qui **tremble, s'enfonce et fait des bulles**, un panneau « bulles » qui clignote en haut de l'écran et deux panneaux de sentier (« Tourbière : mottes plongeantes », « Bulles : ça plonge, attends la remontée ») ; plongée, sa silhouette reste visible sous l'eau ; passage clé : la **Ronde des Crapauds**, trois mottes qui remontent en vague ; nouvelle palette **tourbiere** (orage sur la tourbière) |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 1165 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur des **coteaux de vignes au coucher du soleil** (nouvelle palette `vignes`) ; passage clé : la **Grande Dégringolade**, sept terrasses étroites (130–150 px), annoncées par un panneau, qui **descendent d'un coup** du chai perché jusqu'au pied du coteau (35–40 px plus bas à chaque saut, ravins de 150–160 px), dont trois avec une **ronce sur la lèvre** : on les enchaîne sans s'arrêter ; jusqu'ici les descentes faisaient deux marches au plus |
 | 14 | Les Gorges des Vautours Fainéants | Technique | 1090 m | mécanique inédite : les **ascendances thermiques** — au-dessus de certains ravins trop larges pour un saut normal (330–340 px), une colonne d'air chaud monte par intervalles ; sautée au bon moment, elle fait **planer** le coureur jusqu'à l'autre bord ; annoncées par une colonne orange vive et des traînées cernées qui montent (au repos : quelques volutes pâles), des feuilles en spirale, un **fanion qui se dresse**, des vautours qui tournent, un panneau « spirale » qui clignote en haut de l'écran et deux panneaux de sentier (« Ascendance : saute quand ça monte », « Ça faiblit ? attends la suivante ») ; passages clés : la **Valse des Vautours** (deux ascendances enchaînées) et le **Grand Plané** (ascendance courte) ; nouvelle palette **falaise** (gorges calcaires, ravins en parois striées avec rivière au fond) |
-| 15 | Le Lac des Truites Bavardes *(niveau du jour)* | Tour des lacs | 1142 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) au bord d'un **lac d'altitude à l'aube** (nouvelle palette `lac`, eau turquoise au fond des trous) ; passage clé : le **Saute-Pierres**, huit pierres plates au ras de l'eau, **toutes à la même hauteur et de plus en plus étroites** (180 → 120 px, jamais si étroites jusqu'ici), séparées par des trous de 165 px, annoncées par un panneau « Saute-pierres : ne t'arrête pas » : pas un seul sol de repos, on traverse le lac d'un seul élan |
+| 15 | Le Lac des Truites Bavardes *(niveau du jour)* | Tour des lacs | 1142 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) au bord d'un **lac d'altitude à l'aube** (nouvelle palette `lac`, eau turquoise au fond des trous) ; passage clé : le **Saute-Pierres**, huit pierres plates au ras de l'eau, **toutes à la même hauteur et de plus en plus étroites** (180 → 120 px, jamais si étroites jusqu'ici), séparées par des trous de 165 px, annoncées par un panneau « Saute-pierres : ne t'arrête pas » : pas un seul sol de repos, on traverse le lac d'un seul élan ; avant le refuge, les **Rochers des Truites** (revue du 27/10) : chemin sûr par trois criques, ou **raccourci risqué** de rocher en rocher (270 px) — l'or l'exige ; pierres grises mouillées et surface du lac en arrière-plan |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
@@ -58,7 +58,7 @@ ceux des revues précédentes (20/22 oct., fenêtre tronquée), **ne pas les com
 | 12 | 100 % / 0,20 | 95 % / 2,45 |
 | 13 | 100 % / 0,45 | 88 % / 2,90 |
 | 14 | 100 % / 0,33 *(26/10 ; avant 0,78)* | 95 % / 2,17 *(avant 85 % / 2,60)* |
-| 15 | 100 % / 0,20 *(27/10)* | 83 % / 2,88 |
+| 15 | 100 % / 0,07 *(27/10 ; avant 0,20)* | 95 % / 2,40 *(avant 83 % / 2,88)* |
 
 Détails et méthode : LEVELS.md §8. N°12 (mottes plongeantes) : pressé 95 % / 2,45 sur 40 essais
 (graines 1–40), 85 % / 2,60 sur 40 autres (graines 41–80) soit 90 % / 2,53 sur 80 ; N°10 : 95 % / 1,98
@@ -88,6 +88,10 @@ des sentiers ; elle reste disponible sans `--calibrate`. Le menu affiche sous ch
 médaille de ton record (enregistré dans le navigateur) et les trois temps cibles ; l'écran
 d'arrivée affiche la médaille de la course, ton record et le temps à battre pour la médaille
 suivante. Un sentier sans champ `medals` s'affiche sans médailles (LEVELS.md §6 étape 5b).
+Depuis la revue du 27/10, un sentier classique avec **raccourcis risqués** (champ `shortcuts`,
+LEVELS.md §6 étape 3c, N°15) mesure aussi `autoShort` (pilote auto par les raccourcis,
+`playtest.mjs <id> --shortcut`) : or ≥ autoShort × 1,03 et ≤ auto − 0,1 s, donc **l'or exige les
+raccourcis** ; le pilote auto de référence et les rivaux prennent le chemin sûr.
 
 Temps cibles actuels (or / argent / bronze). **Revue du 24/10** : règle **or ≥ auto × 1,03** (un or à
 0,1–0,2 s du pilote auto n'était atteignable que par un essai parfait) ; 11 niveaux recalibrés (tous sauf
@@ -110,7 +114,7 @@ par profil (pilote du 23/10) :
 | 12 | 31,9 s | 34,5 s | 37,1 s | 73 % / 80 % / 93 % | 15 % / 15 % / 28 % |
 | 13 | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
 | 14 | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
-| 15 | 33,2 s | 35,9 s | 38,6 s | 75 % / 83 % / 85 % | 15 % / 20 % / 28 % |
+| 15 | 33,5 s *(exige les raccourcis)* | 36,2 s | 38,9 s | 40 % / 95 % / 98 % | 10 % / 20 % / 28 % |
 
 Le plancher auto × 1,03 l'emporte sur la fenêtre 30–50 % : sur les niveaux sans attente (temps
 attentifs groupés à moins de 3 % du pilote auto), l'or est atteint par 65–100 % des essais attentifs

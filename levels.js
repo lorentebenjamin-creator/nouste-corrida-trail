@@ -14,6 +14,8 @@ const WORLD_BOTTOM = 780;
 export const p = (x, w, y) => ({ x, y, w, h: WORLD_BOTTOM - y, oneWay: false, kind: "ground" });
 // m(x, y, w)  : passerelle (planche) traversable par-dessous, 18 px d'épaisseur.
 //               ATTENTION à l'ordre : (x, y, w) — différent de p().
+// pierre(x, w, y) : comme p(), mais dessinée en pierre mouillée au ras de l'eau (palette avec `lake`, N°15).
+export const pierre = (x, w, y) => ({ ...p(x, w, y), stone: true });
 export const m = (x, y, w) => ({ x, y, w, h: 18, oneWay: true, kind: "plank" });
 // h(x, y)     : rocher 56×48 posé sur un sol dont le dessus est y.
 export const h = (x, y) => ({ x, y: y - 48, w: 56, h: 48, oneWay: false, kind: "rock" });
@@ -283,6 +285,11 @@ export const THEMES = {
     fog: "#16283a",
     // Clés facultatives (décor) : eau du lac visible au fond des trous entre les pierres.
     water: "#2f7f94", waterHi: "#bfeef2",
+    // Revue du 27/10 (palette lac seulement) : niveau de l'eau (y monde) au pied des pierres et dans les trous,
+    // surface du lac en arrière-plan (y écran) avec reflets et vaguelettes ; sols marqués `stone` (pierre(…))
+    // dessinés en pierres grises mouillées (reflet, mousse légère) au ras de l'eau.
+    lake: 505, lakeBg: 318,
+    stone: "#8e9499", stoneDark: "#5b6166", stoneHi: "#e3eef0", moss: "#7a9a52",
   },
 };
 
@@ -1272,10 +1279,10 @@ LEVELS.push((() => {
   c.arc(3170, 3365, 330, 3, 40); c.arc(3515, 3710, 330, 3, 40); c.arc(3840, 4035, 330, 3, 40);
   c.arc(4155, 4350, 330, 3, 40); c.arc(4460, 4655, 330, 3, 40); c.arc(4755, 4950, 330, 3, 40);
   c.arc(5050, 5245, 330, 3, 40); c.arc(5335, 5530, 330, 3, 40); c.arc(5620, 5815, 330, 3, 40);
-  c.line(5865, 6265, 370, 4); c.arc(6575, 6745, 300, 3, 40); c.arc(6865, 7005, 250, 3, 40);
-  c.arc(7115, 7255, 300, 3, 40); c.arc(7375, 7535, 330, 3, 40); c.line(7815, 8005, 370, 2);
-  c.arc(8015, 8175, 270, 3, 40); c.line(8365, 8545, 310, 2); c.arc(8565, 8715, 200, 3, 40);
-  c.line(8765, 9065, 240, 3); c.arc(9075, 9235, 260, 3, 40); c.line(9465, 9625, 300, 2);
+  c.line(5865, 6035, 370, 4); c.line(6395, 6465, 300, 2); c.arc(6530, 6750, 290, 3, 70);
+  c.arc(6950, 7170, 290, 3, 70); c.arc(7370, 7590, 290, 3, 70); c.line(7765, 7765, 370, 1); c.line(7815, 8005, 370, 2);
+  c.arc(8015, 8175, 290, 3, 40); c.line(8365, 8545, 330, 2); c.arc(8565, 8715, 220, 3, 40);
+  c.line(8765, 9065, 260, 3); c.arc(9075, 9235, 260, 3, 40); c.line(9465, 9625, 300, 2);
   c.arc(9635, 9795, 330, 3, 40); c.line(9845, 10145, 370, 3); c.arc(10455, 10625, 330, 3, 40);
   c.line(10665, 10825, 370, 2); c.line(10985, 11185, 370, 2); c.line(11315, 11405, 370, 2);
   return {
@@ -1293,15 +1300,25 @@ LEVELS.push((() => {
       p(2620, 560, 440),
       // Passage clé : le SAUTE-PIERRES — huit pierres plates au ras de l'eau, même hauteur, de plus en
       // plus étroites (180, 160, 150, 140, 130, 130, 120, 120 px), trous de 165 px, aucun sol de repos
-      p(3345, 180, 440), p(3690, 160, 440), p(4015, 150, 440), p(4330, 140, 440),
-      p(4635, 130, 440), p(4930, 130, 440), p(5225, 120, 440), p(5510, 120, 440),
-      p(5795, 800, 440), h(6315, 440),
-      // Les pontons du refuge : passerelles au-dessus de l'anse
-      m(6725, 390, 160), m(6985, 340, 150), m(7235, 390, 160),
-      p(7515, 520, 440), g(7665, 440),
-      // Montée au refuge
-      p(8155, 420, 380),
-      p(8695, 400, 310),
+      pierre(3345, 180, 440), pierre(3690, 160, 440), pierre(4015, 150, 440), pierre(4330, 140, 440),
+      pierre(4635, 130, 440), pierre(4930, 130, 440), pierre(5225, 120, 440), pierre(5510, 120, 440),
+      p(5795, 560, 440), h(6095, 440),
+      // Les ROCHERS DES TRUITES (revue du 27/10) : quatre gros rochers (haut 345) séparés par trois criques.
+      // Chemin SÛR (pilote auto, rivaux) : on se laisse tomber dans la crique (dalle basse 500), saut par-dessus
+      // l'eau sur la marche (420) collée au rocher suivant, ressaut sur place → ≈ 0,5 s perdue par crique.
+      // RACCOURCI RISQUÉ (champ shortcuts) : grand saut de rocher en rocher, 270 px bord à bord (saut complet,
+      // élan maximal) ; trop tôt ou appui trop court → on retombe dans la crique (temps perdu), voire à l'eau.
+      pierre(6355, 150, 345),
+      pierre(6505, 155, 500), pierre(6730, 45, 420),
+      pierre(6775, 150, 345),
+      pierre(6925, 155, 500), pierre(7150, 45, 420),
+      pierre(7195, 150, 345),
+      pierre(7345, 155, 500), pierre(7570, 45, 420),
+      pierre(7615, 100, 345),
+      p(7715, 320, 440),
+      // Montée au refuge (revue du 27/10 : première marche ramenée de 60 à 40 px — point chaud x≈8100)
+      p(8155, 420, 400),
+      p(8695, 400, 330),
       // Descente vers le torrent de sortie
       p(9215, 440, 370), h(9385, 370),
       p(9775, 700, 440),
@@ -1311,15 +1328,28 @@ LEVELS.push((() => {
     hazards: [
       _(480, 70, 440),
       _(1640, 64, 370),
-      _(8265, 64, 380),
+      _(8265, 64, 400),
       _(10175, 64, 440),
       _(11215, 74, 440),
     ],
-    signs: [panneau(2950, 440, "Saute-pierres :|ne t'arrête pas")],
+    signs: [panneau(2950, 440, "Saute-pierres :|ne t'arrête pas"), panneau(6235, 440, "Raccourci risqué :|de rocher en rocher")],
+    // Raccourcis risqués (revue du 27/10, LEVELS.md §6) : sauts de rocher en rocher au-dessus des criques.
+    // from–to = rocher de départ (haut y), land/landY = rocher d'arrivée. L'IA de référence ne les prend pas.
+    shortcuts: [
+      { name: "Rochers des Truites 1", from: 6355, to: 6505, y: 345, land: 6775, landY: 345 },
+      { name: "Rochers des Truites 2", from: 6775, to: 6925, y: 345, land: 7195, landY: 345 },
+      { name: "Rochers des Truites 3", from: 7195, to: 7345, y: 345, land: 7615, landY: 345 },
+    ],
     coins: c.list,
-    checkpoints: [y(id, 2650, 440, 1), y(id, 5825, 440, 2), y(id, 8715, 310, 3), y(id, 9805, 440, 4)],
+    checkpoints: [y(id, 2650, 440, 1), y(id, 5825, 440, 2), y(id, 8715, 330, 3), y(id, 9805, 440, 4)],
     finishX: 11415,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 32.2, gold: 33.2, silver: 35.9, bronze: 38.6 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 75 %, argent 83 %, bronze 85 % ; pressés : or 15 %, argent 20 %, bronze 28 %)
+    medals: { auto: 33.8, autoShort: 32.2, gold: 33.5, silver: 36.2, bronze: 38.9 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 40 %, argent 95 %, bronze 98 % ; pressés : or 10 %, argent 20 %, bronze 28 %)
+    acceptedWarnings: [
+      { match: "ground@5795→ground@6355: marche montante sans trou (95 px)", reason: "Revue du 27/10 : montée sur le premier des Rochers des Truites avec tout l'élan de la rive (pilote auto sans perte de temps, rivaux sans chute au playtest)." },
+      { match: "ground@6730→ground@6775: marche montante sans trou (75 px)", reason: "Revue du 27/10 : marche voulue du chemin sûr des Rochers des Truites (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
+      { match: "ground@7150→ground@7195: marche montante sans trou (75 px)", reason: "Revue du 27/10 : marche voulue du chemin sûr des Rochers des Truites (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+      { match: "ground@7570→ground@7615: marche montante sans trou (75 px)", reason: "Revue du 27/10 : marche voulue du chemin sûr des Rochers des Truites (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+    ],
   };
 })());

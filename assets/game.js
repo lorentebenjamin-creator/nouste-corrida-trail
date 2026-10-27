@@ -423,6 +423,18 @@ function R(e, t) {
         drawCanyon(n, e.canyon, o, s, i.y, a.y);
         continue;
       }
+      // Revue du 27/10 — palette à `lake` (N°15 seulement) : pas de voile, le lac (arrière-plan) se voit entre
+      // les pierres et l'eau affleure au même niveau partout (`lake`, y monde).
+      if (e.lake) {
+        ((n.fillStyle = e.water),
+          n.fillRect(o, e.lake, s, 780 - e.lake),
+          (n.fillStyle = e.waterHi),
+          (n.globalAlpha = 0.9),
+          n.fillRect(o, e.lake, s, 2),
+          (n.globalAlpha = 1),
+          waterGaps.push({ x: o, w: s, y: e.lake }));
+        continue;
+      }
       ((n.fillStyle = e.fog),
         (n.globalAlpha = 0.72),
         n.fillRect(o, c, s, 780 - c),
@@ -885,6 +897,8 @@ function R(e, t) {
     gusts = [],
     sinkers = [],
     thermals = [],
+    shortcuts = [],
+    autoShort = !1,
     waterGaps = [],
     flies = [],
     autopilot = !1,
@@ -1058,6 +1072,7 @@ function R(e, t) {
     sinkers = s.solids.filter((sd) => sd.sink);
     for (let sd of sinkers) sd.wasUp = !0;
     thermals = s.thermals || [];
+    shortcuts = s.shortcuts || [];
     for (let tm of thermals) {
       tm.wasOn = !1;
       let px = tm.x1 - 14,
@@ -1170,6 +1185,14 @@ function R(e, t) {
     // « sûr » = ni mort ni saut impossible, et on finit posé (pas en pleine chute à l'horizon)
     return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, jetted, dangerX: dead >= 0 && (air < 0 || dead < air) ? c.x : air >= 0 ? airX : c.x, safe: dead < 0 && !invalid && !jetted && !sunk && (c.grounded || landed >= 0) };
   }
+  function shortcutAt(e) {
+    return shortcuts.find((q) => e.x + e.w > q.from && e.x < q.to + 40 && Math.abs(e.y + e.h - q.y) < 8) || null;
+  }
+  // saut (après `dl` images) qui retombe sain et sauf sur le rocher d'arrivée du raccourci `q`
+  function shortcutJump(e, q, dl) {
+    let rs = simRunner(e, 1, dl, dl + 85, !0);
+    return rs.safe && rs.x + e.w > q.land && Math.abs(rs.st.y + rs.st.h - q.landY) < 3 ? rs : null;
+  }
   function aiDecide(e) {
     if ((e.stun || 0) > 0) return ((e.plan = null), { dir: 0, jump: !1 });
     // Arrêté au bord d'un trou qui demande de l'élan : on recule un peu, puis on repart.
@@ -1181,6 +1204,16 @@ function R(e, t) {
       e.backT = 0;
     }
     let can = e.lock <= 0 && (e.grounded || e.coyote > 0);
+    // Raccourcis risqués (revue du 27/10, levels.js `shortcuts`) : sur le rocher de départ d'un raccourci,
+    // l'IA de référence (pilote auto, rivaux) prend TOUJOURS le chemin sûr — elle ne saute pas et se laisse
+    // descendre ; un coureur marqué `short` (pilote auto avec { shortcut: true }, pilote humain qui tente
+    // le raccourci) cherche le saut le plus tardif qui retombe sur le rocher d'arrivée.
+    let sc = can && shortcuts.length ? shortcutAt(e) : null; // (au sol ou pendant le « coyote » après le bord)
+    if (sc) {
+      e.plan = null;
+      if (e.short) for (let dl of [6, 3, 0]) if (shortcutJump(e, sc, dl)) return (dl > 0 && (e.plan = _ + dl / 60), { dir: 1, jump: dl === 0 });
+      return { dir: 1, jump: !1 };
+    }
     // Saut déjà planifié (cibles mobiles) : on s'y tient tant qu'il reste sûr.
     if (can && e.plan != null) {
       let rem = Math.round((e.plan - _) * 60);
@@ -1242,6 +1275,7 @@ function R(e, t) {
     return ((e.aiDir = dc.dir), dc.jump);
   }
   function autoInput(e) {
+    e.short = autoShort;
     let jmp = aiStep(e);
     return { left: e.aiDir < 0, right: e.aiDir > 0, jump: !0, down: !1, edge: jmp };
   }
@@ -1258,7 +1292,8 @@ function R(e, t) {
     hum = {
       opt, rnd,
       D: Math.round((opt.delayMin + (opt.delayMax - opt.delayMin) * rnd()) * 60),
-      f: 0, q: new Map(), jumpAt: -1, holdEnd: -1, dir: 1, plan: null, deaths: -1, jumps: 0, calmWaits: 0, pauseTo: 0, cAir: !1,
+      short: (opt.shortcutP || 0) > 0 && rng32((opt.seed ?? 1) * 40503 + 7)() < opt.shortcutP,
+      f: 0, q: new Map(), jumpAt: -1, holdEnd: -1, dir: 1, plan: null, deaths: -1, scOk: 0, scKo: 0, scFrom: null, jumps: 0, calmWaits: 0, pauseTo: 0, cAir: !1,
     };
   }
   function gauss(rnd) {
@@ -1267,6 +1302,7 @@ function R(e, t) {
   }
   function humanInput(e) {
     let H = hum, D = H.D, f = ++H.f;
+    e.short = H.short; // tente les raccourcis risqués pendant cet essai (shortcutP)
     if (e.deaths !== H.deaths) ((H.deaths = e.deaths), H.q.clear(), (H.jumpAt = -1), (H.holdEnd = -1), (H.plan = null), (H.dir = e.deaths > 0 ? 0 : 1)); // après une chute : on repart après le délai de réaction
     // 1) cerveau : extrapole D images avec les commandes déjà en file, décide pour l'image f + D
     let dirs = [];
@@ -1280,7 +1316,17 @@ function R(e, t) {
         aim = dc.jump ? 0 : -1;
       // Un humain ne saute pas « au dernier moment » : devant un trou ou une ronce, il vise le milieu
       // de la fenêtre de sauts sûrs (calculée une fois, à l'approche), puis s'y tient.
-      if (aim < 0 && dc.dir === 1 && H.jumpAt < f && c.grounded && c.lock <= 0) {
+      let scH = H.short && aim < 0 && H.jumpAt < f && c.grounded && c.lock <= 0 && shortcuts.length ? shortcutAt(c) : null;
+      if (scH) {
+        // raccourci tenté : fenêtre des sauts qui retombent sur le rocher d'arrivée (appui complet), visée
+        // comme ailleurs (aimAt, jitter) ; un appui trop court ou un saut trop tôt fait tomber dans la crique
+        let k0 = -1, k1 = -1;
+        for (let k2 = 0; k2 <= 70; k2++) {
+          if (shortcutJump(c, scH, k2)) (k0 < 0 && (k0 = k2), (k1 = k2));
+          else if (k0 >= 0) break;
+        }
+        k0 >= 0 && (aim = Math.round(k0 + (k1 - k0) * H.opt.aimAt));
+      } else if (aim < 0 && dc.dir === 1 && H.jumpAt < f && c.grounded && c.lock <= 0 && !(shortcuts.length && shortcutAt(c))) {
         let walk = simRunner(c, 1, -1, 70, !0);
         if (!walk.safe) {
           // Fenêtre de sauts sûrs [k0, k1] : jusqu'au bord (walk.air) ou au danger (walk.dead). Revue du 23/10 :
@@ -1345,6 +1391,12 @@ function R(e, t) {
     if ((H.backF || 0) <= 0 && H.still > 90 && simRunner(e, -1, -1, 32, !0).safe) ((H.backF = 24), (H.still = 0), H.q.clear(), (H.jumpAt = -1));
     if ((H.backF || 0) > 0) ((H.backF -= 1), (H.dir = -1), H.q.clear());
     let edge = f === H.jumpAt;
+    // bilan des raccourcis tentés (sauts partis d'un rocher de départ) : posé sur le rocher d'arrivée, ou raté
+    if (shortcuts.length) {
+      e.grounded && H.scFrom && !H.scAir0 && (Math.abs(e.y + e.h - H.scFrom.landY) < 3 && e.x + e.w > H.scFrom.land ? (H.scOk += 1) : (H.scKo += 1), (H.scFrom = null));
+      H.scAir0 = !1;
+      edge && H.short && (H.scFrom = shortcutAt(e)) && (H.scAir0 = !0);
+    }
     edge && ((H.jumps += 1), (H.holdEnd = f + Math.round((H.opt.holdMin + (H.opt.holdMax - H.opt.holdMin) * H.rnd()) * 60)));
     return { left: H.dir < 0, right: H.dir > 0, jump: f <= H.holdEnd, down: !1, edge };
   }
@@ -2018,6 +2070,7 @@ function R(e, t) {
       let n = t.x - v * t.layer;
       n < -60 || n > b + 60 || Xe(n, 250 + t.kind * 40, t.h, e, t.kind);
     }
+    e.lakeBg && lakeBg(e);
     (n.save(),
       n.translate(-Math.round(v) + r, -Math.round(y) + a),
       h && n.drawImage(h, 0, 0),
@@ -2059,6 +2112,29 @@ function R(e, t) {
         n.ellipse(i + 28, 76 + e * 28, 28, 11, 0, 0, Math.PI * 2),
         n.fill());
     }
+  }
+  // Surface du lac en arrière-plan (palette avec `lakeBg`, N°15, revue du 27/10) : rive lointaine,
+  // reflet du soleil et vaguelettes qui glissent lentement (parallaxe). Décor seul.
+  function lakeBg(e) {
+    let y0 = e.lakeBg,
+      g = n.createLinearGradient(0, y0, 0, E);
+    (g.addColorStop(0, e.skyBot), g.addColorStop(0.035, e.waterHi), g.addColorStop(0.26, e.water), g.addColorStop(1, e.fog));
+    ((n.fillStyle = g), n.fillRect(0, y0, b, E - y0));
+    ((n.fillStyle = e.ridge), (n.globalAlpha = 0.6), n.fillRect(0, y0 - 2, b, 3));
+    n.fillStyle = `rgba(243, 206, 140, 0.6)`;
+    for (let k = 0; k < 9; k++) {
+      let ww = 34 - k * 2.5 + Math.sin(_ * 2 + k) * 6;
+      ((n.globalAlpha = 0.75 - k * 0.06), n.fillRect(b * 0.8 - ww / 2 + Math.sin(_ * 1.3 + k * 1.7) * 4, y0 + 5 + k * 8 + k * k * 0.8, ww, 2));
+    }
+    n.fillStyle = e.waterHi;
+    for (let k = 0; k < 48; k++) {
+      let row = k % 8,
+        yy = y0 + 9 + row * 7 + row * row * 2.6,
+        span = b + 80,
+        xx = ((((k * 157.3 + row * 61 - v * 0.12 * (1 + row * 0.35) + _ * 9 * (0.5 + row * 0.1)) % span) + span) % span) - 40;
+      ((n.globalAlpha = 0.16 + 0.16 * Math.sin(_ * 1.8 + k)), n.fillRect(xx, yy, 12 + row * 4, 1.5 + row * 0.25));
+    }
+    n.globalAlpha = 1;
   }
   function qe(e, t, n) {
     (Je(e.ridge, 250, 46, 0.0042, t * 0.22, n),
@@ -2280,15 +2356,16 @@ function R(e, t) {
       getClock: () => _, // horloge des mécaniques (passerelles, mottes, ascendances…) : captures
       setAutopilot: (e, opt) => {
         autopilot = !!e;
+        autoShort = !!opt?.shortcut; // pilote auto qui prend les raccourcis risqués (mesure de medals.auto… voir levels.js shortcuts)
         opt?.human
-          ? humanReset({ delayMin: 0.15, delayMax: 0.2, jitter: 0.045, holdMin: 0.28, holdMax: 0.55, calm: !0, aimAt: 0.35, hesitP: 0.2, pauseMin: 0.1, pauseMax: 0.4, ...opt.human })
+          ? humanReset({ delayMin: 0.15, delayMax: 0.2, jitter: 0.045, holdMin: 0.28, holdMax: 0.55, calm: !0, aimAt: 0.35, hesitP: 0.2, pauseMin: 0.1, pauseMax: 0.4, shortcutP: 0.6, ...opt.human })
           : (hum = null);
       },
       // N pas de simulation par image affichée (0 = temps réel) : pour les essais en masse
       setTurbo: (e) => {
         turbo = Math.max(0, Math.min(60, e | 0));
       },
-      getHuman: () => (hum ? { D: hum.D, jumps: hum.jumps, calmWaits: hum.calmWaits } : null),
+      getHuman: () => (hum ? { D: hum.D, jumps: hum.jumps, calmWaits: hum.calmWaits, short: hum.short, scOk: hum.scOk, scKo: hum.scKo } : null),
       teleport: (e, t) => {
         d && ((d.x = e), (d.y = t), (d.vx = 0), (d.vy = 0));
       },
@@ -2319,7 +2396,46 @@ function R(e, t) {
     ct
   );
 }
+// Pierre mouillée au ras de l'eau (sol `stone` d'une palette avec `lake`, N°15, revue du 27/10) : pierre grise
+// arrondie, dessus éclairé et luisant, mousse légère, bande mouillée et reflet au pied, eau en dessous.
+// Le dessus reste plat sur toute la largeur (collision inchangée), seuls les coins sont à peine arrondis.
+function drawStone(e, t, n) {
+  let wl = Math.max(n.lake, t.y + 6),
+    x = t.x,
+    w = t.w,
+    y = t.y,
+    r = Math.min(8, w * 0.12),
+    R = de((t.x * 31 + t.y) >>> 0),
+    body = () => {
+      (e.beginPath(), e.moveTo(x - 2, wl + 2), e.lineTo(x, y + r), e.quadraticCurveTo(x, y, x + r, y), e.lineTo(x + w - r, y));
+      (e.quadraticCurveTo(x + w, y, x + w, y + r), e.lineTo(x + w + 2, wl + 2), e.closePath());
+    };
+  ((e.fillStyle = n.water), e.fillRect(x - 2, wl, w + 4, t.y + t.h - wl));
+  let g = e.createLinearGradient(0, y, 0, wl);
+  (g.addColorStop(0, n.stone), g.addColorStop(Math.min(1, 40 / Math.max(1, wl - y)), n.stone), g.addColorStop(1, n.stoneDark));
+  (e.save(), body(), e.clip(), (e.fillStyle = g), e.fillRect(x - 2, y, w + 4, wl - y + 2));
+  ((e.strokeStyle = `rgba(40,46,52,0.35)`), (e.lineWidth = 1.5));
+  for (let k = 0; k < (wl - y - 20) / 28; k++) {
+    let yy = y + 18 + k * 28 + R() * 6;
+    (e.beginPath(), e.moveTo(x + R() * w * 0.3, yy), e.quadraticCurveTo(x + w * 0.5, yy + (R() - 0.5) * 8, x + w * (0.7 + R() * 0.3), yy + (R() - 0.5) * 6), e.stroke());
+  }
+  ((e.fillStyle = `rgba(0,0,0,0.16)`), e.fillRect(x - 2, y, 6, wl - y), e.fillRect(x + w - 4, y, 6, wl - y));
+  ((e.fillStyle = `rgba(16,40,52,0.38)`), e.fillRect(x - 2, wl - 9, w + 4, 11), e.restore());
+  ((e.fillStyle = n.stoneHi), (e.globalAlpha = 0.6), e.fillRect(x + r, y + 2, w - 2 * r, 2), (e.globalAlpha = 0.35));
+  for (let k = 0; k < w / 24; k++) e.fillRect(x + 6 + R() * (w - 18), y + 6 + R() * Math.max(2, Math.min(24, wl - y - 10)), 5 + R() * 9, 1.5);
+  e.fillStyle = n.moss;
+  for (let k = 0; k < Math.max(1, w / 55); k++) {
+    let mw = 8 + R() * 14,
+      mx = x + 4 + R() * Math.max(1, w - 8 - mw);
+    ((e.globalAlpha = 0.8), e.beginPath(), e.ellipse(mx + mw / 2, y + 1.5, mw / 2, 2.6, 0, 0, Math.PI * 2), e.fill());
+  }
+  ((e.fillStyle = n.waterHi), (e.globalAlpha = 0.9), e.fillRect(x - 6, wl, w + 12, 2), (e.globalAlpha = 0.45));
+  (e.fillRect(x - 14, wl + 6, 10, 1.5), e.fillRect(x + w + 4, wl + 6, 10, 1.5), (e.globalAlpha = 0.2), (e.fillStyle = n.stone));
+  for (let k = 0; k < 4; k++) e.fillRect(x + 4 + k * 3, wl + 5 + k * 6, Math.max(2, w - 8 - k * 6), 2);
+  e.globalAlpha = 1;
+}
 function pe(e, t, n) {
+  if (t.stone && n.lake) return drawStone(e, t, n);
   ((e.fillStyle = n.dirt),
     e.fillRect(t.x, t.y, t.w, t.h),
     (e.fillStyle = n.dirtDark),
@@ -2523,6 +2639,7 @@ function G(e) {
 }
 // ---- Médailles (champ facultatif `medals` des niveaux, écrit par tools/medals.mjs) ----
 // medals: { auto, gold, silver, bronze } en secondes. Sans champ (ou champ invalide) : pas de médailles.
+// Niveau à raccourcis risqués (shortcuts) : + autoShort (pilote auto par les raccourcis) ; l'or est sous `auto`.
 var MEDALS = [
   { key: `gold`, label: `Or`, long: `Médaille d’or`, next: `l’or` },
   { key: `silver`, label: `Argent`, long: `Médaille d’argent`, next: `l’argent` },
@@ -3037,8 +3154,10 @@ function K() {
                           (0, U.jsx)(`span`, {
                             className: `mr-next`,
                             children: nx
-                              ? `Prochaine : ${nx.next} sous ${WT(nx.t)}`
-                              : `Toutes les médailles ! Le pilote auto fait ${W((M.medals.auto ?? medalTargets(M)[0].t) + 1e-6)}.`,
+                              ? `Prochaine : ${nx.next} sous ${WT(nx.t)}${M.medals.autoShort && nx.t < M.medals.auto ? ` (il faut les raccourcis)` : ``}`
+                              : M.medals.autoShort
+                                ? `Toutes les médailles ! Le pilote auto fait ${W(M.medals.auto + 1e-6)} par le chemin sûr, ${W(M.medals.autoShort + 1e-6)} par les raccourcis.`
+                                : `Toutes les médailles ! Le pilote auto fait ${W((M.medals.auto ?? medalTargets(M)[0].t) + 1e-6)}.`,
                           }),
                         ],
                       }),

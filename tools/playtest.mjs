@@ -25,7 +25,7 @@ import { chromium } from 'playwright';
 const pos = [], flags = {};
 for (let i = 2; i < process.argv.length; i++) {
   const a = process.argv[i];
-  if (a.startsWith('--')) { const k = a.slice(2); const nx = process.argv[i + 1]; if (nx != null && !nx.startsWith('--') && !['human', 'md', 'verbose', 'json'].includes(k)) { flags[k] = nx; i++; } else flags[k] = true; }
+  if (a.startsWith('--')) { const k = a.slice(2); const nx = process.argv[i + 1]; if (nx != null && !nx.startsWith('--') && !['human', 'md', 'verbose', 'json', 'shortcut'].includes(k)) { flags[k] = nx; i++; } else flags[k] = true; }
   else pos.push(a);
 }
 if (pos[0] && !/^https?:\/\//.test(pos[0])) pos.unshift(''); // URL facultative : `playtest.mjs all` marche aussi
@@ -46,6 +46,11 @@ if (flags.hesit != null) hopt.hesitP = Number(flags.hesit);
 if (flags.pause) { const [a, c] = String(flags.pause).split('-').map(Number); hopt.pauseMin = a; hopt.pauseMax = c ?? a; }
 if (flags.aim != null) hopt.aimAt = Number(flags.aim);
 if (flags.calm != null) hopt.calm = flags.calm !== '0';
+// Raccourcis risqués (levels.js `shortcuts`, revue du 27/10) : --shortcut = le pilote auto (ou humain : à chaque
+//   essai) prend les raccourcis ; --shortcut-p 0.5 = probabilité, tirée par essai, que le pilote humain les tente
+//   (défaut du moteur : 0,6). Sans option, le pilote auto prend le chemin SÛR (temps `medals.auto`).
+if (flags['shortcut-p'] != null) hopt.shortcutP = Number(flags['shortcut-p']);
+if (flags.shortcut && human) hopt.shortcutP = 1;
 if (flags.hold) { const [a, c] = String(flags.hold).split('-').map(Number); hopt.holdMin = a; hopt.holdMax = c ?? a; }
 
 const b = await chromium.launch();
@@ -76,7 +81,7 @@ if (!human) {
     let clicked = false;
     for (const c of cards) if ((await c.innerText()).includes(L.name)) { await c.scrollIntoViewIfNeeded(); await c.click(); clicked = true; break; }
     if (!clicked) { console.log(`[${L.id}] carte du menu introuvable`); allOk = false; continue; }
-    await pg.evaluate(() => window.__controlsTest.setAutopilot(true));
+    await pg.evaluate((sc) => window.__controlsTest.setAutopilot(true, sc ? { shortcut: true } : undefined), !!flags.shortcut);
     const t0 = Date.now(); let st, shotDone = !shot, lastMode = '', deathsAt = [];
     while (Date.now() - t0 < 150000) {
       await pg.waitForTimeout(250);
@@ -111,7 +116,7 @@ if (!human) {
     await p.evaluate(() => { const c = window.__controlsTest; c.setTurbo(0); c.setAutopilot(false); c.pause?.(); });
     const ok = st.mode === 'finish' && st.deaths <= maxDeaths;
     const why = ok ? '' : st.deaths > maxDeaths ? `>${maxDeaths} chutes` : st.time > 240 ? `bloqué x=${Math.round(st.x)}` : `délai réel dépassé x=${Math.round(st.x)} t=${st.time.toFixed(0)}`;
-    return { ok, why, time: st.finishTime ?? st.time, deaths: st.deaths, D: st.H?.D, rivalMax: Math.max(...st.r.slice(1).map((x) => x.deaths)), deathsAt: st.deathXs || [] };
+    return { ok, why, time: st.finishTime ?? st.time, deaths: st.deaths, D: st.H?.D, rivalMax: Math.max(...st.r.slice(1).map((x) => x.deaths)), deathsAt: st.deathXs || [], short: !!st.H?.short, scOk: st.H?.scOk || 0, scKo: st.H?.scKo || 0 };
   }
   const rows = [];
   for (const L of list) {
@@ -126,9 +131,13 @@ if (!human) {
     const loops = res.filter((r) => r.rivalMax >= 8).length;
     rows.push({ L, okN, meanDeaths, meanTime, hot, loops });
     console.log(`${okN / trials >= 0.3 ? 'OK   ' : 'DUR  '} [${L.id}] ${L.name} (${L.difficulty}) — réussite ${okN}/${trials} (${Math.round((100 * okN) / trials)} %) — chutes moy. ${meanDeaths.toFixed(2)} — temps moy. ${isNaN(meanTime) ? '—' : meanTime.toFixed(1) + ' s'}${hot ? ' — chutes surtout à ' + hot : ''}${loops ? ' — RIVAL EN BOUCLE dans ' + loops + ' essai(s)' : ''}`);
+    const shN = res.filter((r) => r.short).length;
+    if (shN) { const tOk = (sh) => res.filter((r) => r.ok && r.short === sh).map((r) => r.time).sort((a, c) => a - c), med = (a) => (a.length ? a[a.length >> 1].toFixed(1) + ' s' : '—');
+      const sOk = res.reduce((a, r) => a + r.scOk, 0), sKo = res.reduce((a, r) => a + r.scKo, 0);
+      console.log(`      raccourci risqué tenté dans ${shN}/${trials} essais (sauts réussis ${sOk}/${sOk + sKo}) — temps médian (réussis) : avec ${med(tOk(true))}, sans ${med(tOk(false))}`); }
     if (loops) allOk = false;
     // --json : une ligne par niveau avec le temps d'arrivée de chaque essai (null = raté), lue par tools/medals.mjs --human
-    if (flags.json) console.log('JSON ' + JSON.stringify({ id: L.id, trials, times: res.map((r) => (r.ok ? Math.round(r.time * 100) / 100 : null)), deaths: res.map((r) => r.deaths) }));
+    if (flags.json) console.log('JSON ' + JSON.stringify({ id: L.id, trials, times: res.map((r) => (r.ok ? Math.round(r.time * 100) / 100 : null)), deaths: res.map((r) => r.deaths), short: res.map((r) => r.short), deathsAt: res.map((r) => r.deathsAt) }));
     if (flags.verbose) for (const r of res) if (!r.ok) console.log(`      graine ${r.sd} : ${r.why} (chutes ${r.deaths}${r.deathsAt.length ? ' à ' + r.deathsAt.join(',') : ''})`);
   }
   if (flags.md) {

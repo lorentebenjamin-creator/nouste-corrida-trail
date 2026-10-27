@@ -67,7 +67,13 @@ LEVELS.forEach((L, idx) => {
   // Médailles (facultatives) : medals: { auto, gold, silver, bronze } écrit par tools/medals.mjs
   if (L.medals != null) {
     const md = L.medals, okNum = (x) => typeof x === "number" && isFinite(x) && x > 0;
+    // Niveau à raccourci risqué (champ shortcuts, revue du 27/10) : `auto` = pilote auto par le chemin SÛR,
+    // `autoShort` = pilote auto par les raccourcis ; l'or doit EXIGER le raccourci : autoShort ≤ or < auto.
+    const hasSc = Array.isArray(L.shortcuts) && L.shortcuts.length > 0;
     if (![md.auto, md.gold, md.silver, md.bronze].every(okNum)) err(tag, `medals : auto, gold, silver et bronze doivent être des nombres > 0`);
+    else if (hasSc && !okNum(md.autoShort)) err(tag, `medals : niveau à raccourci (shortcuts) sans autoShort (tools/medals.mjs --calibrate)`);
+    else if (hasSc && !(md.autoShort <= md.gold && md.gold < md.auto && md.gold < md.silver && md.silver < md.bronze)) err(tag, `medals : niveau à raccourci, il faut autoShort ≤ or < auto (l'or exige le raccourci) et or < argent < bronze`);
+    else if (hasSc) { if (md.gold < md.autoShort * 1.03 - 1e-9) warn(tag, `medals : or ${md.gold} s à moins de 3 % au-dessus du pilote auto par les raccourcis ${md.autoShort} s`); }
     else if (!(md.auto <= md.gold && md.gold < md.silver && md.silver < md.bronze)) err(tag, `medals : il faut auto ≤ or < argent < bronze`);
     // Or ≥ auto × 1,03 (revue du 24/10) : un or à 0,1–0,2 s du pilote auto n'est atteignable que par un essai
     // parfait (quasi jamais en profil pressé) : recalibrer (tools/medals.mjs --calibrate) ou justifier.
@@ -76,6 +82,18 @@ LEVELS.forEach((L, idx) => {
     // (quelques dixièmes = le jitter d'une image) : recalibrer (tools/medals.mjs --calibrate) ou justifier.
     else if (md.silver < md.gold * 1.08 - 1e-9) warn(tag, `medals : argent ${md.silver} s à moins de 8 % au-dessus de l'or ${md.gold} s (+${((md.silver / md.gold - 1) * 100).toFixed(1)} %, viser ≥ ${(Math.ceil(md.gold * 1.08 * 10 - 1e-6) / 10).toFixed(1)} s)`);
   } else info(tag, `pas de médailles (lancer tools/medals.mjs ${L.id} --write)`);
+  // Raccourcis risqués (revue du 27/10, LEVELS.md §6) : { name, from, to, y, land, landY } — rocher de départ
+  // (sol de dessus y couvrant from–to) et rocher d'arrivée (sol de dessus landY commençant en land).
+  if (L.shortcuts != null) {
+    if (!Array.isArray(L.shortcuts)) err(tag, `shortcuts doit être un tableau (ou absent)`);
+    else for (const q of L.shortcuts) {
+      const nm = `raccourci « ${q?.name || "?"} »`;
+      if (!q || ![q.from, q.to, q.y, q.land, q.landY].every((x) => typeof x === "number" && isFinite(x)) || !(q.from < q.to && q.to < q.land)) { err(tag, `${nm} : from < to < land et y, landY numériques requis`); continue; }
+      if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.y === q.y && sd.x === q.from && sd.x + sd.w === q.to)) err(tag, `${nm} : pas de sol de dessus y=${q.y} de ${q.from} à ${q.to} (rocher de départ)`);
+      if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.y === q.landY && sd.x === q.land)) err(tag, `${nm} : pas de sol de dessus y=${q.landY} commençant en ${q.land} (rocher d'arrivée)`);
+      if (q.land - q.to > 285) err(tag, `${nm} : ${q.land - q.to} px bord à bord, infranchissable (≤ 285)`);
+    }
+  }
   for (const k of ["id", "name", "blurb", "difficulty", "theme"]) if (typeof L[k] !== "string" || !L[k].trim()) err(tag, `champ texte manquant: ${k}`);
   for (const k of ["width", "floor", "spawnX", "finishX"]) if (typeof L[k] !== "number" || !isFinite(L[k])) err(tag, `champ numérique manquant: ${k}`);
   if (ids.has(L.id)) err(tag, `id déjà utilisé`); ids.add(L.id);

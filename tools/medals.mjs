@@ -27,6 +27,11 @@
 //      node tools/medals.mjs [url] [last|all|<id>] [--write]
 //      node tools/medals.mjs --from-auto <levelId>=<secondes> [...] --write   (sans navigateur)
 //
+// Niveaux à RACCOURCI RISQUÉ (champ `shortcuts`, revue du 27/10, LEVELS.md §6) : le pilote auto de
+//    référence prend le chemin sûr (`auto`) ; un second passage `playtest.mjs <id> --shortcut` donne
+//    `autoShort` (pilote auto par les raccourcis). Le pilote humain tente les raccourcis dans une part des
+//    essais (shortcutP, 0,6 par défaut, tiré par essai). Règle de l'or : plancher autoShort × 1,03 (au lieu de
+//    auto × 1,03) et plafond auto − 0,1 s (l'or EXIGE le raccourci), part attentive visée 30–50 % comme ailleurs.
 // Contrôle sans rien écrire (pourcentages or/argent/bronze des deux profils pour les seuils actuels) :
 //      node tools/medals.mjs [url] all --human [--trials 20] [--md]
 // Options : --keep-auto (reprend `auto` de levels.js au lieu de relancer le pilote auto),
@@ -58,14 +63,18 @@ function quantileUp(times, q, lo) {
   return Math.max(lo, Math.ceil(t * 10 - 1e-6) / 10);
 }
 // times = essais attentifs ; pressed = essais pressés (facultatif) — null = raté
-export function calibrate(auto, times, pressed) {
-  const lo = Math.ceil(auto * 10 - 1e-6) / 10;
+export function calibrate(auto, times, pressed, autoShort) {
+  // niveau à raccourci (revue du 27/10) : bornes calculées sur le temps du pilote auto par les raccourcis
+  const sc = typeof autoShort === 'number' && autoShort < auto, base = sc ? autoShort : auto;
+  const lo = Math.ceil(base * 10 - 1e-6) / 10;
   // or ≥ auto × 1,03 (revue du 24/10) : un or à 0,1–0,2 s du pilote auto n'est atteignable que par un essai
   // parfait (quasi jamais en profil pressé). Plancher arrondi au dixième supérieur.
-  const loGold = Math.max(lo, Math.ceil(auto * TARGET.goldAuto * 10 - 1e-6) / 10);
+  // Raccourci : plancher autoShort × 1,03, plafond `cap` = auto (chemin sûr) − 0,1 s.
+  const cap = sc ? Math.round(auto * 10 - 1) / 10 : Infinity;
+  const loGold = Math.min(cap, Math.max(lo, Math.ceil(base * TARGET.goldAuto * 10 - 1e-6) / 10));
   // or : seuil au dixième dont la part d'essais attentifs est la plus proche de 40 % (fenêtre 30–50 %,
   // revue du 24/10 ; avant : 17,5 %, fenêtre 10–25 %), jamais sous auto × 1,03
-  const cands = [...new Set([loGold, ...times.filter((x) => x != null && x >= loGold).map((x) => Math.ceil(x * 10 - 1e-6) / 10)])].sort((a, b) => a - b);
+  const cands = [...new Set([loGold, ...times.filter((x) => x != null && x >= loGold).map((x) => Math.ceil(x * 10 - 1e-6) / 10)])].filter((x) => x <= cap).sort((a, b) => a - b);
   let gold = cands[0], best = Infinity;
   const pick = (cs) => { for (const c of cs) {
     const sh = share(times, c), d = Math.abs(sh - TARGET.gold) + (sh < TARGET.goldMin || sh > TARGET.goldMax ? 1 : 0);
@@ -74,7 +83,7 @@ export function calibrate(auto, times, pressed) {
   pick(cands);
   // temps très groupés (aucun dixième dans la fenêtre 30–50 %) : on s'autorise le 0,05 s
   // (le jeu affiche alors ce temps cible au centième)
-  if (best >= 1) pick([...new Set(times.filter((x) => x != null && x >= loGold).map((x) => Math.ceil(x * 20 - 1e-6) / 20))].sort((a, b) => a - b));
+  if (best >= 1) pick([...new Set(times.filter((x) => x != null && x >= loGold).map((x) => Math.ceil(x * 20 - 1e-6) / 20))].filter((x) => x <= cap).sort((a, b) => a - b));
   let silver = r1(Math.max(gold + TARGET.gap, quantileUp(times, TARGET.silver, lo)));
   const bronze0 = r1(Math.max(silver + TARGET.gap, quantileUp(times, TARGET.bronze, lo)));
   // cible pressée (≈ 30 % des essais pressés), plafonnée au milieu de l'intervalle or–bronze
@@ -90,7 +99,7 @@ export function calibrate(auto, times, pressed) {
   let bronzeFloor = silver + TARGET.gap;
   if (silver < minSilver) { silver = r1(minSilver); bronzeFloor = Math.max(silver + TARGET.gap, Math.ceil((2 * silver - gold) * 10 - 1e-6) / 10); }
   const bronze = r1(Math.max(bronzeFloor, bronze0));
-  return { auto, gold: r2(gold), silver, bronze };
+  return sc ? { auto, autoShort, gold: r2(gold), silver, bronze } : { auto, gold: r2(gold), silver, bronze };
 }
 
 const args = process.argv.slice(2), write = args.includes('--write');
@@ -119,6 +128,15 @@ if (args.includes('--from-auto')) {
   }
 }
 if (!Object.keys(times).length) { console.log('aucun temps de pilote auto'); process.exit(1); }
+// niveaux à raccourci : temps du pilote auto par les raccourcis (playtest --shortcut), ou repris de levels.js
+const timesShort = {};
+for (const L of list) if (L.shortcuts?.length && times[L.id] != null) {
+  if (args.includes('--keep-auto') || (human && !calib)) { if (L.medals?.autoShort) timesShort[L.id] = L.medals.autoShort; continue; }
+  const r = spawnSync(process.execPath, [join(here, 'playtest.mjs'), url, L.id, '--shortcut'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'inherit'] });
+  const mt = r.stdout.match(/^OK\s+\[[a-z0-9-]+\].*arrivé en (\d+(?:\.\d+)?) s — chutes joueur 0/m);
+  if (mt) { timesShort[L.id] = Number(mt[1]); console.log(`[${L.id}] pilote auto par les raccourcis : ${mt[1]} s`); }
+  else console.log(`⚠ [${L.id}] pilote auto par les raccourcis : échec\n${r.stdout}`);
+}
 
 // --- pilote humain : deux profils en parallèle ---
 const hum = {}; // hum[profil][id] = [temps | null]
@@ -151,9 +169,9 @@ for (const L of list) {
     const ta = hum.attentif?.[id];
     if (!ta) { console.log(`[${id}] pas d'essais humains`); process.exitCode = 1; continue; }
     const tp = hum['pressé']?.[id];
-    mdl = calibrate(auto, ta, tp);
+    mdl = calibrate(auto, ta, tp, timesShort[id]);
     const f = (k, ts = ta) => String(Math.round(100 * share(ts, mdl[k])));
-    lineTxt = `medals: { auto: ${auto}, gold: ${mdl.gold}, silver: ${mdl.silver}, bronze: ${mdl.bronze} }, // tools/medals.mjs --calibrate (${trials} essais attentifs : or ${f('gold')} %, argent ${f('silver')} %, bronze ${f('bronze')} %${tp ? ` ; pressés : or ${f('gold', tp)} %, argent ${f('silver', tp)} %, bronze ${f('bronze', tp)} %` : ''})`;
+    lineTxt = `medals: { auto: ${auto}, ${mdl.autoShort != null ? `autoShort: ${mdl.autoShort}, ` : ''}gold: ${mdl.gold}, silver: ${mdl.silver}, bronze: ${mdl.bronze} }, // tools/medals.mjs --calibrate (${trials} essais attentifs : or ${f('gold')} %, argent ${f('silver')} %, bronze ${f('bronze')} %${tp ? ` ; pressés : or ${f('gold', tp)} %, argent ${f('silver', tp)} %, bronze ${f('bronze', tp)} %` : ''})`;
   } else if (human) {
     mdl = L.medals;
     if (!mdl) { console.log(`[${id}] pas de médailles dans levels.js`); continue; }
@@ -163,6 +181,7 @@ for (const L of list) {
   }
   const row = { n: LEVELS.indexOf(L) + 1, L, md: mdl };
   let txt = `[${id}] auto ${auto} s → or ${mdl.gold} s (×${(mdl.gold / auto).toFixed(2)}), argent ${mdl.silver} s (×${(mdl.silver / auto).toFixed(2)}), bronze ${mdl.bronze} s (×${(mdl.bronze / auto).toFixed(2)})`;
+  if (mdl.autoShort) txt += `\n    raccourcis : pilote auto ${mdl.autoShort} s par les raccourcis (or < auto ${auto} s : l'or exige le raccourci)`;
   if (human) for (const prof of Object.keys(PROFILES)) {
     const ts = hum[prof]?.[id] || [];
     row[prof] = ['gold', 'silver', 'bronze'].map((k) => share(ts, mdl[k]));

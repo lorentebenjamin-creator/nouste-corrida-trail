@@ -48,7 +48,9 @@ Le menu affiche les niveaux du N°1 (en haut) au plus récent (en bas) (liste d�
   gusts: [ ... ],          // OPTIONNEL (v4) : rafales de vent de face, helper rafale() (§3d)
   signs: [ ... ],          // OPTIONNEL : panneaux de sentier (décor), helper panneau() (§3d, ravin au calme)
   patrols: [ ... ],        // OPTIONNEL (v2) : patous, helper patou()
+  shortcuts: [ ... ],      // OPTIONNEL (revue du 27/10) : raccourcis risqués de rocher en rocher (§6 étape 3c)
   medals: { auto: 30.8, gold: 35.5, silver: 42, bronze: 49.5 }, // OPTIONNEL : écrit par tools/medals.mjs (§6 étape 5b)
+                           // niveau à raccourcis : + autoShort (pilote auto par les raccourcis), or < auto
   acceptedWarnings: [ { match: "…", reason: "…" } ],           // OPTIONNEL : avertissements check-levels acceptés (§6b)
 }
 ```
@@ -63,6 +65,7 @@ Originaux : 0.93/0.84/0.74 → 0.97/0.88/0.78 → 0.99/0.90/0.82 ; niveau 4 : 1.
 | Helper | Signature | Produit | Notes |
 |---|---|---|---|
 | `p` | `p(x, w, y)` | **sol plein** de `x` à `x+w`, dessus à `y`, jusqu'en bas du monde | Les trous entre deux `p` sont des ravins (brouillard dessiné automatiquement). |
+| `pierre` | `pierre(x, w, y)` | comme `p`, marqué `stone: true` | Dessiné en **pierre grise mouillée au ras de l'eau** (reflet, mousse légère) si la palette a `lake` (N°15) ; sinon identique à `p`. Même collision. |
 | `m` | `m(x, y, w)` | **passerelle** (planche) 18 px, traversable par-dessous, on peut descendre avec ↓ | ⚠ ordre `(x, y, w)` ≠ `p(x, w, y)` |
 | `h` | `h(x, yDuSol)` | **rocher** 56×48 posé sur un sol de dessus `yDuSol` | Obstacle solide (à sauter). |
 | `g` | `g(x, yDuSol)` | **tronc** 100×34 posé sur le sol | Obstacle solide (à sauter). |
@@ -328,7 +331,10 @@ lande ventée du plateau, bruyère mauve, clé facultative `tuft` pour les touff
 facultatives `moss`/`mossDark` pour les mottes plongeantes §3e), `vignes` (niv. 13, coteaux de vignes au coucher
 du soleil, argile rouge, feuilles de vigne rousses), `falaise` (niv. 14, gorges calcaires l'après-midi,
 falaises crème, pins d'Alep), `lac` (niv. 15, lac d'altitude à l'aube, ciel rose et lilas, eau turquoise
-`water`/`waterHi` au fond des trous).
+`water`/`waterHi` au fond des trous ; revue du 27/10 : clés facultatives `lake` (niveau de l'eau, y monde,
+au pied des pierres et dans les trous, sans voile de brouillard), `lakeBg` (y écran de la surface du lac en
+arrière-plan : rive lointaine, reflet du soleil, vaguelettes animées), `stone`/`stoneDark`/`stoneHi`/`moss`
+(couleurs des sols `pierre(…)`). Ces clés n'existent que dans `lac` : aucun autre niveau ne change).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -416,6 +422,55 @@ chute, un humain peut passer.
    comprises, avec parcimonie), puis N°12 à mécaniques (mottes plongeantes, §3e) → **le N°13
    DOIT être classique**, puis N°14 à mécaniques (ascendances, 26/10), N°15 classique (Lac des Truites Bavardes, 27/10)
    → **le N°16 DOIT être à mécaniques**, puis N°17 classique, etc.
+3c. **Raccourci risqué pour les classiques** (revue du 27/10, règle à appliquer à **tous les futurs
+   niveaux classiques**, N°17, 19…) : sur un classique, le pilote auto ne ralentit jamais (temps ≈
+   distance / 352 px/s) et un humain attentif le suit à 3 % près, donc l'or (plancher auto × 1,03) tombe
+   à 70–100 % des essais attentifs (N°4, 9, 11, 12, 15 avant le 27/10). Un classique doit donc offrir
+   **une trajectoire optionnelle plus rapide mais risquée, lisible**, et l'or doit **l'exiger** :
+   * **Le chemin sûr doit coûter du temps réel.** Dans ce moteur la vitesse horizontale est constante :
+     sauter « par-dessus » une pierre ne fait rien gagner tant que le chemin normal se court à pleine
+     vitesse. Le temps se perd sur des **marches sans élan** (ressaut sur place contre une paroi, ≈ 0,5 s),
+     un détour par le bas, une attente. Modèle (N°15, Rochers des Truites) : rochers `pierre(x, 150, 345)`
+     séparés par des **criques** = dalle basse `pierre(·, 155, 500)` collée au rocher, eau 70 px, marche
+     `pierre(·, 45, 420)` collée au rocher suivant (montée 75 px sans trou). Chemin sûr : on se laisse
+     tomber, saut par-dessus l'eau, ressaut ≈ 0,5 s perdue par crique. **Raccourci** : saut de rocher en
+     rocher, **270 px bord à bord** (saut complet à pleine vitesse, coyote compris) ; trop tôt, appui trop
+     court → retombée dans la crique (temps perdu), très court → à l'eau. 3 criques = 1,6 s d'écart.
+   * **Déclarer chaque raccourci** dans `shortcuts: [{ name, from, to, y, land, landY }]` (rocher de départ
+     = sol de dessus `y` de `from` à `to`, rocher d'arrivée = sol de dessus `landY` commençant en `land` ;
+     vérifié par check-levels, ≤ 285 px bord à bord). Sur le rocher de départ (ou pendant le coyote),
+     l'**IA de référence** (pilote auto, rivaux) ne saute pas et prend le chemin sûr ; le pilote auto
+     avec `setAutopilot(true, { shortcut: true })` (`playtest.mjs <id> --shortcut`) cherche le saut le
+     plus tardif qui retombe sur le rocher d'arrivée → temps `autoShort`. Le pilote humain tente les
+     raccourcis dans une part des essais (`shortcutP`, **0,6** par défaut, tirée par essai avec une graine
+     séparée : aucun effet sur les niveaux sans `shortcuts`) en visant la fenêtre des sauts qui
+     retombent sur le rocher d'arrivée (`aimAt`, jitter, appui aléatoire comme ailleurs) ; `--shortcut-p
+     0..1` règle la part. La ligne `--human` affiche « raccourci risqué tenté dans n/N essais (sauts
+     réussis a/b) » et les temps médians avec / sans.
+   * **Lisibilité** : panneau avant (« Raccourci risqué : de rocher en rocher »), arc de balises sur la
+     trajectoire du raccourci, rochers bien distincts du sol courant.
+   * **Médailles** (étape 5b) : `medals.mjs --calibrate` mesure aussi `autoShort` et écrit
+     `medals: { auto, autoShort, gold, … }` ; or ≥ **autoShort × 1,03** et ≤ **auto − 0,1 s** (l'or exige le
+     raccourci : aucun essai par le chemin sûr ne l'atteint, vérifié sur 40 + 40 essais du N°15), part attentive
+     visée 30–50 % comme ailleurs. check-levels impose `autoShort ≤ or < auto`. Le jeu affiche « Prochaine :
+     l'or sous … (il faut les raccourcis) » et, toutes médailles prises, les deux temps du pilote auto.
+   * Viser **≥ 1,2 s d'écart** auto − autoShort (sinon la fenêtre [autoShort × 1,03, auto − 0,1] est vide)
+     et un taux de réussite du saut ≈ 80–90 % attentif, 50–65 % pressé (N°15 : 84 % / 58 %).
+   **À faire pour les classiques existants** (non modifiés le 27/10, or attentif trop généreux) :
+   * **N°11 Névé des Marmottes** (or 73 % attentif) : remplacer les ponts de neige (passerelles au-dessus
+     de la grande crevasse, après les Dents de la Marmotte) par 3 séracs-rochers séparés de criques de neige
+     (dalle basse + marche contre le sérac suivant), raccourci de sérac en sérac à 270 px ; palette `neve`
+     inchangée (les rochers en `p` suffisent) ; `shortcuts`, recalibrer (`--calibrate --write`).
+   * **N°12 Tourbière des Crapauds** (or 73 %) : niveau **à mécaniques** (mottes), la règle ne s'impose pas ;
+     si on veut l'appliquer : dans les buttes de sphaigne, une butte haute avant chaque gouille, chemin sûr
+     par la motte (attente de sa remontée = le temps perdu), raccourci = saut long de butte en butte
+     par-dessus la gouille ; l'IA de référence doit attendre la motte (déjà le cas).
+   * **N°13 Coteaux des Vendangeurs** (or 53 %, juste au-dessus de la fenêtre) : dans la montée au pressoir,
+     terrasses avec marches sans élan (ressaut contre le mur de pierre sèche) et raccourci de terrasse haute
+     en terrasse haute ; ou dans la descente vers la cave un « toboggan » sûr (détour par le bas) contre un
+     saut direct risqué. Puis `shortcuts` et recalibrage.
+   Pour ces trois niveaux : ids, rivaux et autres passages inchangés ; relancer check-levels, playtest
+   (pilote auto **et** `--shortcut`), `--human` dans les deux profils, `medals.mjs <id> --calibrate --write`.
 4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement non justifié**
    (dernière ligne : `… 0 erreur(s), 0 avertissement(s) non justifié(s), N accepté(s)`).
    Un avertissement du nouveau niveau se **corrige dans la géométrie** ; on ne l'accepte
@@ -480,6 +535,9 @@ chute, un humain peut passer.
      au-dessus de la fenêtre (temps attentifs groupés près du pilote auto), le plancher l'emporte et
      le script affiche ⚠. `check-levels.mjs` avertit si `or < auto × 1,03` (`medals : or … à moins
      de 3 % au-dessus du pilote auto`) ;
+   * **niveau à raccourci risqué** (`shortcuts`, étape 3c, revue du 27/10) : le plancher devient
+     **autoShort × 1,03** (temps du pilote auto par les raccourcis, mesuré par `playtest.mjs <id>
+     --shortcut`) et l'or est plafonné à **auto − 0,1 s** (auto = chemin sûr) : l'or exige le raccourci ;
    * **argent** ≈ **50 %** des essais attentifs, **bronze** ≈ **85 %** ;
    * **cible d'argent sur le profil pressé** (revue du 22/10) : l'argent est relevé, si besoin,
      jusqu'au temps atteint par **≈ 30 % des essais pressés**, mais **jamais au-delà du milieu de
@@ -613,7 +671,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | 19 (dont 9 autour des mottes) | 4 | **6 mottes plongeantes** (1 seule, puis 2, puis la **Ronde des Crapauds** à 3), 2 panneaux | 1 / 0.93 / 0.86 | 30,9 s |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 1165 m | 22 (dont 7 dans la Dégringolade) | 8 (dont **3 sur la lèvre des terrasses**) | — (classique ; passage clé : la **Grande Dégringolade**, 7 terrasses de 130–150 px en descente, 1 panneau) | 1 / 0.93 / 0.86 | 32,9 s |
 | 14 | Les Gorges des Vautours Fainéants | Technique | 1090 m | 14 (dont **5 sauts d'ascendance** de 330–340 px) | 3 | **5 ascendances thermiques** (1 seule, puis la **Valse des Vautours** à 2, puis le **Grand Plané**, ascendance courte), 2 panneaux | 1 / 0.93 / 0.86 | 32,3 s |
-| 15 | Le Lac des Truites Bavardes | Tour des lacs | 1142 m | 22 (dont 9 dans le Saute-Pierres) | 5 | — (classique ; passage clé : le **Saute-Pierres**, 8 pierres plates de 180 → 120 px à la même hauteur, trous de 165 px, 1 panneau) | 1 / 0.93 / 0.86 | 32,2 s |
+| 15 | Le Lac des Truites Bavardes | Tour des lacs | 1142 m | 20 (dont 9 dans le Saute-Pierres, 3 criques) | 5 | — (classique ; passage clé : le **Saute-Pierres**, 8 pierres plates de 180 → 120 px à la même hauteur, trous de 165 px ; 27/10 : **Rochers des Truites**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 33,8 s (chemin sûr) ; 32,2 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -635,7 +693,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 12 | La Tourbière des Crapauds Ronfleurs | 30,9 s | 31,9 s | 34,5 s | 37,1 s | 73 % / 80 % / 93 % | 15 % / 15 % / 28 % |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | 32,9 s | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
 | 14 | Les Gorges des Vautours Fainéants | 32,3 s | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
-| 15 | Le Lac des Truites Bavardes | 32,2 s | 33,2 s | 35,9 s | 38,6 s | 75 % / 83 % / 85 % | 15 % / 20 % / 28 % |
+| 15 | Le Lac des Truites Bavardes | 33,8 s *(raccourcis : 32,2 s)* | 33,5 s *(exige les raccourcis)* | 36,2 s | 38,9 s | 40 % / 95 % / 98 % | 10 % / 20 % / 28 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -737,6 +795,37 @@ de 165 px, panneau « Saute-pierres : ne t'arrête pas »). Réglage des trous (
 Points chauds pressés : x≈8100 (ravin montant de 60 px avant le refuge), x≈4600 et x≈3700 (pierres).
 Autopilote 32,2 s, rivaux 0 chute ; N°1–14 inchangés (temps `auto` identiques au dixième).
 Médailles 33,2 / 35,9 / 38,6 s (plancher or = auto × 1,03 ; attentif 75 / 83 / 85 %, pressé 15 / 20 / 28 %).
+
+**Revue du 27/10 (N°15)** — or trop facile (75 % attentif, plancher auto × 1,03 d'un classique) et point
+chaud hors passage clé. Trois changements, N°1–14 inchangés (temps `auto` identiques au dixième) :
+1. **Raccourci risqué** (règle §6 étape 3c) : les pontons du refuge (3 passerelles) sont remplacés par les
+   **Rochers des Truites** — 4 rochers (haut 345) et 3 criques (dalle 500, eau 70 px, marche 420 collée au
+   rocher suivant), panneau « Raccourci risqué : de rocher en rocher », arcs de balises sur la trajectoire.
+   Pilote auto (chemin sûr) **33,8 s**, par les raccourcis **32,2 s** (`--shortcut`), rivaux 0 chute (chemin
+   sûr). Mise au point (40 essais par profil, raccourci tenté à chaque essai, sauts réussis attentif / pressé) :
+   225 px bord à bord, 2 criques → 99 % / 85 % ; 245 px → 96 % / 79 % ; **270 px** → 85 % / 62 % (3 criques : 85 % / 56 %) ; 2 criques ne
+   font gagner que 1,0 s (fenêtre de l'or vide : autoShort × 1,03 = auto) → **3 criques, 1,6 s**. Pilote humain :
+   raccourci tenté dans 60 % des essais (`shortcutP` 0,6 ; 20/40 tentés avec les graines 1–40), sauts réussis
+   47/56 (84 %) attentif, 34/59 (58 %) pressé ; temps médian attentif avec 32,9 s, sans 34,2 s.
+2. **Décor** (palette `lac` seulement) : pierres du Saute-Pierres et des Rochers dessinées en **pierres grises
+   mouillées** (`pierre(…)`, reflet, mousse légère, bande mouillée et reflet au ras de l'eau), surface du lac
+   en arrière-plan (reflet du soleil, vaguelettes), eau au même niveau partout, sans voile de brouillard.
+3. **Point chaud x≈8100** (ravin montant avant le refuge) : marche ramenée de **60 à 40 px** (sol 380 → 400,
+   ronce suivante sur ce sol, le sol suivant 310 → 330 garde sa montée de 70 px, fanion 3 et balises suivent).
+
+Points chauds (40 essais par profil, graines 1–40, toutes les chutes, x arrondi à 100) :
+
+| Profil | Avant (0a45e6d) | Après (revue du 27/10) |
+|---|---|---|
+| Attentif | 100 % — 0,20 chute — x≈8100 : 5, x≈1500 : 1, x≈2000 : 1, x≈4000 : 1 | 100 % — 0,07 chute — x≈1500 : 1, x≈2000 : 1, x≈4000 : 1 (aucune à 8100) |
+| Pressé | 83 % — 2,88 chutes — x≈8100 : 13 (+ 8200 : 4), x≈4600 : 11, x≈3700 : 10 ; pontons x≈6800 : 3, x≈7100 : 2 | 95 % — 2,40 chutes — x≈4600 : 11, x≈3700 : 10, x≈4000 : 10 ; x≈8100 : 4 (+ 8200 : 5) ; Rochers : 0 |
+
+Les chutes se concentrent désormais dans le Saute-Pierres (x 3300–5500 : 57 chutes pressées sur 96, avant
+57 sur 115). Contrepartie : en profil pressé le N°15 passe de 83 % à 95 % (au-dessus du N°13, 88 %) — le
+raccourci raté ne tue presque jamais (on retombe dans la crique), c'est une perte de temps, pas de vie.
+Médailles N°15 recalibrées : 33,2 / 35,9 / 38,6 s → **33,5 / 36,2 / 38,9 s** (autoShort 32,2 ; or ≤ auto − 0,1 :
+**l'or exige les raccourcis**, 0 essai sur 80 l'atteint par le chemin sûr) ; or attentif **75 % → 40 %**,
+pressé **15 % → 10 %** ; argent 83 % → 95 % attentif, 20 % pressé (inchangé), bronze 98 % / 28 %.
 **Prochain niveau (N°16) : à mécaniques**, puis alternance 1 classique / 1 à mécaniques.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
@@ -750,6 +839,10 @@ Même cerveau que l'autopilote (simulation exacte de la physique), rendu impréc
   lâche la direction 0,1–0,4 s (seulement si s'arrêter là est sûr) — sans elles, tous les essais
   sans chute finissaient au centième près au temps du pilote auto et l'or ne pouvait pas être
   calibré ; `--hesit 0` les coupe ;
+* **raccourcis risqués** (revue du 27/10, niveaux avec `shortcuts` seulement, §6 étape 3c) : dans
+  `shortcutP` des essais (**0,6** par défaut, `--shortcut-p`, tiré avec une graine séparée), il saute de
+  rocher en rocher en visant la fenêtre des sauts qui retombent sur le rocher d'arrivée (même `aimAt`,
+  jitter et appui que les autres sauts) ; sinon il prend le chemin sûr comme le pilote auto ;
 * **attente du calme** (profil attentif) : dans une zone de rafale, il ne saute pas au-dessus du
   vide pendant la rafale ni quand les herbes couchées annoncent une rafale qui arriverait avant
   la fin du saut (≈ 0,8 s) ; `--calm 0` coupe ce comportement ;
@@ -824,7 +917,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 100 % | 0,20 | 32,7 s | 95 % | 2,45 | 44,5 s |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 100 % | 0,45 | 37,1 s | 88 % | 2,90 | 49,0 s |
 | 14 | Les Gorges des Vautours Fainéants | Technique | 100 % | 0,33 | 36,4 s | 95 % | 2,17 | 47,7 s |
-| 15 | Le Lac des Truites Bavardes | Tour des lacs | 100 % | 0,20 | 34,1 s | 83 % | 2,88 | 45,4 s |
+| 15 | Le Lac des Truites Bavardes | Tour des lacs | 100 % | 0,07 *(27/10 ; avant 0,20)* | 34,0 s | 95 % *(avant 83 %)* | 2,40 *(avant 2,88)* | 46,7 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le
