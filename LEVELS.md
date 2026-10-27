@@ -327,7 +327,8 @@ lande ventée du plateau, bruyère mauve, clé facultative `tuft` pour les touff
 `tourbiere` (niv. 12, tourbière sous l'orage qui monte, eau brune `water`/`waterHi`, clés
 facultatives `moss`/`mossDark` pour les mottes plongeantes §3e), `vignes` (niv. 13, coteaux de vignes au coucher
 du soleil, argile rouge, feuilles de vigne rousses), `falaise` (niv. 14, gorges calcaires l'après-midi,
-falaises crème, pins d'Alep).
+falaises crème, pins d'Alep), `lac` (niv. 15, lac d'altitude à l'aube, ciel rose et lilas, eau turquoise
+`water`/`waterHi` au fond des trous).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -413,7 +414,8 @@ chute, un humain peut passer.
    Suite : N°9 classique, N°10 à mécaniques (rafales de vent, §3d) → **le N°11 DOIT être
    classique** (une seule nouveauté ; il peut utiliser une seule mécanique existante, rafales
    comprises, avec parcimonie), puis N°12 à mécaniques (mottes plongeantes, §3e) → **le N°13
-   DOIT être classique**, puis N°14 à mécaniques (ascendances, 26/10), N°15 classique, etc.
+   DOIT être classique**, puis N°14 à mécaniques (ascendances, 26/10), N°15 classique (Lac des Truites Bavardes, 27/10)
+   → **le N°16 DOIT être à mécaniques**, puis N°17 classique, etc.
 4. Vérifier : `node tools/check-levels.mjs` → **0 erreur et 0 avertissement non justifié**
    (dernière ligne : `… 0 erreur(s), 0 avertissement(s) non justifié(s), N accepté(s)`).
    Un avertissement du nouveau niveau se **corrige dans la géométrie** ; on ne l'accepte
@@ -593,7 +595,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–14)
+## 8. Courbe de difficulté (niveaux 1–15)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -611,6 +613,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | 19 (dont 9 autour des mottes) | 4 | **6 mottes plongeantes** (1 seule, puis 2, puis la **Ronde des Crapauds** à 3), 2 panneaux | 1 / 0.93 / 0.86 | 30,9 s |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 1165 m | 22 (dont 7 dans la Dégringolade) | 8 (dont **3 sur la lèvre des terrasses**) | — (classique ; passage clé : la **Grande Dégringolade**, 7 terrasses de 130–150 px en descente, 1 panneau) | 1 / 0.93 / 0.86 | 32,9 s |
 | 14 | Les Gorges des Vautours Fainéants | Technique | 1090 m | 14 (dont **5 sauts d'ascendance** de 330–340 px) | 3 | **5 ascendances thermiques** (1 seule, puis la **Valse des Vautours** à 2, puis le **Grand Plané**, ascendance courte), 2 panneaux | 1 / 0.93 / 0.86 | 32,3 s |
+| 15 | Le Lac des Truites Bavardes | Tour des lacs | 1142 m | 22 (dont 9 dans le Saute-Pierres) | 5 | — (classique ; passage clé : le **Saute-Pierres**, 8 pierres plates de 180 → 120 px à la même hauteur, trous de 165 px, 1 panneau) | 1 / 0.93 / 0.86 | 32,2 s |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -632,6 +635,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 12 | La Tourbière des Crapauds Ronfleurs | 30,9 s | 31,9 s | 34,5 s | 37,1 s | 73 % / 80 % / 93 % | 15 % / 15 % / 28 % |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | 32,9 s | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
 | 14 | Les Gorges des Vautours Fainéants | 32,3 s | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
+| 15 | Le Lac des Truites Bavardes | 32,2 s | 33,2 s | 35,9 s | 38,6 s | 75 % / 83 % / 85 % | 15 % / 20 % / 28 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -724,7 +728,16 @@ ascendances (portée ≈ 464 px au lieu de 417 en saut complet, 352 px avec un a
 attentif 0,42, pressé 95 % — retenu : les cinq, plus lisible (« les ascendances portent pareil »).
 Médailles N°14 recalibrées : 35,0 / 39,4 / 43,9 s → **33,3 / 36,8 / 40,3 s** (or = auto × 1,03 ;
 attentif 43 / 63 / 85 %, pressé 3 / 8 / 20 %).
-**Prochain niveau (N°15) : classique**, puis alternance 1 classique / 1 à mécaniques.
+**N°15 (27/10, classique)** : le Lac des Truites Bavardes, étiquette de caractère « Tour des lacs ».
+Passage clé : le **Saute-Pierres** (8 pierres de 180, 160, 150, 140, 130, 130, 120, 120 px à y = 440, trous
+de 165 px, panneau « Saute-pierres : ne t'arrête pas »). Réglage des trous (40 essais pressés, graines 1–40) :
+120–130 px → 98 % / 1,48 (trop facile) ; 150 → 95 % / 2,38 ; 160 → 93 % / 2,77 ; 160/165 alternés → 88 % / 2,80
+(graines 41–80 : 93 % / 2,33) ; **165 retenu** → 83 % / 2,88 (graines 41–80 : 88 % / 2,75, soit 85 % / 2,82 sur
+80), au niveau du N°13 (88 % / 2,90), règle des classiques respectée à ±5 points. Attentif 100 % / 0,20.
+Points chauds pressés : x≈8100 (ravin montant de 60 px avant le refuge), x≈4600 et x≈3700 (pierres).
+Autopilote 32,2 s, rivaux 0 chute ; N°1–14 inchangés (temps `auto` identiques au dixième).
+Médailles 33,2 / 35,9 / 38,6 s (plancher or = auto × 1,03 ; attentif 75 / 83 / 85 %, pressé 15 / 20 / 28 %).
+**Prochain niveau (N°16) : à mécaniques**, puis alternance 1 classique / 1 à mécaniques.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
@@ -811,6 +824,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 100 % | 0,20 | 32,7 s | 95 % | 2,45 | 44,5 s |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 100 % | 0,45 | 37,1 s | 88 % | 2,90 | 49,0 s |
 | 14 | Les Gorges des Vautours Fainéants | Technique | 100 % | 0,33 | 36,4 s | 95 % | 2,17 | 47,7 s |
+| 15 | Le Lac des Truites Bavardes | Tour des lacs | 100 % | 0,20 | 34,1 s | 83 % | 2,88 | 45,4 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le

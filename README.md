@@ -26,13 +26,14 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 11 | Le Névé des Marmottes Frileuses | Haute montagne | 1145 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur un **névé au soleil de midi** (nouvelle palette `neve`) ; passage clé : les **Dents de la Marmotte**, sept séracs étroits (150 px) **en dents de scie** — on monte, on redescend, on remonte plus haut (60 → 90 px) ; jusqu'ici les suites de sauts montaient ou descendaient toujours dans le même sens |
 | 12 | La Tourbière des Crapauds Ronfleurs | Bien engagé | 1065 m | mécanique inédite : les **mottes plongeantes** — des tapis de sphaigne qui flottent sur les gouilles de la tourbière puis **plongent** (plus de sol) et remontent, en cycle ; annoncées par la motte qui **tremble, s'enfonce et fait des bulles**, un panneau « bulles » qui clignote en haut de l'écran et deux panneaux de sentier (« Tourbière : mottes plongeantes », « Bulles : ça plonge, attends la remontée ») ; plongée, sa silhouette reste visible sous l'eau ; passage clé : la **Ronde des Crapauds**, trois mottes qui remontent en vague ; nouvelle palette **tourbiere** (orage sur la tourbière) |
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 1165 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur des **coteaux de vignes au coucher du soleil** (nouvelle palette `vignes`) ; passage clé : la **Grande Dégringolade**, sept terrasses étroites (130–150 px), annoncées par un panneau, qui **descendent d'un coup** du chai perché jusqu'au pied du coteau (35–40 px plus bas à chaque saut, ravins de 150–160 px), dont trois avec une **ronce sur la lèvre** : on les enchaîne sans s'arrêter ; jusqu'ici les descentes faisaient deux marches au plus |
-| 14 | Les Gorges des Vautours Fainéants *(niveau du jour)* | Technique | 1090 m | mécanique inédite : les **ascendances thermiques** — au-dessus de certains ravins trop larges pour un saut normal (330–340 px), une colonne d'air chaud monte par intervalles ; sautée au bon moment, elle fait **planer** le coureur jusqu'à l'autre bord ; annoncées par une colonne orange vive et des traînées cernées qui montent (au repos : quelques volutes pâles), des feuilles en spirale, un **fanion qui se dresse**, des vautours qui tournent, un panneau « spirale » qui clignote en haut de l'écran et deux panneaux de sentier (« Ascendance : saute quand ça monte », « Ça faiblit ? attends la suivante ») ; passages clés : la **Valse des Vautours** (deux ascendances enchaînées) et le **Grand Plané** (ascendance courte) ; nouvelle palette **falaise** (gorges calcaires, ravins en parois striées avec rivière au fond) |
+| 14 | Les Gorges des Vautours Fainéants | Technique | 1090 m | mécanique inédite : les **ascendances thermiques** — au-dessus de certains ravins trop larges pour un saut normal (330–340 px), une colonne d'air chaud monte par intervalles ; sautée au bon moment, elle fait **planer** le coureur jusqu'à l'autre bord ; annoncées par une colonne orange vive et des traînées cernées qui montent (au repos : quelques volutes pâles), des feuilles en spirale, un **fanion qui se dresse**, des vautours qui tournent, un panneau « spirale » qui clignote en haut de l'écran et deux panneaux de sentier (« Ascendance : saute quand ça monte », « Ça faiblit ? attends la suivante ») ; passages clés : la **Valse des Vautours** (deux ascendances enchaînées) et le **Grand Plané** (ascendance courte) ; nouvelle palette **falaise** (gorges calcaires, ravins en parois striées avec rivière au fond) |
+| 15 | Le Lac des Truites Bavardes *(niveau du jour)* | Tour des lacs | 1142 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) au bord d'un **lac d'altitude à l'aube** (nouvelle palette `lac`, eau turquoise au fond des trous) ; passage clé : le **Saute-Pierres**, huit pierres plates au ras de l'eau, **toutes à la même hauteur et de plus en plus étroites** (180 → 120 px, jamais si étroites jusqu'ici), séparées par des trous de 165 px, annoncées par un panneau « Saute-pierres : ne t'arrête pas » : pas un seul sol de repos, on traverse le lac d'un seul élan |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
 Alternance : après la série 5–8 à mécaniques, **le N°9 est un sentier classique** (rythme /
 endurance, modèle N°4, une seule nouveauté) ; le N°10 est de nouveau à mécaniques (rafales de
-vent, mécanique inédite) ; le N°11 est classique (Névé des Marmottes Frileuses) ; le N°12 est à mécaniques (mottes plongeantes, mécanique inédite) ; le N°13 est classique (Coteaux des Vendangeurs Assoiffés) ; **le N°14 sera à mécaniques**, puis on alterne. Chaque nouveau sentier passe le pilote « humain »
+vent, mécanique inédite) ; le N°11 est classique (Névé des Marmottes Frileuses) ; le N°12 est à mécaniques (mottes plongeantes, mécanique inédite) ; le N°13 est classique (Coteaux des Vendangeurs Assoiffés) ; le N°14 est à mécaniques (ascendances thermiques) ; le N°15 est classique (Lac des Truites Bavardes) ; **le N°16 sera à mécaniques**, puis on alterne. Chaque nouveau sentier passe le pilote « humain »
 (`playtest --human`, deux profils) et doit respecter la courbe de difficulté.
 
 Difficulté mesurée (pilote « humain », **40 essais**, réussite / chutes moyennes, **23/10/2026** ; profil
@@ -57,6 +58,7 @@ ceux des revues précédentes (20/22 oct., fenêtre tronquée), **ne pas les com
 | 12 | 100 % / 0,20 | 95 % / 2,45 |
 | 13 | 100 % / 0,45 | 88 % / 2,90 |
 | 14 | 100 % / 0,33 *(26/10 ; avant 0,78)* | 95 % / 2,17 *(avant 85 % / 2,60)* |
+| 15 | 100 % / 0,20 *(27/10)* | 83 % / 2,88 |
 
 Détails et méthode : LEVELS.md §8. N°12 (mottes plongeantes) : pressé 95 % / 2,45 sur 40 essais
 (graines 1–40), 85 % / 2,60 sur 40 autres (graines 41–80) soit 90 % / 2,53 sur 80 ; N°10 : 95 % / 1,98
@@ -65,6 +67,8 @@ de chutes en plus : pas de durcissement nécessaire (LEVELS.md §8, revue du 23/
 N°13 (24/10, classique, après la revue du 24/10 : panneau avant la Grande Dégringolade, 3e terrasse
 avancée, ronce de la 6e à 55 px) : 40 essais, attentif 100 % / 0,45, pressé 88 % / 2,90 (avant 85 % / 3,00),
 au niveau du N°11 (85 % / 3,2) ; étiquette « Grand raid » conservée (règle d'attribution : LEVELS.md §8).
+N°15 (27/10, classique) : 40 essais, attentif 100 % / 0,20, pressé 83 % / 2,88 (graines 41–80 : 88 % / 2,75,
+soit 85 % / 2,82 sur 80), au niveau du N°13 (88 % / 2,90), classique précédent ; étiquette de caractère « Tour des lacs ».
 
 ## Médailles
 
@@ -106,6 +110,7 @@ par profil (pilote du 23/10) :
 | 12 | 31,9 s | 34,5 s | 37,1 s | 73 % / 80 % / 93 % | 15 % / 15 % / 28 % |
 | 13 | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
 | 14 | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
+| 15 | 33,2 s | 35,9 s | 38,6 s | 75 % / 83 % / 85 % | 15 % / 20 % / 28 % |
 
 Le plancher auto × 1,03 l'emporte sur la fenêtre 30–50 % : sur les niveaux sans attente (temps
 attentifs groupés à moins de 3 % du pilote auto), l'or est atteint par 65–100 % des essais attentifs

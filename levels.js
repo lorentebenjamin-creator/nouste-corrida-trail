@@ -269,6 +269,21 @@ export const THEMES = {
     // décor des ravins (revue 26/10, game.js drawCanyon) : parois calcaires striées, fond profond, rivière
     canyon: { wall: "#d8c29a", wallDark: "#9c8360", strata: "rgba(110,80,50,0.45)", back: "#7a6248", deep: "#22180f", river: "#3f7f8c", riverHi: "#c8eef0" },
   },
+  lac: {
+    // Niveau 15 : lac d'altitude à l'aube (ciel rose et lilas, eau turquoise, pierres plates grises,
+    // pelouses alpines encore dans l'ombre)
+    skyTop: "#3a4f7a", skyMid: "#c99ab0", skyBot: "#fbe2c4",
+    ridge: "#4a5a78", ridge2: "#8a9ab8",
+    pine: "#1f3a34", pine2: "#3f6a58",
+    dirt: "#6a5a4a", dirtDark: "#43382e",
+    grass: "#6fa860", grassDark: "#4a7a44",
+    wood: "#86603c", woodDark: "#523a24",
+    rock: "#b4b2aa", rockDark: "#76746c",
+    thorn: "#2a2a24", leaf: "#4f7a50", berry: "#d05a6a",
+    fog: "#16283a",
+    // Clés facultatives (décor) : eau du lac visible au fond des trous entre les pierres.
+    water: "#2f7f94", waterHi: "#bfeef2",
+  },
 };
 
 // =====================================================================
@@ -1237,5 +1252,74 @@ LEVELS.push((() => {
     finishX: 10900,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
     medals: { auto: 32.3, gold: 33.3, silver: 36.8, bronze: 40.3 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 43 %, argent 63 %, bronze 85 % ; pressés : or 3 %, argent 8 %, bronze 20 %)
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 15 — Le Lac des Truites Bavardes (niveau du jour, 2026-10-27)
+// Niveau classique (règle d'alternance, après le N°14 à mécaniques) — nouveauté : un seul passage
+// clé inédit, le SAUTE-PIERRES, huit pierres plates au ras de l'eau, toutes à la même hauteur, de
+// plus en plus ÉTROITES (180 → 120 px, jamais si étroites jusqu'ici), séparées par des trous de
+// 165 px : pas un seul sol de repos, on traverse le lac d'un seul élan. Aucune mécanique v2–v6 :
+// sols, ravins, ronces, rochers, troncs, passerelles fixes et fanions, sur le modèle du niveau 4.
+// Nouvelle palette `lac` (lac d'altitude à l'aube, eau turquoise au fond des trous).
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "lac-truites", c = v(id);
+  c.line(160, 400, 370, 3); c.arc(770, 960, 330, 3, 40); c.line(1200, 1340, 370, 2);
+  c.arc(1360, 1530, 290, 3, 40); c.line(1700, 1880, 300, 2); c.arc(1910, 2080, 230, 3, 40);
+  c.line(2280, 2460, 240, 2); c.arc(2480, 2640, 330, 3, 40); c.line(2700, 3000, 370, 3);
+  c.arc(3170, 3365, 330, 3, 40); c.arc(3515, 3710, 330, 3, 40); c.arc(3840, 4035, 330, 3, 40);
+  c.arc(4155, 4350, 330, 3, 40); c.arc(4460, 4655, 330, 3, 40); c.arc(4755, 4950, 330, 3, 40);
+  c.arc(5050, 5245, 330, 3, 40); c.arc(5335, 5530, 330, 3, 40); c.arc(5620, 5815, 330, 3, 40);
+  c.line(5865, 6265, 370, 4); c.arc(6575, 6745, 300, 3, 40); c.arc(6865, 7005, 250, 3, 40);
+  c.arc(7115, 7255, 300, 3, 40); c.arc(7375, 7535, 330, 3, 40); c.line(7815, 8005, 370, 2);
+  c.arc(8015, 8175, 270, 3, 40); c.line(8365, 8545, 310, 2); c.arc(8565, 8715, 200, 3, 40);
+  c.line(8765, 9065, 240, 3); c.arc(9075, 9235, 260, 3, 40); c.line(9465, 9625, 300, 2);
+  c.arc(9635, 9795, 330, 3, 40); c.line(9845, 10145, 370, 3); c.arc(10455, 10625, 330, 3, 40);
+  c.line(10665, 10825, 370, 2); c.line(10985, 11185, 370, 2); c.line(11315, 11405, 370, 2);
+  return {
+    id, name: "Le Lac des Truites Bavardes",
+    blurb: "L'aube rosit le lac : traverse-le de pierre en pierre sans jamais t'arrêter, les truites commentent chaque saut.",
+    difficulty: "Tour des lacs", theme: "lac",
+    width: 11825, floor: 440, spawnX: 60,
+    solids: [
+      // Départ sur la pelouse du déversoir, ressauts vers le belvédère
+      p(0, 800, 440),
+      p(940, 440, 440), h(1100, 440),
+      p(1510, 420, 370),
+      p(2060, 440, 310), g(2190, 310),
+      // Descente sur la rive
+      p(2620, 560, 440),
+      // Passage clé : le SAUTE-PIERRES — huit pierres plates au ras de l'eau, même hauteur, de plus en
+      // plus étroites (180, 160, 150, 140, 130, 130, 120, 120 px), trous de 165 px, aucun sol de repos
+      p(3345, 180, 440), p(3690, 160, 440), p(4015, 150, 440), p(4330, 140, 440),
+      p(4635, 130, 440), p(4930, 130, 440), p(5225, 120, 440), p(5510, 120, 440),
+      p(5795, 800, 440), h(6315, 440),
+      // Les pontons du refuge : passerelles au-dessus de l'anse
+      m(6725, 390, 160), m(6985, 340, 150), m(7235, 390, 160),
+      p(7515, 520, 440), g(7665, 440),
+      // Montée au refuge
+      p(8155, 420, 380),
+      p(8695, 400, 310),
+      // Descente vers le torrent de sortie
+      p(9215, 440, 370), h(9385, 370),
+      p(9775, 700, 440),
+      // Dernier sprint le long du torrent jusqu'à l'arche
+      p(10605, 1120, 440), g(10865, 440),
+    ],
+    hazards: [
+      _(480, 70, 440),
+      _(1640, 64, 370),
+      _(8265, 64, 380),
+      _(10175, 64, 440),
+      _(11215, 74, 440),
+    ],
+    signs: [panneau(2950, 440, "Saute-pierres :|ne t'arrête pas")],
+    coins: c.list,
+    checkpoints: [y(id, 2650, 440, 1), y(id, 5825, 440, 2), y(id, 8715, 310, 3), y(id, 9805, 440, 4)],
+    finishX: 11415,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 32.2, gold: 33.2, silver: 35.9, bronze: 38.6 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 75 %, argent 83 %, bronze 85 % ; pressés : or 15 %, argent 20 %, bronze 28 %)
   };
 })());
