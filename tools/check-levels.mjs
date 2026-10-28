@@ -394,6 +394,16 @@ LEVELS.forEach((L, idx) => {
     if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.y === sn.y && sn.x - 10 >= sd.x && sn.x + 10 <= sd.x + sd.w)) err(tag, `panneau @${sn.x}: pas planté sur un sol de dessus y=${sn.y}`);
     const lines = sn.text.split("|");
     if (lines.length > 2 || lines.some((t) => t.trim().length > 20)) warn(tag, `panneau @${sn.x}: texte trop long (2 lignes de 20 caractères max, séparées par « | »)`);
+    // Balise trop proche d'un panneau (revue 28/10) : planche 164×(16+16·lignes), texte à
+    // y ∈ [sol−64−bh, sol−64] ; balise visuelle ≈ 11 px de rayon. Avertissement si une balise
+    // est à hauteur du texte et à moins de 40 px du bord horizontal de la planche.
+    const bw = 164, bh = 16 + lines.length * 16, top = sn.y - 64 - bh, bot = top + bh;
+    const x0 = sn.x - bw / 2, x1 = x0 + bw;
+    for (const c of L.coins) {
+      if (c.y + 11 < top || c.y - 11 > bot) continue;
+      const gap = c.x < x0 ? x0 - c.x : c.x > x1 ? c.x - x1 : 0;
+      if (gap < 40) warn(tag, `balise trop proche d'un panneau @${sn.x} (balise @${Math.round(c.x)},${Math.round(c.y)} : ${Math.round(gap)} px < 40)`);
+    }
   }
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);

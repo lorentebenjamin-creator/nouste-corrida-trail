@@ -343,8 +343,9 @@ première amanite sans panneau contenant « amanite » dans les 1500 px avant.
 
 Recette (N°16) : une amanite seule collée au bord (on se laisse tomber, corniche +160 px), une amanite
 loin du bord (160 px de vide : il faut la viser d'un saut), le **Ricochet** (trois amanites de suite,
-130 px, au-dessus d'un ravin de 870 px, sans sol de repos), puis l'**Échelle** (deux rebonds pour monter
-de 440 à 220). Nouvelle palette `brume`.
+120 px, 170 px de vide d'appel, creux ~200 px, 2e un peu plus basse, ronce à la réception — revue 28/10),
+puis l'**Échelle** (deux rebonds, 170 px de vide d'appel, marche courte, ronce en haut — revue 28/10).
+Nouvelle palette `brume`.
 
 ## 4. Thèmes
 
@@ -644,6 +645,16 @@ vers le ressaut, ce qui supprime aussi la montée 60/140) et N°8 (`gue-lucioles
 la nuit 115/125 → 140/140 px : écart 130 au lieu de 155 pour la montée de 40, et 160 au lieu de 175
 vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, radeaux rapides du N°8).
 
+### Contrôle « balise trop proche d'un panneau » (revue du 28/10)
+
+`tools/check-levels.mjs` avertit si une **balise** (pièce) est à **hauteur du texte** d'un panneau
+(`signs`) et à moins de **40 px** du bord horizontal de la planche. Géométrie du panneau (moteur
+`drawSign`) : planche **164 × (16 + 16·lignes)** px, centrée sur `x`, dessus à `yDuSol − 64 − bh` ;
+balise visuelle ≈ 11 px de rayon. Ne pas laisser une balise chevaucher le texte. Les niveaux déjà
+publiés qui déclenchent l'avertissement ne sont **pas** retouchés a posteriori : l'avertissement
+reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` si voulu).
+
+
 ## 7. Ce qui a été modifié par rapport au bundle d'origine
 
 * `assets/index-wVumaOia.js` : l'hydratation TanStack Router/SSR est remplacée par un rendu client
@@ -710,7 +721,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 1165 m | 22 (dont 7 dans la Dégringolade) | 8 (dont **3 sur la lèvre des terrasses**) | — (classique ; passage clé : la **Grande Dégringolade**, 7 terrasses de 130–150 px en descente, 1 panneau) | 1 / 0.93 / 0.86 | 32,9 s |
 | 14 | Les Gorges des Vautours Fainéants | Technique | 1090 m | 14 (dont **5 sauts d'ascendance** de 330–340 px) | 3 | **5 ascendances thermiques** (1 seule, puis la **Valse des Vautours** à 2, puis le **Grand Plané**, ascendance courte), 2 panneaux | 1 / 0.93 / 0.86 | 32,3 s |
 | 15 | Le Lac des Truites Bavardes | Tour des lacs | 1142 m | 20 (dont 9 dans le Saute-Pierres, 3 criques) | 5 | — (classique ; passage clé : le **Saute-Pierres**, 8 pierres plates de 180 → 120 px à la même hauteur, trous de 165 px ; 27/10 : **Rochers des Truites**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 33,8 s (chemin sûr) ; 32,2 s par les raccourcis |
-| 16 | La Forêt des Amanites Farceuses | Technique | 1200 m | 15 (dont **7 rebonds d'amanite**, 3 creux) | 4 | **7 amanites rebondissantes** (1 seule, puis 1 à viser, le **Ricochet** à 3, l'**Échelle** à 2) ; **Souches Moussues**, 3 raccourcis risqués ; 4 panneaux | 1 / 0.93 / 0.86 | 35,5 s (chemin sûr) ; 33,9 s par les raccourcis |
+| 16 | La Forêt des Amanites Farceuses | Technique | 1200 m | 15 (dont **7 rebonds d'amanite**, 3 creux) | 6 | **7 amanites rebondissantes** (1 seule, puis 1 à viser, le **Ricochet** à 3 durci, l'**Échelle** à 2 durcie) ; **Souches Moussues**, 3 raccourcis risqués ; 5 panneaux | 1 / 0.93 / 0.86 | 35,5 s (chemin sûr) ; 33,9 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -733,7 +744,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 13 | Les Coteaux des Vendangeurs Assoiffés | 32,9 s | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
 | 14 | Les Gorges des Vautours Fainéants | 32,3 s | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
 | 15 | Le Lac des Truites Bavardes | 33,8 s *(raccourcis : 32,2 s)* | 33,5 s *(exige les raccourcis)* | 36,2 s | 38,9 s | 40 % / 95 % / 98 % | 10 % / 20 % / 28 % |
-| 16 | La Forêt des Amanites Farceuses | 35,5 s *(raccourcis : 33,9 s)* | 35,0 s *(exige les raccourcis)* | 37,8 s | 40,6 s | 43 % / 100 % / 100 % | 35 % / 68 % / 78 % |
+| 16 | La Forêt des Amanites Farceuses | 35,5 s *(raccourcis : 33,9 s)* | 35,1 s *(exige les raccourcis)* | 38,1 s | 41,1 s | 23 % / 55 % / 85 % | 10 % / 28 % / 35 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -870,15 +881,21 @@ pressé **15 % → 10 %** ; argent 83 % → 95 % attentif, 20 % pressé (inchang
 
 N°16 (28/10, niveau du jour) : **La Forêt des Amanites Farceuses**, mécanique v7 inédite (amanites
 rebondissantes, §3g), palette `brume`. Pilote auto 35,5 s (chemin sûr), 33,9 s par les raccourcis, rivaux
-0 chute ; N°1–15 inchangés au dixième (`playtest.mjs all`). 40 essais par profil : attentif 100 % / 0,00
-chute / 35,5 s ; pressé 100 % / 0,47 chute / 38,2 s (chutes surtout x≈8300, 800, 1700 : ronces du sentier ;
-aucune sur les amanites). Le rebond est automatique (aucun timing à part viser le chapeau), d'où un
-pressé **plus facile que le N°14** (95 % / 2,17) : étiquette « **Technique** », la plus basse de l'échelle
-d'engagement (cohérente à ±5 points avec 100 %). Sans raccourci, l'or tombait à 98 % attentif (plancher
-auto × 1,03, temps groupés) : ajout des **Souches Moussues** (modèle des Rochers des Truites, étape 3c,
-3 raccourcis de 270 px, 1,6 s d'écart) → or **35,0 s exige les raccourcis**, 43 % attentif, 35 % pressé ;
-sauts du raccourci réussis 91 % attentif (48/53), 69 % pressé (25/36). Pour durcir un futur niveau à
-amanites : chapeaux plus étroits, amanites mobiles ou combinées à une autre mécanique.
+0 chute ; N°1–15 inchangés au dixième (`playtest.mjs all`).
+
+**Revue du 28/10 (Boss Bot — difficulté, médailles, finition).** Avant : attentif 100 % / 0,00 chute ;
+pressé **100 % / 0,47** (aucune chute sur les amanites) — trop facile pour un niveau à mécanique.
+Durcissement du **Ricochet** (170 px de vide d'appel, chapeaux 120, creux ~200 px, 2e amanite plus basse,
+ronce 88 px à la réception) et de l'**Échelle** (170 px de vide d'appel, marche 170 px, ronce en haut,
+panneau « Échelle : deux rebonds ») ; balises du panneau Ricochet décalées (≥ 40 px). Après, 40 essais :
+attentif **100 % / 0,15** ; pressé **90 % / 1,68** (chutes x≈6900, 7000, 7400 : appel de l'Échelle et
+Ricochet). Étiquette « **Technique** » conservée (cohérente à ±5 avec 90 %, comme le N°5 à 85 %).
+Médailles recalibrées : **35,1 / 38,1 / 41,1 s** (autoShort 33,9 ; or exige les raccourcis) ; or attentif
+**23 %** (⚠ hors fenêtre documentée 30–50 % : plancher autoShort × 1,03, temps groupés — la règle de
+l'outil est conservée ; Boss Bot citait 10–25 %, écart noté sans changer la règle). Contrôle **balise
+trop proche d'un panneau** ajouté à `check-levels.mjs` (planche 164 px, < 40 px horizontalement à
+hauteur du texte) : N°16 propre ; N°10, 12, 13, 14, 15 déclenchent l'avertissement (géométrie non
+modifiée, listés dans le rapport de revue).
 **Prochain niveau (N°17) : classique**, avec un raccourci risqué (étape 3c).
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
@@ -971,7 +988,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 100 % | 0,45 | 37,1 s | 88 % | 2,90 | 49,0 s |
 | 14 | Les Gorges des Vautours Fainéants | Technique | 100 % | 0,33 | 36,4 s | 95 % | 2,17 | 47,7 s |
 | 15 | Le Lac des Truites Bavardes | Tour des lacs | 100 % | 0,07 *(27/10 ; avant 0,20)* | 34,0 s | 95 % *(avant 83 %)* | 2,40 *(avant 2,88)* | 46,7 s |
-| 16 | La Forêt des Amanites Farceuses | Technique | 100 % | 0,00 | 35,5 s | 100 % | 0,47 | 38,2 s |
+| 16 | La Forêt des Amanites Farceuses | Technique | 100 % | 0,15 | 38,2 s | 90 % | 1,68 | 49,6 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le

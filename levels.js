@@ -1383,21 +1383,22 @@ LEVELS.push((() => {
 // coureur vers le haut (≈ 230 px) : on se laisse tomber dessus pour atteindre une corniche trop haute
 // pour un saut normal. Progression : une amanite seule où il suffit de se laisser tomber (découverte),
 // une amanite loin du bord qu'il faut viser d'un saut, le RICOCHET (passage clé, trois amanites de
-// suite au-dessus d'un long ravin), puis l'Échelle (deux rebonds pour monter de 220 px) ; à la fin, les Souches Moussues
+// suite au-dessus d'un long ravin, durci 28/10), puis l'Échelle (deux rebonds, durcie 28/10) ; à la fin, les Souches Moussues
 // (raccourci risqué de souche en souche, §6 étape 3c : l'or l'exige).
 // Nouvelle palette `brume` (vieille forêt de sapins dans la brume du crépuscule).
 // ---------------------------------------------------------------------
 LEVELS.push((() => {
   const id = "amanites-farceuses", c = v(id);
-  c.line(160, 600, 370, 4); c.arc(1300, 1400, 380, 3, 40); c.line(1450, 1900, 370, 4);
+  c.line(160, 600, 370, 4); c.arc(1300, 1400, 380, 3, 40); c.line(1450, 1600, 370, 2); c.line(1890, 1990, 370, 2);
   c.arc(2060, 2240, 260, 4, 60); c.line(2320, 2700, 250, 4);
   c.line(2950, 3250, 370, 3); c.arc(3600, 3740, 380, 3, 40); c.arc(3800, 3980, 250, 3, 50);
-  c.line(4060, 4400, 270, 3); c.line(4640, 5000, 330, 3);
-  c.arc(5200, 5410, 330, 3, 70); c.arc(5495, 5705, 330, 3, 70); c.arc(5790, 5980, 310, 3, 70);
-  c.line(6080, 6560, 330, 4); c.line(6800, 7200, 370, 3);
-  c.arc(7300, 7480, 300, 3, 50); c.line(7520, 7660, 260, 2); c.arc(7740, 7920, 190, 3, 40);
-  c.line(8000, 8400, 150, 3); c.arc(8460, 8560, 200, 3, 40); c.line(8660, 9100, 260, 4);
-  c.line(9400, 9560, 370, 2); c.line(9620, 9880, 370, 3);
+  c.line(4060, 4400, 270, 3); c.line(4500, 4560, 330, 3);
+  // balises après le panneau Ricochet (écart ≥ 40 px), puis arcs du Ricochet durci
+  c.line(4860, 5120, 330, 2); c.arc(5310, 5550, 330, 3, 70); c.arc(5630, 5870, 350, 3, 70); c.arc(5950, 6170, 310, 3, 70);
+  c.line(6320, 6780, 330, 4); c.line(7120, 7260, 370, 3);
+  c.arc(7340, 7540, 300, 3, 50); c.line(7580, 7740, 270, 2); c.arc(7840, 8060, 190, 3, 40);
+  c.line(8140, 8540, 150, 3); c.arc(8600, 8700, 200, 3, 40); c.line(8800, 9100, 260, 4);
+  c.line(9400, 9420, 370, 2); c.line(9685, 9880, 370, 3);
   // arcs du raccourci des Souches (saut de souche en souche)
   c.arc(10080, 10330, 220, 3, 60); c.arc(10500, 10750, 220, 3, 60); c.arc(10920, 11170, 220, 3, 60);
   c.line(11320, 11900, 370, 5);
@@ -1421,19 +1422,19 @@ LEVELS.push((() => {
       amanite(3720, 480, 130),
       p(4000, 460, 340),
       p(4580, 560, 400),
-      // Passage clé : le RICOCHET — trois amanites de suite au-dessus d'un ravin de 870 px, sans sol de
-      // repos : on rebondit d'amanite en amanite (on peut freiner en l'air pour bien retomber)
-      amanite(5150, 480, 130), amanite(5445, 480, 130), amanite(5740, 480, 130),
-      p(6010, 600, 400),
-      // Retour au sentier
-      p(6740, 520, 440),
-      // L'Échelle des Amanites : deux rebonds pour monter de 440 à 220
-      amanite(7270, 480, 120),
-      p(7500, 200, 330),
-      amanite(7720, 370, 120),
-      p(7950, 560, 220),
+      // Passage clé : le RICOCHET (revue 28/10) — 170 px de vide avant la 1re (viser), chapeaux 120,
+      // creux ~200 px bord à bord, 2e plus basse (timing), ronce large à la réception
+      amanite(5310, 480, 120), amanite(5630, 510, 120), amanite(5950, 480, 120),
+      p(6160, 560, 400),
+      // Retour au sentier (vide avant l'Échelle : viser la 1re amanite)
+      p(6890, 250, 440),
+      // L'Échelle des Amanites (revue 28/10) : 150 px de vide d'appel, marche courte, ronce en haut
+      amanite(7310, 480, 120),
+      p(7570, 170, 330),
+      amanite(7840, 360, 120),
+      p(8080, 560, 220),
       // Descente de la corniche
-      p(8640, 540, 280),
+      p(8780, 540, 280),
       p(9320, 600, 440),
       // Les SOUCHES MOUSSUES (raccourci risqué, LEVELS.md §6 étape 3c, modèle des Rochers des Truites du N°15) :
       // quatre grosses souches (haut 345) séparées par trois creux de mousse. Chemin SÛR (pilote auto, rivaux) :
@@ -1454,20 +1455,22 @@ LEVELS.push((() => {
       _(1700, 64, 440),
       _(3300, 64, 440),
       _(4210, 64, 340),
-      _(7010, 64, 440),
-      _(8260, 64, 220),
+      _(6160, 88, 400), // ronce à la réception du Ricochet
+      _(6900, 64, 440),
+      _(8080, 72, 220), // ronce à la réception de l'Échelle
     ],
     signs: [
       panneau(1760, 440, "Amanites :|laisse-toi tomber"),
       panneau(3420, 440, "Amanite au milieu :|vise-la d'un saut"),
-      panneau(4920, 400, "Ricochet :|d'amanite en amanite"),
+      panneau(4700, 400, "Ricochet :|d'amanite en amanite"), // décalé (≥ 40 px des balises, revue 28/10)
+      panneau(6980, 440, "Échelle :|deux rebonds"),
       panneau(9560, 440, "Raccourci risqué :|de souche en souche"),
     ],
     coins: c.list,
-    checkpoints: [y(id, 2900, 440, 1), y(id, 4600, 400, 2), y(id, 6030, 400, 3), y(id, 9340, 440, 4)],
+    checkpoints: [y(id, 2900, 440, 1), y(id, 4600, 400, 2), y(id, 6180, 400, 3), y(id, 9340, 440, 4)],
     finishX: 12000,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 35.5, autoShort: 33.9, gold: 35, silver: 37.8, bronze: 40.6 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 43 %, argent 100 %, bronze 100 % ; pressés : or 35 %, argent 68 %, bronze 78 %)
+    medals: { auto: 35.5, autoShort: 33.9, gold: 35.1, silver: 38.1, bronze: 41.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 23 %, argent 55 %, bronze 85 % ; pressés : or 10 %, argent 28 %, bronze 35 %)
     // Raccourcis risqués (LEVELS.md §6 étape 3c) : sauts de souche en souche au-dessus des creux de mousse.
     shortcuts: [
       { name: "Souches Moussues 1", from: 9920, to: 10070, y: 345, land: 10340, landY: 345 },
@@ -1475,6 +1478,9 @@ LEVELS.push((() => {
       { name: "Souches Moussues 3", from: 10760, to: 10910, y: 345, land: 11180, landY: 345 },
     ],
     acceptedWarnings: [
+      { match: "ground@4580→plank@5310: écart 170 px", reason: "Revue 28/10 : vide voulu avant la 1re amanite du Ricochet (viser d'un saut, comme l'amanite du milieu) ; rival le plus lent porte à plat ≈ 217 px, playtest auto et rivaux 0 chute." },
+      { match: "ground@6160→ground@6890: écart 170 px", reason: "Revue 28/10 : creux voulu entre la réception du Ricochet et l'appel de l'Échelle (durcissement pressé) ; playtest auto et rivaux 0 chute." },
+      { match: "ground@6890→plank@7310: écart 170 px", reason: "Revue 28/10 : vide voulu avant la 1re amanite de l'Échelle (viser) ; playtest auto et rivaux 0 chute." },
       { match: "ground@9320→ground@9920: marche montante sans trou (95 px)", reason: "Montée sur la première des Souches Moussues avec tout l'élan (modèle des Rochers des Truites du N°15, pilote auto sans perte de temps)." },
       { match: "ground@10295→ground@10340: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Souches Moussues (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
       { match: "ground@10715→ground@10760: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Souches Moussues (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
