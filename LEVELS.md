@@ -315,6 +315,37 @@ Recette (N°14) : ravins de 330–340 px (au-delà d'un saut normal, en deçà d
 réception à la même hauteur, une ascendance seule d'abord, puis deux enchaînées décalées, puis le passage
 clé à ascendance courte (`on` 0,45) annoncé par un panneau.
 
+## 3g. Mécanique v7 : amanites rebondissantes (`amanite`, niveau 16)
+
+`amanite(x, y, w = 140, bounce = 1000)` (dans `solids`) : chapeau de champignon géant (passerelle
+`oneWay` fixe, dessus `y`, h 18) planté au fond d'un ravin. Le coureur qui **retombe** dessus est relancé
+vers le haut à `vy = −bounce` **sans appuyer sur saut** (pas de « saut court » : le relâchement de saut ne
+coupe pas le rebond ; ↓ ne traverse pas le chapeau). Avec 1000 : sommet ≈ 231 px au-dessus du chapeau,
+portée ≈ 317 px à plat (272 px pour un rival à 0,86), ≈ 264–270 px pour remonter de 140–160 px. On se
+laisse donc tomber dans le trou pour atteindre une **corniche trop haute pour un saut normal** (montée
+> 110 px) ou franchir un ravin trop large. Toujours au-dessus du vide : rater le chapeau = chute.
+Moteur (`assets/game.js`) : branche `n.bounce` dans `Le` (collision verticale, commune à la boucle
+principale et à `simRunner`, donc l'IA « voit » le rebond) ; compteur `e.bounced` ; `simRunner` prolonge
+son horizon de 45 images après un rebond (simulations de sécurité seulement, l'extrapolation du pilote
+humain garde exactement D images) ; liste `bouncers`, dessin `drawBouncer` (`De()` ne dessine pas les
+amanites). **Annonce** : chapeau rouge vif à pois blancs sur un grand pied blanc (bien visible sur la
+palette sombre `brume`), lamelles, « respiration » lente, spores qui montent, **chevrons « ^ » jaunes
+pulsés** au-dessus du chapeau quand le joueur arrive (620 px avant), écrasement amorti + son « boing »
+au rebond, panneaux de sentier (« Amanites : laisse-toi tomber »). `getState().bounces`.
+
+Contrôles (`tools/check-levels.mjs`) : depuis un chapeau, la relance remplace le saut (`bounceReach`) :
+erreur si la montée dépasse le sommet du rebond − 40 px, ou si la réception est hors de portée du rival
+le plus lent (+ 30 − 30 px de marge, depuis le milieu du chapeau) ; avertissement si la réception est
+trop courte ou si le vol dépasse 75 images. Par amanite : erreurs si ce n'est pas une passerelle fixe,
+bounce hors 850–1150, hauteur hors [300, 600], ronce dessus, fanion à moins de 120 px, < 600 px du départ ;
+avertissements : largeur < 120, sol juste dessous (mécanique illisible), autre mécanique à moins de 300 px,
+première amanite sans panneau contenant « amanite » dans les 1500 px avant.
+
+Recette (N°16) : une amanite seule collée au bord (on se laisse tomber, corniche +160 px), une amanite
+loin du bord (160 px de vide : il faut la viser d'un saut), le **Ricochet** (trois amanites de suite,
+130 px, au-dessus d'un ravin de 870 px, sans sol de repos), puis l'**Échelle** (deux rebonds pour monter
+de 440 à 220). Nouvelle palette `brume`.
+
 ## 4. Thèmes
 
 Le décor est **100 % procédural** (dégradé de ciel, crêtes, sapins, sol, ronces) : un thème
@@ -334,7 +365,8 @@ falaises crème, pins d'Alep), `lac` (niv. 15, lac d'altitude à l'aube, ciel ro
 `water`/`waterHi` au fond des trous ; revue du 27/10 : clés facultatives `lake` (niveau de l'eau, y monde,
 au pied des pierres et dans les trous, sans voile de brouillard), `lakeBg` (y écran de la surface du lac en
 arrière-plan : rive lointaine, reflet du soleil, vaguelettes animées), `stone`/`stoneDark`/`stoneHi`/`moss`
-(couleurs des sols `pierre(…)`). Ces clés n'existent que dans `lac` : aucun autre niveau ne change).
+(couleurs des sols `pierre(…)`). Ces clés n'existent que dans `lac` : aucun autre niveau ne change), `brume` (niv. 16, vieille forêt de sapins
+dans la brume du crépuscule, ciel violet et cuivre ; les amanites rouges ressortent sur ce fond froid).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -421,7 +453,8 @@ chute, un humain peut passer.
    classique** (une seule nouveauté ; il peut utiliser une seule mécanique existante, rafales
    comprises, avec parcimonie), puis N°12 à mécaniques (mottes plongeantes, §3e) → **le N°13
    DOIT être classique**, puis N°14 à mécaniques (ascendances, 26/10), N°15 classique (Lac des Truites Bavardes, 27/10)
-   → **le N°16 DOIT être à mécaniques**, puis N°17 classique, etc.
+   → **le N°16 DOIT être à mécaniques**, puis N°17 classique, etc. N°16 à mécaniques (amanites
+   rebondissantes, §3g, 28/10) → **le N°17 DOIT être classique** (avec un raccourci risqué, étape 3c).
 3c. **Raccourci risqué pour les classiques** (revue du 27/10, règle à appliquer à **tous les futurs
    niveaux classiques**, N°17, 19…) : sur un classique, le pilote auto ne ralentit jamais (temps ≈
    distance / 352 px/s) et un humain attentif le suit à 3 % près, donc l'or (plancher auto × 1,03) tombe
@@ -645,6 +678,11 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   (voile, traînées, feuilles, fanion, vautours, panneau « spirale »), souffle dans `tickDynamicSounds`,
   `getState().thermTime`. Niveaux sans ascendance : inchangés (temps autopilote des N°1–13 identiques
   au dixième après la modification).
+* **v7 (28/10)** : amanites rebondissantes (`amanite`, champ `bounce` d'une passerelle, §3g) — branche
+  `n.bounce` dans `Le` (relance vy = −bounce, `cut`, compteur `bounced`), horizon de `simRunner` prolongé
+  de 45 images après un rebond (simulations de sécurité), liste `bouncers`, dessin `drawBouncer` (pied,
+  chapeau à pois, spores, chevrons, écrasement), son au rebond, `getState().bounces`. Niveaux sans amanite :
+  inchangés (temps autopilote des N°1–15 identiques au dixième après la modification).
 * `assets/routes-x3PbsDEU.css` : URLs des polices relatives. `custom.css` : liste de niveaux
   défilante, badge, bouton ↓, médailles (disques CSS, sans emoji).
 * Médailles (revue du 20/10) : `medalTargets` / `medalOf` / `medalNext` dans `assets/game.js` lisent
@@ -653,7 +691,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–15)
+## 8. Courbe de difficulté (niveaux 1–16)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -672,6 +710,7 @@ vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, rad
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 1165 m | 22 (dont 7 dans la Dégringolade) | 8 (dont **3 sur la lèvre des terrasses**) | — (classique ; passage clé : la **Grande Dégringolade**, 7 terrasses de 130–150 px en descente, 1 panneau) | 1 / 0.93 / 0.86 | 32,9 s |
 | 14 | Les Gorges des Vautours Fainéants | Technique | 1090 m | 14 (dont **5 sauts d'ascendance** de 330–340 px) | 3 | **5 ascendances thermiques** (1 seule, puis la **Valse des Vautours** à 2, puis le **Grand Plané**, ascendance courte), 2 panneaux | 1 / 0.93 / 0.86 | 32,3 s |
 | 15 | Le Lac des Truites Bavardes | Tour des lacs | 1142 m | 20 (dont 9 dans le Saute-Pierres, 3 criques) | 5 | — (classique ; passage clé : le **Saute-Pierres**, 8 pierres plates de 180 → 120 px à la même hauteur, trous de 165 px ; 27/10 : **Rochers des Truites**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 33,8 s (chemin sûr) ; 32,2 s par les raccourcis |
+| 16 | La Forêt des Amanites Farceuses | Technique | 1200 m | 15 (dont **7 rebonds d'amanite**, 3 creux) | 4 | **7 amanites rebondissantes** (1 seule, puis 1 à viser, le **Ricochet** à 3, l'**Échelle** à 2) ; **Souches Moussues**, 3 raccourcis risqués ; 4 panneaux | 1 / 0.93 / 0.86 | 35,5 s (chemin sûr) ; 33,9 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -694,6 +733,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 13 | Les Coteaux des Vendangeurs Assoiffés | 32,9 s | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
 | 14 | Les Gorges des Vautours Fainéants | 32,3 s | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
 | 15 | Le Lac des Truites Bavardes | 33,8 s *(raccourcis : 32,2 s)* | 33,5 s *(exige les raccourcis)* | 36,2 s | 38,9 s | 40 % / 95 % / 98 % | 10 % / 20 % / 28 % |
+| 16 | La Forêt des Amanites Farceuses | 35,5 s *(raccourcis : 33,9 s)* | 35,0 s *(exige les raccourcis)* | 37,8 s | 40,6 s | 43 % / 100 % / 100 % | 35 % / 68 % / 78 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -828,6 +868,19 @@ Médailles N°15 recalibrées : 33,2 / 35,9 / 38,6 s → **33,5 / 36,2 / 38,9 s*
 pressé **15 % → 10 %** ; argent 83 % → 95 % attentif, 20 % pressé (inchangé), bronze 98 % / 28 %.
 **Prochain niveau (N°16) : à mécaniques**, puis alternance 1 classique / 1 à mécaniques.
 
+N°16 (28/10, niveau du jour) : **La Forêt des Amanites Farceuses**, mécanique v7 inédite (amanites
+rebondissantes, §3g), palette `brume`. Pilote auto 35,5 s (chemin sûr), 33,9 s par les raccourcis, rivaux
+0 chute ; N°1–15 inchangés au dixième (`playtest.mjs all`). 40 essais par profil : attentif 100 % / 0,00
+chute / 35,5 s ; pressé 100 % / 0,47 chute / 38,2 s (chutes surtout x≈8300, 800, 1700 : ronces du sentier ;
+aucune sur les amanites). Le rebond est automatique (aucun timing à part viser le chapeau), d'où un
+pressé **plus facile que le N°14** (95 % / 2,17) : étiquette « **Technique** », la plus basse de l'échelle
+d'engagement (cohérente à ±5 points avec 100 %). Sans raccourci, l'or tombait à 98 % attentif (plancher
+auto × 1,03, temps groupés) : ajout des **Souches Moussues** (modèle des Rochers des Truites, étape 3c,
+3 raccourcis de 270 px, 1,6 s d'écart) → or **35,0 s exige les raccourcis**, 43 % attentif, 35 % pressé ;
+sauts du raccourci réussis 91 % attentif (48/53), 69 % pressé (25/36). Pour durcir un futur niveau à
+amanites : chapeaux plus étroits, amanites mobiles ou combinées à une autre mécanique.
+**Prochain niveau (N°17) : classique**, avec un raccourci risqué (étape 3c).
+
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
 Même cerveau que l'autopilote (simulation exacte de la physique), rendu imprécis :
@@ -918,6 +971,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 13 | Les Coteaux des Vendangeurs Assoiffés | Grand raid | 100 % | 0,45 | 37,1 s | 88 % | 2,90 | 49,0 s |
 | 14 | Les Gorges des Vautours Fainéants | Technique | 100 % | 0,33 | 36,4 s | 95 % | 2,17 | 47,7 s |
 | 15 | Le Lac des Truites Bavardes | Tour des lacs | 100 % | 0,07 *(27/10 ; avant 0,20)* | 34,0 s | 95 % *(avant 83 %)* | 2,40 *(avant 2,88)* | 46,7 s |
+| 16 | La Forêt des Amanites Farceuses | Technique | 100 % | 0,00 | 35,5 s | 100 % | 0,47 | 38,2 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le

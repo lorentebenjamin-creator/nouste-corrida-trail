@@ -455,7 +455,7 @@ function R(e, t) {
       }
     }
     for (let t of s.solids)
-      t.move || t.sink
+      t.move || t.sink || t.bounce
         ? 0
         : t.kind === `ground`
         ? pe(n, t, e)
@@ -717,7 +717,15 @@ function R(e, t) {
     for (let n of s.solids)
       if (fe(e, n)) {
         if (n.oneWay) {
-          if (e.drop > 0 || e.vy < 0 || t > n.y + 3) continue;
+          if ((e.drop > 0 && !n.bounce) || e.vy < 0 || t > n.y + 3) continue;
+          // v7 — Amanite rebondissante (`amanite()` de levels.js, LEVELS.md §3g) : se poser dessus relance
+          // vers le haut (vy = −bounce), sans appui ni « saut court » (cut) ; ↓ ne la traverse pas.
+          if (n.bounce) {
+            ((e.y = n.y - e.h), (e.vy = -n.bounce), (e.grounded = !1), (e.coyote = 0), (e.cut = !0), (e.squash = -0.6),
+              (e.bounced = (e.bounced || 0) + 1));
+            e.sim || ((n.boing = _), e.you && (r.jump(), r.burst(0.12, 0.05, 1.8)));
+            continue;
+          }
           (e.vy > 760 && (e.squash = Math.min(1, e.vy / 1100)),
             (e.y = n.y - e.h),
             (e.vy = 0),
@@ -897,6 +905,7 @@ function R(e, t) {
     gusts = [],
     sinkers = [],
     thermals = [],
+    bouncers = [],
     shortcuts = [],
     autoShort = !1,
     waterGaps = [],
@@ -1072,6 +1081,8 @@ function R(e, t) {
     sinkers = s.solids.filter((sd) => sd.sink);
     for (let sd of sinkers) sd.wasUp = !0;
     thermals = s.thermals || [];
+    bouncers = s.solids.filter((sd) => sd.bounce);
+    for (let bn of bouncers) bn.boing = -9;
     shortcuts = s.shortcuts || [];
     for (let tm of thermals) {
       tm.wasOn = !1;
@@ -1134,7 +1145,8 @@ function R(e, t) {
   }
   // --- IA : simulation exacte de la même physique ---------------------
   function simRunner(e, dir, jumpAt, maxF, stopOnLand) {
-    let c = { ...e },
+    let c = { ...e, sim: !0 },
+      nb = e.bounced || 0,
       dt = 1 / 60,
       saved = movers.length ? movers.map((m) => [m.x, m.y]) : null,
       dead = -1,
@@ -1171,6 +1183,8 @@ function R(e, t) {
         ((c.vy = j), (c.grounded = !1), (c.coyote = 0), (c.lock = c.you ? 0 : 0.28), (left = !0));
       }
       (fallStep(c, dt, _ + fr * dt), jetPush(c, _ + fr * dt) && (jetted = !0), Re(c, dt));
+      // v7 : un rebond sur une amanite relance le vol (≈ 1 s) : on prolonge l'horizon des simulations de sûreté
+      bouncers.length && (c.bounced || 0) > nb && ((nb = c.bounced), stopOnLand && (maxF += 45));
       if (c.y > se || s.hazards.some((hz) => fe(c, hz)) || dynHit(c, _ + fr * dt)) {
         dead = fr;
         break;
@@ -1501,6 +1515,7 @@ function R(e, t) {
     }
     for (let jt of jets) drawJet(jt);
     for (let sd of sinkers) drawSinker(sd, th);
+    for (let bn of bouncers) drawBouncer(bn, th);
     for (let sg of s.signs || []) drawSign(sg, th);
     for (let gu of gusts) drawGust(gu, th);
     for (let tm of thermals) drawThermal(tm, th);
@@ -1772,6 +1787,61 @@ function R(e, t) {
   // Panneau de sentier (champ facultatif `signs`, helper panneau() de levels.js) : poteau et
   // planche posés sur le sol en (x, y), texte sur 1 ou 2 lignes (séparées par « | »). Décor seul,
   // aucun effet de jeu.
+  // v7 — Amanite rebondissante : chapeau rouge à pois blancs sur un grand pied blanc qui plonge dans le
+  // ravin ; elle « respire » doucement (spores qui montent), des chevrons « ^ » pulsent au-dessus quand on
+  // approche, et elle s'écrase puis rebondit (ressort amorti) quand un coureur s'y pose.
+  function drawBouncer(bn, th) {
+    if (bn.x > v + b + 80 || bn.x + bn.w < v - 80) return;
+    let cx = bn.x + bn.w / 2,
+      dtb = _ - (bn.boing ?? -9),
+      sq = dtb >= 0 && dtb < 0.6 ? Math.exp(-6 * dtb) * Math.cos(dtb * 26) : 0,
+      br = Math.sin(_ * 2.1 + bn.x * 0.01) * 0.03,
+      sy = 1 - 0.35 * sq + br,
+      sx = 1 + 0.18 * sq - br * 0.5,
+      top = bn.y,
+      capH = 30 * sy,
+      hw = (bn.w / 2 + 6) * sx;
+    // pied : colonne blanche jusqu'au fond du ravin, anneau
+    ((n.fillStyle = `#e9e2d0`), n.fillRect(cx - 13, top + capH - 6, 26, 700 - top));
+    ((n.fillStyle = `rgba(90,70,60,0.25)`), n.fillRect(cx + 5, top + capH - 6, 8, 700 - top));
+    ((n.fillStyle = `#f6f1e4`), n.beginPath(), n.ellipse(cx, top + capH + 18, 20, 6, 0, 0, Math.PI * 2), n.fill());
+    // dessous du chapeau (lamelles)
+    ((n.fillStyle = `#f1e6cf`), n.beginPath(), n.ellipse(cx, top + capH - 4, hw - 4, 8, 0, 0, Math.PI * 2), n.fill());
+    // chapeau : dôme rouge cerné de sombre
+    n.beginPath();
+    n.moveTo(cx - hw, top + capH - 2);
+    n.quadraticCurveTo(cx - hw, top - 4 * sy, cx, top - 6 * sy);
+    n.quadraticCurveTo(cx + hw, top - 4 * sy, cx + hw, top + capH - 2);
+    n.closePath();
+    ((n.fillStyle = `#5a1410`), (n.lineWidth = 5), (n.strokeStyle = `#3a0e0c`), n.stroke());
+    let gr = n.createLinearGradient(0, top - 6, 0, top + capH);
+    (gr.addColorStop(0, `#ff5a3c`), gr.addColorStop(1, `#b8221a`), (n.fillStyle = gr), n.fill());
+    // pois blancs (positions fixes)
+    n.fillStyle = `#fff8ec`;
+    for (let q = 0; q < 6; q++) {
+      let fx = -0.72 + q * 0.29,
+        fy = 0.25 + ((q * 37) % 5) * 0.09;
+      (n.beginPath(), n.ellipse(cx + fx * hw * 0.92, top + capH * fy, 5 + (q % 2) * 2, 3.5 * sy + 1, 0, 0, Math.PI * 2), n.fill());
+    }
+    // reflet
+    ((n.fillStyle = `rgba(255,255,255,0.28)`), n.beginPath(), n.ellipse(cx - hw * 0.35, top + 4, hw * 0.3, 4, -0.2, 0, Math.PI * 2), n.fill());
+    // spores qui montent
+    for (let q = 0; q < 4; q++) {
+      let k2 = (_ * 0.45 + q / 4 + bn.x * 0.001) % 1;
+      ((n.fillStyle = `rgba(255,245,215,${0.65 * (1 - k2)})`),
+        n.beginPath(), n.arc(cx + Math.sin(k2 * 6 + q * 2) * hw * 0.6, top - 8 - k2 * 90, 2.2, 0, Math.PI * 2), n.fill());
+    }
+    // chevrons « ^ » quand le joueur approche (annonce du rebond)
+    let px = d ? d.x : -9999;
+    if (px > bn.x - 620 && px < bn.x + bn.w) {
+      let a2 = 0.55 + 0.45 * Math.sin(_ * 6);
+      ((n.strokeStyle = `rgba(255,236,140,${a2})`), (n.lineWidth = 4), (n.lineCap = `round`));
+      for (let q = 0; q < 2; q++) {
+        let yy = top - 34 - q * 16 - ((_ * 40) % 16);
+        (n.beginPath(), n.moveTo(cx - 12, yy + 8), n.lineTo(cx, yy - 2), n.lineTo(cx + 12, yy + 8), n.stroke());
+      }
+    }
+  }
   function drawSign(sg, th) {
     if (sg.x < v - 160 || sg.x > v + b + 160) return;
     let lines = String(sg.text).split(`|`).map((t) => t.trim()),
@@ -2381,6 +2451,7 @@ function R(e, t) {
         jetHits: d?.jetHits ?? 0,
         gustTime: d?.gustT ?? 0, // temps passé ralenti par une rafale (v4)
         thermTime: d?.thermT ?? 0, // temps passé à planer dans une ascendance (v6)
+        bounces: d?.bounced ?? 0, // rebonds sur les amanites (v7)
         deathXs: d?.deathXs ?? [],
       }),
       getRunners: () =>

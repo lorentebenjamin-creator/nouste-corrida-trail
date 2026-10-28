@@ -38,6 +38,16 @@ function thermReach(speed, lift, fall, up = 0) {
   }
   return [x, 300];
 }
+// v7 (LEVELS.md §3g) : rebond sur une amanite (vy = −bounce depuis le chapeau), course à 352 × speed.
+// Renvoie [portée horizontale quand les pieds redescendent à `up` px au-dessus du chapeau, images, apex].
+function bounceReach(speed, bounce, up = 0) {
+  let vx = 352 * speed, vy = -bounce, x = 0, yy = 0, top = 0; const dt = 1 / 60;
+  for (let f = 0; f < 300; f++) {
+    let gr = vy < 0 ? 2100 : 4700; if (Math.abs(vy) < 110) gr = 1200; vy = Math.min(1080, vy + gr * dt);
+    x += vx * dt; yy += vy * dt; top = Math.min(top, yy); if (vy > 0 && yy >= -up) return [x, f + 1, -top];
+  }
+  return [x, 300, -top];
+}
 let errors = 0, warnings = 0;
 const err = (l, m) => { errors++; console.log(`ERREUR  [${l}] ${m}`); };
 // Avertissements acceptés : champ `acceptedWarnings: [{ match: "début du message", reason: "pourquoi" }]`
@@ -185,6 +195,18 @@ LEVELS.forEach((L, idx) => {
       if (L.hazards.some((hz) => hit(hz.x, hz.x + hz.w)) || L.solids.some((sd) => (sd.kind === "rock" || sd.kind === "log") && hit(sd.x, sd.x + sd.w)) || (L.rockfalls || []).some((fl) => hit(fl.x, fl.x + fl.size)) || (L.patrols || []).some((dg) => hit(dg.x1, dg.x2)))
         warn(tag, `${w}: saut d'ascendance sans aire d'attente sûre (150 px sans danger avant le bord)`);
       info(tag, `${w}: SAUT D'ASCENDANCE (écart ${gap} px, montée ${up} ; portée en planant ≈ ${Math.round(rP + 30)} px joueur / ${Math.round(rS + 30)} px rival ${sMin}, ${fP} images ; sans ascendance ≈ ${Math.round(rNorm)} px) — valider avec tools/playtest.mjs --human`);
+      continue;
+    }
+    // Rebond d'amanite (v7, §3g) : depuis le chapeau, la relance (vy = −bounce) remplace le saut.
+    if (a.bounce) {
+      const sMin = Math.min(...(L.rivals || []).map((r) => r.speed));
+      const [rS] = bounceReach(sMin, a.bounce, up), [rP, fP, apex] = bounceReach(1, a.bounce, up);
+      const mid = a.x + a.w / 2;
+      if (up > apex - 40) err(tag, `${w}: rebond trop haut (montée ${up} px, apex du rebond ≈ ${Math.round(apex)} px, marge < 40)`);
+      if (b.x > mid + rS + 30 - 30) err(tag, `${w}: rebond trop court pour le rival le plus lent ${sMin} (depuis le milieu du chapeau ≈ ${Math.round(rS)} px, il faut ${b.x - mid} px + 30 de marge)`);
+      if (b.x + b.w < mid + rP + 40) warn(tag, `${w}: réception trop courte après le rebond (on la dépasse)`);
+      if (fP > 75) warn(tag, `${w}: vol de rebond de ${fP} images (> 75 : l'IA voit mal la fin)`);
+      info(tag, `${w}: REBOND D'AMANITE (écart ${gap} px, montée ${up} ; portée depuis le chapeau ≈ ${Math.round(rP)} px joueur / ${Math.round(rS)} px rival ${sMin}, apex ${Math.round(apex)} px, ${fP} images) — valider avec tools/playtest.mjs --human`);
       continue;
     }
     if (up > LIMITS.maxUp) err(tag, `${w}: montée ${up} px > ${LIMITS.maxUp}`);
@@ -347,6 +369,24 @@ LEVELS.forEach((L, idx) => {
     }
   });
   if (sinks.length) info(tag, `${sinks.length} motte(s) plongeante(s) : passages chronométrés, à valider avec tools/playtest.mjs --human`);
+  // Amanites rebondissantes (v7, LEVELS.md §3g) : chapeaux qui relancent vers le haut, au-dessus du vide
+  const bns = L.solids.filter((sd) => sd.bounce).sort((a, b) => a.x - b.x);
+  bns.forEach((bn, bi) => {
+    const tagb = `amanite @${bn.x}`;
+    if (bn.kind !== "plank" || !bn.oneWay || bn.move || bn.sink) err(tag, `${tagb}: doit être une passerelle fixe (helper amanite())`);
+    if (!(bn.bounce >= 850 && bn.bounce <= 1150)) err(tag, `${tagb}: bounce ${bn.bounce} hors 850–1150`);
+    if (bn.w < 120) warn(tag, `${tagb}: largeur ${bn.w} < 120 (cible trop petite)`);
+    if (bn.y < 300 || bn.y > 600) err(tag, `${tagb}: hauteur hors [300, 600]`);
+    if (L.hazards.some((hz) => hz.x < bn.x + bn.w && hz.x + hz.w > bn.x && hz.y + hz.h === bn.y)) err(tag, `${tagb}: pas de ronce sur une amanite`);
+    if (L.solids.some((o) => o !== bn && o.x < bn.x + bn.w && o.x + o.w > bn.x && o.y > bn.y && o.y - bn.y < 200 && (o.kind === "ground" || o.kind === "plank")))
+      warn(tag, `${tagb}: un sol juste dessous (l'amanite doit être au-dessus du vide : mécanique illisible)`);
+    for (const cp of L.checkpoints) if (cp.x + 60 > bn.x - 120 && cp.x < bn.x + bn.w + 60) err(tag, `${tagb}: trop près du fanion @${cp.x}`);
+    if (bn.x < L.spawnX + 600) err(tag, `${tagb}: trop près du départ`);
+    if (movers.some((m) => { const e = env(m); return e.x2 > bn.x - 300 && e.x1 < bn.x + bn.w + 300; }) || (L.jets || []).some((jt) => jt.x + jt.w > bn.x - 300 && jt.x < bn.x + bn.w + 300) || (L.gusts || []).some((gu) => gu.x2 > bn.x - 300 && gu.x1 < bn.x + bn.w + 300) || (L.thermals || []).some((tm) => tm.x2 > bn.x - 300 && tm.x1 < bn.x + bn.w + 300) || L.solids.some((sd) => sd.sink && sd.x < bn.x + bn.w + 300 && sd.x + sd.w > bn.x - 300))
+      warn(tag, `${tagb}: autre mécanique à moins de 300 px (combinaison peu lisible)`);
+    if (bi === 0 && !(L.signs || []).some((sn) => sn.x <= bn.x && sn.x >= bn.x - 1500 && /amanite/i.test(sn.text || ""))) warn(tag, `${tagb}: première amanite sans panneau (texte « amanite ») dans les 1500 px avant`);
+  });
+  if (bns.length) info(tag, `${bns.length} amanite(s) rebondissante(s) : à valider avec tools/playtest.mjs --human`);
   // Panneaux de sentier (facultatifs, décor) : posés sur un sol, texte court
   if (L.signs != null && !Array.isArray(L.signs)) err(tag, `signs doit être un tableau (ou absent)`);
   for (const sn of L.signs || []) {
@@ -358,7 +398,7 @@ LEVELS.forEach((L, idx) => {
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.thermals || []).length && `${L.thermals.length} ascendance(s)`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.thermals || []).length && `${L.thermals.length} ascendance(s)`, L.solids.some((sd) => sd.bounce) && `${L.solids.filter((sd) => sd.bounce).length} amanite(s)`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
   for (const a of accepting) if (!a.used) warn(tag, `acceptedWarnings obsolète : "${a.match}" ne correspond plus à aucun avertissement (le retirer)`);
   accepting = [];
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);

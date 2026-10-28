@@ -127,6 +127,15 @@ export const thermique = (x1, x2, period = 5, on = 0.55, phase = 0, warn = 1.0, 
   x1, x2, period, on, phase, warn, lift, fall, fade,
 });
 
+// ---- Mécanique v7 ----------------------------------------------------------
+// amanite(x, y, w=140, bounce=1000) : AMANITE REBONDISSANTE — chapeau de champignon géant (dessus `y`,
+//   largeur `w`) planté au fond d'un ravin sur un grand pied blanc. Se poser dessus RELANCE le coureur
+//   vers le haut (vy = −bounce, ≈ 230 px au-dessus du chapeau avec 1000), sans appuyer sur saut : on se
+//   laisse tomber dans le trou et l'amanite renvoie vers une corniche trop haute pour un saut normal, ou
+//   par-dessus un ravin trop large. Le rebond est toujours le même (pas de « saut court »), ↓ ne la
+//   traverse pas. Toujours au-dessus du vide : la rater = chute. À mettre dans `solids` (LEVELS.md §3g).
+export const amanite = (x, y, w = 140, bounce = 1000) => ({ x, y, w, h: 18, oneWay: true, kind: "plank", bounce });
+
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
 // On peut en ajouter ici (toutes les clés sont obligatoires) : le décor est
@@ -290,6 +299,19 @@ export const THEMES = {
     // dessinés en pierres grises mouillées (reflet, mousse légère) au ras de l'eau.
     lake: 505, lakeBg: 318,
     stone: "#8e9499", stoneDark: "#5b6166", stoneHi: "#e3eef0", moss: "#7a9a52",
+  },
+  brume: {
+    // Niveau 16 : vieille forêt de sapins dans la brume du crépuscule (ciel violet et cuivre, mousses
+    // sombres, troncs moussus ; les amanites rouges à pois blancs ressortent sur ce fond froid)
+    skyTop: "#1d2240", skyMid: "#5d5a86", skyBot: "#e3a77a",
+    ridge: "#2b2f4c", ridge2: "#4d5274",
+    pine: "#14241e", pine2: "#2a4636",
+    dirt: "#4e3d2e", dirtDark: "#30261c",
+    grass: "#6a9a52", grassDark: "#466e38",
+    wood: "#7c5838", woodDark: "#4a3422",
+    rock: "#8c8a90", rockDark: "#5a5960",
+    thorn: "#1f1a1d", leaf: "#4d6e3c", berry: "#e0452e",
+    fog: "#121628",
   },
 };
 
@@ -1350,6 +1372,113 @@ LEVELS.push((() => {
       { match: "ground@6730→ground@6775: marche montante sans trou (75 px)", reason: "Revue du 27/10 : marche voulue du chemin sûr des Rochers des Truites (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
       { match: "ground@7150→ground@7195: marche montante sans trou (75 px)", reason: "Revue du 27/10 : marche voulue du chemin sûr des Rochers des Truites (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
       { match: "ground@7570→ground@7615: marche montante sans trou (75 px)", reason: "Revue du 27/10 : marche voulue du chemin sûr des Rochers des Truites (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+    ],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 16 — La Forêt des Amanites Farceuses (niveau du jour, 2026-10-28)
+// Niveau à mécaniques (règle d'alternance, après le N°15 classique) — mécanique v7 inédite : les
+// AMANITES REBONDISSANTES (§3g), chapeaux de champignons géants au fond des ravins qui relancent le
+// coureur vers le haut (≈ 230 px) : on se laisse tomber dessus pour atteindre une corniche trop haute
+// pour un saut normal. Progression : une amanite seule où il suffit de se laisser tomber (découverte),
+// une amanite loin du bord qu'il faut viser d'un saut, le RICOCHET (passage clé, trois amanites de
+// suite au-dessus d'un long ravin), puis l'Échelle (deux rebonds pour monter de 220 px) ; à la fin, les Souches Moussues
+// (raccourci risqué de souche en souche, §6 étape 3c : l'or l'exige).
+// Nouvelle palette `brume` (vieille forêt de sapins dans la brume du crépuscule).
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "amanites-farceuses", c = v(id);
+  c.line(160, 600, 370, 4); c.arc(1300, 1400, 380, 3, 40); c.line(1450, 1900, 370, 4);
+  c.arc(2060, 2240, 260, 4, 60); c.line(2320, 2700, 250, 4);
+  c.line(2950, 3250, 370, 3); c.arc(3600, 3740, 380, 3, 40); c.arc(3800, 3980, 250, 3, 50);
+  c.line(4060, 4400, 270, 3); c.line(4640, 5000, 330, 3);
+  c.arc(5200, 5410, 330, 3, 70); c.arc(5495, 5705, 330, 3, 70); c.arc(5790, 5980, 310, 3, 70);
+  c.line(6080, 6560, 330, 4); c.line(6800, 7200, 370, 3);
+  c.arc(7300, 7480, 300, 3, 50); c.line(7520, 7660, 260, 2); c.arc(7740, 7920, 190, 3, 40);
+  c.line(8000, 8400, 150, 3); c.arc(8460, 8560, 200, 3, 40); c.line(8660, 9100, 260, 4);
+  c.line(9400, 9560, 370, 2); c.line(9620, 9880, 370, 3);
+  // arcs du raccourci des Souches (saut de souche en souche)
+  c.arc(10080, 10330, 220, 3, 60); c.arc(10500, 10750, 220, 3, 60); c.arc(10920, 11170, 220, 3, 60);
+  c.line(11320, 11900, 370, 5);
+  return {
+    id, name: "La Forêt des Amanites Farceuses",
+    blurb: "Au crépuscule, les amanites géantes renvoient les coureurs dans les airs : laisse-toi tomber dessus et rebondis jusqu'aux corniches !",
+    difficulty: "Technique", theme: "brume",
+    width: 12500, floor: 440, spawnX: 60,
+    solids: [
+      // Départ dans la clairière, ressauts de mise en jambes
+      p(0, 700, 440),
+      p(820, 460, 440), h(1000, 440),
+      p(1400, 620, 440),
+      // Découverte : UNE amanite collée au bord — il suffit de se laisser tomber, elle renvoie sur la
+      // corniche (120 px plus haut que le sentier : trop haut pour un saut normal)
+      amanite(2030, 480, 130),
+      p(2270, 480, 320),
+      p(2880, 680, 440),
+      // L'amanite du milieu : 160 px de vide avant elle, il faut la viser d'un saut (un saut trop court ou
+      // trop long renvoie à côté de la corniche)
+      amanite(3720, 480, 130),
+      p(4000, 460, 340),
+      p(4580, 560, 400),
+      // Passage clé : le RICOCHET — trois amanites de suite au-dessus d'un ravin de 870 px, sans sol de
+      // repos : on rebondit d'amanite en amanite (on peut freiner en l'air pour bien retomber)
+      amanite(5150, 480, 130), amanite(5445, 480, 130), amanite(5740, 480, 130),
+      p(6010, 600, 400),
+      // Retour au sentier
+      p(6740, 520, 440),
+      // L'Échelle des Amanites : deux rebonds pour monter de 440 à 220
+      amanite(7270, 480, 120),
+      p(7500, 200, 330),
+      amanite(7720, 370, 120),
+      p(7950, 560, 220),
+      // Descente de la corniche
+      p(8640, 540, 280),
+      p(9320, 600, 440),
+      // Les SOUCHES MOUSSUES (raccourci risqué, LEVELS.md §6 étape 3c, modèle des Rochers des Truites du N°15) :
+      // quatre grosses souches (haut 345) séparées par trois creux de mousse. Chemin SÛR (pilote auto, rivaux) :
+      // on se laisse tomber dans le creux (dalle basse 500), saut par-dessus le trou sur la marche (420) collée à
+      // la souche suivante, ressaut sur place → ≈ 0,5 s perdue par creux. RACCOURCI (champ shortcuts) : grand
+      // saut de souche en souche, 270 px bord à bord ; trop tôt ou appui trop court → retombée dans le creux.
+      p(9920, 150, 345),
+      p(10070, 155, 500), p(10295, 45, 420),
+      p(10340, 150, 345),
+      p(10490, 155, 500), p(10715, 45, 420),
+      p(10760, 150, 345),
+      p(10910, 155, 500), p(11135, 45, 420),
+      p(11180, 100, 345),
+      // Dernier sprint dans la clairière jusqu'à l'arche
+      p(11280, 1220, 440), g(11560, 440),
+    ],
+    hazards: [
+      _(1700, 64, 440),
+      _(3300, 64, 440),
+      _(4210, 64, 340),
+      _(7010, 64, 440),
+      _(8260, 64, 220),
+    ],
+    signs: [
+      panneau(1760, 440, "Amanites :|laisse-toi tomber"),
+      panneau(3420, 440, "Amanite au milieu :|vise-la d'un saut"),
+      panneau(4920, 400, "Ricochet :|d'amanite en amanite"),
+      panneau(9560, 440, "Raccourci risqué :|de souche en souche"),
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2900, 440, 1), y(id, 4600, 400, 2), y(id, 6030, 400, 3), y(id, 9340, 440, 4)],
+    finishX: 12000,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 35.5, autoShort: 33.9, gold: 35, silver: 37.8, bronze: 40.6 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 43 %, argent 100 %, bronze 100 % ; pressés : or 35 %, argent 68 %, bronze 78 %)
+    // Raccourcis risqués (LEVELS.md §6 étape 3c) : sauts de souche en souche au-dessus des creux de mousse.
+    shortcuts: [
+      { name: "Souches Moussues 1", from: 9920, to: 10070, y: 345, land: 10340, landY: 345 },
+      { name: "Souches Moussues 2", from: 10340, to: 10490, y: 345, land: 10760, landY: 345 },
+      { name: "Souches Moussues 3", from: 10760, to: 10910, y: 345, land: 11180, landY: 345 },
+    ],
+    acceptedWarnings: [
+      { match: "ground@9320→ground@9920: marche montante sans trou (95 px)", reason: "Montée sur la première des Souches Moussues avec tout l'élan (modèle des Rochers des Truites du N°15, pilote auto sans perte de temps)." },
+      { match: "ground@10295→ground@10340: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Souches Moussues (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
+      { match: "ground@10715→ground@10760: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Souches Moussues (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+      { match: "ground@11135→ground@11180: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Souches Moussues (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
     ],
   };
 })());
