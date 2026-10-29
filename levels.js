@@ -313,6 +313,20 @@ export const THEMES = {
     thorn: "#1f1a1d", leaf: "#4d6e3c", berry: "#e0452e",
     fog: "#121628",
   },
+  etoiles: {
+    // Niveau 17 : crête de nuit sous les étoiles (ciel indigo, lueur violette à l'horizon, herbe
+    // givrée bleutée, cairns de pierre claire ; liseré clair obligatoire pour une palette de nuit)
+    skyTop: "#050817", skyMid: "#18204a", skyBot: "#5e4673",
+    ridge: "#0d1330", ridge2: "#252d55",
+    pine: "#0a1120", pine2: "#1a2838",
+    dirt: "#4a4552", dirtDark: "#2b2832",
+    grass: "#8a9bb4", grassDark: "#56637c",
+    wood: "#6e5640", woodDark: "#403226",
+    rock: "#b2b6c8", rockDark: "#6a6e82",
+    thorn: "#17131f", leaf: "#3a4a5e", berry: "#f2cc66",
+    fog: "#03050d",
+    rim: "#dfe8ff",
+  },
 };
 
 // =====================================================================
@@ -1485,6 +1499,122 @@ LEVELS.push((() => {
       { match: "ground@10295→ground@10340: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Souches Moussues (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
       { match: "ground@10715→ground@10760: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Souches Moussues (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
       { match: "ground@11135→ground@11180: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Souches Moussues (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+    ],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 17 — La Crête des Chamois Noctambules (niveau du jour, 2026-10-29)
+// Niveau classique (règle d'alternance, après le N°16 à mécaniques) — nouveauté : un seul passage
+// clé inédit, la CRÊTE DES CAIRNS : sept dents de crête étroites (220 px) dont chacune porte un cairn
+// (rocher) planté AU BORD du vide ; un seul saut doit franchir le cairn ET le trou (100 → 140 px).
+// Trop tôt, on retombe dans le trou ; trop tard, on bute contre le cairn et on repart sans élan.
+// Jusqu'ici les rochers étaient toujours posés au milieu d'un sol, loin du bord. Puis les SAUTS DE
+// CHAMOIS (raccourci risqué de bloc en bloc, §6 étape 3c, modèle des Rochers des Truites : l'or
+// l'exige). Aucune mécanique : sols, ravins, ronces, rochers, troncs, fanions, sur le modèle du N°4.
+// Nouvelle palette `etoiles` (crête de nuit sous les étoiles, avec `rim`).
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "crete-chamois", c = v(id);
+  c.line(160, 400, 370, 3); c.arc(740, 920, 330, 3, 40); c.arc(1020, 1150, 330, 3, 40);
+  c.arc(1380, 1540, 290, 3, 40); c.line(1760, 1900, 300, 2); c.arc(1930, 2090, 220, 3, 40);
+  c.line(2280, 2460, 230, 2); c.arc(2500, 2660, 260, 3, 40); c.line(2720, 2880, 370, 3);
+  // arcs de la Crête des Cairns (cairn + trou en un seul saut)
+  for (const [r, l] of [[3194, 3350], [3514, 3670], [3834, 4000], [4164, 4330], [4494, 4670], [4834, 5010], [5174, 5370]]) c.arc(r - 10, l + 20, 330, 3, 60);
+  c.line(5560, 5900, 370, 4); c.arc(5960, 6100, 300, 3, 40); c.arc(6180, 6290, 290, 3, 40);
+  c.arc(6500, 6640, 230, 3, 40); c.line(6700, 6980, 240, 3); c.arc(7020, 7170, 270, 3, 40);
+  c.line(7220, 7420, 370, 3);
+  // arcs des Sauts de Chamois (trajectoire du raccourci)
+  c.arc(7965, 8185, 290, 3, 70); c.arc(8385, 8605, 290, 3, 70); c.arc(8805, 9025, 290, 3, 70);
+  c.line(9200, 9200, 370, 1); c.line(9250, 9440, 370, 2);
+  c.arc(9460, 9600, 320, 3, 40); c.arc(9680, 9790, 310, 3, 40); c.arc(10000, 10140, 250, 3, 40);
+  c.line(10200, 10480, 260, 3); c.arc(10520, 10660, 280, 3, 40); c.arc(10830, 10920, 280, 2, 40);
+  c.arc(11160, 11300, 330, 3, 40); c.line(11350, 11600, 370, 3); c.arc(11630, 11740, 320, 3, 40);
+  c.line(11800, 11950, 370, 2); c.arc(11990, 12110, 330, 3, 40); c.line(12150, 12240, 370, 2);
+  return {
+    id, name: "La Crête des Chamois Noctambules",
+    blurb: "Minuit sur la crête, frontale allumée : saute les cairns au bord du vide, les chamois noctambules t'attendent au sommet.",
+    difficulty: "Crête de nuit", theme: "etoiles",
+    width: 12690, floor: 440, spawnX: 60,
+    solids: [
+      // Départ sur l'épaule de la crête, ressauts de mise en jambes
+      p(0, 760, 440),
+      p(900, 500, 440), h(1060, 440),
+      p(1525, 420, 370),
+      p(2070, 440, 300), h(2170, 300),
+      p(2650, 600, 440),
+      // Passage clé : la CRÊTE DES CAIRNS — sept cairns plantés au bord du vide (le premier au bout du
+      // sol d'appel), dents de crête de 220 px, trous de 100, 100, 110, 110, 120, 120, 140 px : un seul
+      // saut franchit le cairn et le trou ; trop tôt = dans le trou, trop tard = contre le cairn
+      h(3194, 440),
+      p(3350, 220, 440), h(3514, 440),
+      p(3670, 220, 440), h(3834, 440),
+      p(4000, 220, 440), h(4164, 440),
+      p(4330, 220, 440), h(4494, 440),
+      p(4670, 220, 440), h(4834, 440),
+      p(5010, 220, 440), h(5174, 440),
+      p(5370, 600, 440),
+      // Montée vers l'antécime
+      p(6090, 420, 380),
+      p(6630, 400, 310),
+      // Descente sur le replat des chamois
+      p(7150, 640, 440),
+      // Les SAUTS DE CHAMOIS (raccourci risqué, LEVELS.md §6 étape 3c, modèle des Rochers des Truites du N°15) :
+      // quatre blocs de granit (haut 345) séparés par trois brèches. Chemin SÛR (pilote auto, rivaux) : on se
+      // laisse tomber dans la brèche (dalle basse 500), saut par-dessus le trou sur la marche (420) collée au
+      // bloc suivant, ressaut sur place → ≈ 0,5 s perdue par brèche. RACCOURCI (champ shortcuts) : grand saut
+      // de bloc en bloc, 270 px bord à bord ; trop tôt ou appui trop court → retombée dans la brèche.
+      p(7790, 150, 345),
+      p(7940, 155, 500), p(8165, 45, 420),
+      p(8210, 150, 345),
+      p(8360, 155, 500), p(8585, 45, 420),
+      p(8630, 150, 345),
+      p(8780, 155, 500), p(9005, 45, 420),
+      p(9050, 100, 345),
+      p(9150, 320, 440),
+      // Montée au sommet
+      p(9590, 420, 400),
+      p(10130, 400, 330),
+      // Descente vers le col
+      p(10650, 520, 380), h(10850, 380),
+      // Dernier sprint sur le col jusqu'à l'arche
+      p(11290, 1300, 440), g(12000, 440),
+    ],
+    hazards: [
+      _(470, 70, 440),
+      _(1640, 64, 370),
+      _(6200, 64, 380),
+      _(9700, 64, 400),
+      _(11650, 70, 440),
+    ],
+    signs: [
+      panneau(3050, 440, "Cairns au bord :|saute cairn et trou"),
+      panneau(7600, 440, "Raccourci risqué :|de bloc en bloc"),
+    ],
+    // Raccourcis risqués (LEVELS.md §6 étape 3c) : sauts de bloc en bloc au-dessus des brèches.
+    shortcuts: [
+      { name: "Sauts de Chamois 1", from: 7790, to: 7940, y: 345, land: 8210, landY: 345 },
+      { name: "Sauts de Chamois 2", from: 8210, to: 8360, y: 345, land: 8630, landY: 345 },
+      { name: "Sauts de Chamois 3", from: 8630, to: 8780, y: 345, land: 9050, landY: 345 },
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2680, 440, 1), y(id, 5400, 440, 2), y(id, 7180, 440, 3), y(id, 10150, 330, 4)],
+    finishX: 12250,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 36.5, autoShort: 34.9, gold: 36.4, silver: 39.4, bronze: 42.4 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 33 %, argent 78 %, bronze 90 % ; pressés : or 8 %, argent 13 %, bronze 13 %)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "rock @3194: seulement 56 px avant le bord", reason: "Passage clé de la Crête des Cairns (29/10) : cairn planté au bord du vide, voulu ; un seul saut franchit cairn + trou (100–140 px). Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 % / 0,30, pressé 85 % / 3,02." },
+      { match: "rock @3514: seulement 56 px avant le bord", reason: "Passage clé de la Crête des Cairns (29/10) : cairn planté au bord du vide, voulu ; un seul saut franchit cairn + trou (100–140 px). Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 % / 0,30, pressé 85 % / 3,02." },
+      { match: "rock @3834: seulement 56 px avant le bord", reason: "Passage clé de la Crête des Cairns (29/10) : cairn planté au bord du vide, voulu ; un seul saut franchit cairn + trou (100–140 px). Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 % / 0,30, pressé 85 % / 3,02." },
+      { match: "rock @4164: seulement 56 px avant le bord", reason: "Passage clé de la Crête des Cairns (29/10) : cairn planté au bord du vide, voulu ; un seul saut franchit cairn + trou (100–140 px). Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 % / 0,30, pressé 85 % / 3,02." },
+      { match: "rock @4494: seulement 56 px avant le bord", reason: "Passage clé de la Crête des Cairns (29/10) : cairn planté au bord du vide, voulu ; un seul saut franchit cairn + trou (100–140 px). Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 % / 0,30, pressé 85 % / 3,02." },
+      { match: "rock @4834: seulement 56 px avant le bord", reason: "Passage clé de la Crête des Cairns (29/10) : cairn planté au bord du vide, voulu ; un seul saut franchit cairn + trou (100–140 px). Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 % / 0,30, pressé 85 % / 3,02." },
+      { match: "rock @5174: seulement 56 px avant le bord", reason: "Passage clé de la Crête des Cairns (29/10) : cairn planté au bord du vide, voulu ; un seul saut franchit cairn + trou (100–140 px). Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 % / 0,30, pressé 85 % / 3,02." },
+      { match: "ground@7150→ground@7790: marche montante sans trou (95 px)", reason: "Montée sur le premier des Sauts de Chamois avec tout l'élan (modèle des Rochers des Truites du N°15) ; pilote auto sans perte de temps, rivaux 0 chute au playtest." },
+      { match: "ground@8165→ground@8210: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts de Chamois (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
+      { match: "ground@8585→ground@8630: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts de Chamois (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+      { match: "ground@9005→ground@9050: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts de Chamois (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
     ],
   };
 })());

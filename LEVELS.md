@@ -367,7 +367,8 @@ falaises crème, pins d'Alep), `lac` (niv. 15, lac d'altitude à l'aube, ciel ro
 au pied des pierres et dans les trous, sans voile de brouillard), `lakeBg` (y écran de la surface du lac en
 arrière-plan : rive lointaine, reflet du soleil, vaguelettes animées), `stone`/`stoneDark`/`stoneHi`/`moss`
 (couleurs des sols `pierre(…)`). Ces clés n'existent que dans `lac` : aucun autre niveau ne change), `brume` (niv. 16, vieille forêt de sapins
-dans la brume du crépuscule, ciel violet et cuivre ; les amanites rouges ressortent sur ce fond froid).
+dans la brume du crépuscule, ciel violet et cuivre ; les amanites rouges ressortent sur ce fond froid),
+`etoiles` (niv. 17, crête de nuit sous les étoiles, ciel indigo et lueur violette, herbe givrée, avec `rim`).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -455,7 +456,8 @@ chute, un humain peut passer.
    comprises, avec parcimonie), puis N°12 à mécaniques (mottes plongeantes, §3e) → **le N°13
    DOIT être classique**, puis N°14 à mécaniques (ascendances, 26/10), N°15 classique (Lac des Truites Bavardes, 27/10)
    → **le N°16 DOIT être à mécaniques**, puis N°17 classique, etc. N°16 à mécaniques (amanites
-   rebondissantes, §3g, 28/10) → **le N°17 DOIT être classique** (avec un raccourci risqué, étape 3c).
+   rebondissantes, §3g, 28/10) → **le N°17 DOIT être classique** (avec un raccourci risqué, étape 3c). N°17 classique (Crête des
+   Chamois Noctambules, 29/10, raccourci « Sauts de Chamois ») → **le N°18 DOIT être à mécaniques**.
 3c. **Raccourci risqué pour les classiques** (revue du 27/10, règle à appliquer à **tous les futurs
    niveaux classiques**, N°17, 19…) : sur un classique, le pilote auto ne ralentit jamais (temps ≈
    distance / 352 px/s) et un humain attentif le suit à 3 % près, donc l'or (plancher auto × 1,03) tombe
@@ -702,7 +704,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–16)
+## 8. Courbe de difficulté (niveaux 1–17)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -722,6 +724,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
 | 14 | Les Gorges des Vautours Fainéants | Technique | 1090 m | 14 (dont **5 sauts d'ascendance** de 330–340 px) | 3 | **5 ascendances thermiques** (1 seule, puis la **Valse des Vautours** à 2, puis le **Grand Plané**, ascendance courte), 2 panneaux | 1 / 0.93 / 0.86 | 32,3 s |
 | 15 | Le Lac des Truites Bavardes | Tour des lacs | 1142 m | 20 (dont 9 dans le Saute-Pierres, 3 criques) | 5 | — (classique ; passage clé : le **Saute-Pierres**, 8 pierres plates de 180 → 120 px à la même hauteur, trous de 165 px ; 27/10 : **Rochers des Truites**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 33,8 s (chemin sûr) ; 32,2 s par les raccourcis |
 | 16 | La Forêt des Amanites Farceuses | Technique | 1200 m | 15 (dont **7 rebonds d'amanite**, 3 creux) | 6 | **7 amanites rebondissantes** (1 seule, puis 1 à viser, le **Ricochet** à 3 durci, l'**Échelle** à 2 durcie) ; **Souches Moussues**, 3 raccourcis risqués ; 5 panneaux | 1 / 0.93 / 0.86 | 35,5 s (chemin sûr) ; 33,9 s par les raccourcis |
+| 17 | La Crête des Chamois Noctambules | Crête de nuit | 1225 m | 21 (dont 7 dans la Crête des Cairns, 3 brèches) | 5 | — (classique ; passage clé : la **Crête des Cairns**, 7 cairns plantés au bord du vide, trous de 100 → 140 px ; **Sauts de Chamois**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 36,5 s (chemin sûr) ; 34,9 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -745,6 +748,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 14 | Les Gorges des Vautours Fainéants | 32,3 s | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
 | 15 | Le Lac des Truites Bavardes | 33,8 s *(raccourcis : 32,2 s)* | 33,5 s *(exige les raccourcis)* | 36,2 s | 38,9 s | 40 % / 95 % / 98 % | 10 % / 20 % / 28 % |
 | 16 | La Forêt des Amanites Farceuses | 35,5 s *(raccourcis : 33,9 s)* | 35,1 s *(exige les raccourcis)* | 38,1 s | 41,1 s | 23 % / 55 % / 85 % | 10 % / 28 % / 35 % |
+| 17 | La Crête des Chamois Noctambules | 36,5 s *(raccourcis : 34,9 s)* | 36,4 s *(exige les raccourcis)* | 39,4 s | 42,4 s | 33 % / 78 % / 90 % | 8 % / 13 % / 13 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -898,6 +902,17 @@ hauteur du texte) : N°16 propre ; N°10, 12, 13, 14, 15 déclenchent l'avertiss
 modifiée, listés dans le rapport de revue).
 **Prochain niveau (N°17) : classique**, avec un raccourci risqué (étape 3c).
 
+**N°17 (29/10, classique)** : **La Crête des Chamois Noctambules**, étiquette de caractère « Crête de nuit »,
+nouvelle palette `etoiles`. Passage clé : la **Crête des Cairns** (7 cairns `h()` plantés au bord du vide, dents de
+220 px, trous 100, 100, 110, 110, 120, 120, 140 px ; un seul saut franchit cairn + trou ; avertissements « rock …
+avant le bord » acceptés §6b). Raccourci risqué **Sauts de Chamois** (géométrie des Rochers des Truites). Premier
+jet (dents de 200 px, trous 120 → 140) : pressé 55 % / 4,10, attentif 0,85 chute (20 essais) → trop dur, adouci.
+Retenu, 40 essais : attentif **100 % / 0,30**, pressé **85 % / 3,02** (N°15 : 95 % / 2,40 ; N°13 : 88 % / 2,90 :
+règle des classiques respectée) ; points chauds pressés x≈5300 (dernier trou, 140 px), 4600, 5000. Raccourci :
+sauts réussis 47/55 (85 %) attentif, 34/60 (57 %) pressé. Pilote auto 36,5 s, 34,9 s par les raccourcis, rivaux
+0 chute. Médailles **36,4 / 39,4 / 42,4 s** (or attentif 33 %, dans la fenêtre). Aucun avertissement « balise trop
+proche d'un panneau ». **Prochain niveau (N°18) : à mécaniques.**
+
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
 Même cerveau que l'autopilote (simulation exacte de la physique), rendu imprécis :
@@ -989,6 +1004,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 14 | Les Gorges des Vautours Fainéants | Technique | 100 % | 0,33 | 36,4 s | 95 % | 2,17 | 47,7 s |
 | 15 | Le Lac des Truites Bavardes | Tour des lacs | 100 % | 0,07 *(27/10 ; avant 0,20)* | 34,0 s | 95 % *(avant 83 %)* | 2,40 *(avant 2,88)* | 46,7 s |
 | 16 | La Forêt des Amanites Farceuses | Technique | 100 % | 0,15 | 38,2 s | 90 % | 1,68 | 49,6 s |
+| 17 | La Crête des Chamois Noctambules | Crête de nuit | 100 % | 0,30 | 38,6 s | 85 % | 3,02 | 54,5 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le
