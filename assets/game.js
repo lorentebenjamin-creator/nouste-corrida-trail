@@ -435,13 +435,24 @@ function R(e, t) {
           waterGaps.push({ x: o, w: s, y: e.lake }));
         continue;
       }
-      ((n.fillStyle = e.fog),
-        (n.globalAlpha = 0.72),
-        n.fillRect(o, c, s, 780 - c),
-        (n.globalAlpha = 0.35),
-        (n.fillStyle = `#070b0a`),
-        n.fillRect(o + 6, c + 30, Math.max(0, s - 12), 780),
-        (n.globalAlpha = 1));
+      // Revue 29/10 : palette de nuit (`rim` / `pit`) — fond de trou opaque ; sinon voile d'origine.
+      if (e.rim || e.pit) {
+        let pit = e.pit || `#010208`;
+        ((n.fillStyle = e.fog),
+          (n.globalAlpha = 0.95),
+          n.fillRect(o, c, s, 780 - c),
+          (n.globalAlpha = 1),
+          (n.fillStyle = pit),
+          n.fillRect(o, c + 8, s, 780));
+      } else {
+        ((n.fillStyle = e.fog),
+          (n.globalAlpha = 0.72),
+          n.fillRect(o, c, s, 780 - c),
+          (n.globalAlpha = 0.35),
+          (n.fillStyle = `#070b0a`),
+          n.fillRect(o + 6, c + 30, Math.max(0, s - 12), 780),
+          (n.globalAlpha = 1));
+      }
       // Palette de nuit : le gave au fond du ravin (décor seul, la chute reste mortelle à y=700).
       if (e.water) {
         let wy = Math.min(Math.max(i.y, a.y) + 58, 505);
@@ -2522,23 +2533,35 @@ function pe(e, t, n) {
   e.fillStyle = `rgba(255,255,255,0.05)`;
   for (let n = 0; n < t.w / 22; n++)
     e.fillRect(t.x + r() * t.w, t.y + 40 + r() * 70, 4, 2);
-  ((e.fillStyle = `rgba(0,0,0,0.18)`),
-    e.fillRect(t.x, t.y, 7, Math.min(t.h, 220)),
-    e.fillRect(t.x + t.w - 7, t.y, 7, Math.min(t.h, 220)));
+  // Revue 29/10 : en palette de nuit, pas d'assombrissement des flancs (ça fondait dans le trou) ;
+  // le liseré rimTop marque le bord. Jour : ombre latérale inchangée.
+  if (!n.rim) {
+    ((e.fillStyle = `rgba(0,0,0,0.18)`),
+      e.fillRect(t.x, t.y, 7, Math.min(t.h, 220)),
+      e.fillRect(t.x + t.w - 7, t.y, 7, Math.min(t.h, 220)));
+  }
   rimTop(e, t, n);
 }
 // Liseré clair sur le dessus des sols et passerelles (palettes de nuit : thème avec `rim`).
 // Purement visuel : rend lisibles les bords et les points d'appel dans le noir.
+// Revue 29/10 : liseré plus long sur les flancs verticaux (≈ 48 px) pour que les brèches
+// ne se confondent plus avec la face sombre du sol (Crête des Cairns, N°17).
 function rimTop(e, t, n) {
   if (!n.rim) return;
+  // Flancs : liseré sur toute la hauteur visible du sol (cap 120 px) pour que chaque trou
+  // se lise au moins 1 s à l'avance (Crête des Cairns, revue 29/10).
+  let side = Math.min(t.h, 120);
   ((e.fillStyle = n.rim),
-    (e.globalAlpha = 0.18),
+    (e.globalAlpha = 0.22),
     e.fillRect(t.x - 1, t.y - 3, t.w + 2, 6),
-    (e.globalAlpha = 0.85),
+    (e.globalAlpha = 0.9),
     e.fillRect(t.x, t.y, t.w, 2),
-    (e.globalAlpha = 0.6),
-    e.fillRect(t.x, t.y, 2, Math.min(t.h, 14)),
-    e.fillRect(t.x + t.w - 2, t.y, 2, Math.min(t.h, 14)),
+    (e.globalAlpha = 0.85),
+    e.fillRect(t.x, t.y, 3, side),
+    e.fillRect(t.x + t.w - 3, t.y, 3, side),
+    (e.globalAlpha = 0.4),
+    e.fillRect(t.x + 3, t.y, 4, Math.min(t.h, 40)),
+    e.fillRect(t.x + t.w - 7, t.y, 4, Math.min(t.h, 40)),
     (e.globalAlpha = 1));
 }
 function me(e, t, n) {

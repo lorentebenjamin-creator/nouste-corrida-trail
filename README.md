@@ -119,8 +119,8 @@ par profil (pilote du 23/10) :
 | 13 | 33,9 s | 38,3 s | 42,8 s | 53 % / 60 % / 85 % | 3 % / 18 % / 30 % |
 | 14 | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
 | 15 | 33,5 s *(exige les raccourcis)* | 36,2 s | 38,9 s | 40 % / 95 % / 98 % | 10 % / 20 % / 28 % |
-| 16 | 35,0 s *(exige les raccourcis)* | 37,8 s | 40,6 s | 43 % / 100 % / 100 % | 35 % / 68 % / 78 % |
-| 17 | 36,4 s *(exige les raccourcis)* | 39,4 s | 42,4 s | 33 % / 78 % / 90 % | 8 % / 13 % / 13 % |
+| 16 | 35,1 s *(exige les raccourcis)* | 38,1 s | 41,1 s | 23 % / 55 % / 85 % | 10 % / 28 % / 35 % |
+| 17 | 36,4 s *(exige les raccourcis)* | 39,4 s | 48,8 s | 33 % / 78 % / 98 % | 8 % / 13 % / 33 % |
 
 Le plancher auto × 1,03 l'emporte sur la fenêtre 30–50 % : sur les niveaux sans attente (temps
 attentifs groupés à moins de 3 % du pilote auto), l'or est atteint par 65–100 % des essais attentifs

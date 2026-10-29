@@ -19,6 +19,10 @@
 //    jusqu'au temps atteint par ≈ 30 % des essais pressés, sans dépasser le MILIEU de l'intervalle
 //    or–bronze (règle d'espacement : l'argent ne colle plus à l'or quand le bronze est loin, et ne
 //    mange jamais plus de la moitié de l'écart or–bronze). Sans essais pressés : règle attentive seule.
+//    Cible de bronze sur le profil PRESSÉ (revue du 29/10) : le bronze est relevé, si besoin, jusqu'au
+//    temps atteint par ≈ 32 % des essais pressés (fenêtre 30–35 %, comme le N°16 à 35 %), sans jamais
+//    descendre sous argent + 0,5 s ni sous le plancher qui garde l'argent ≤ milieu or–bronze. Sinon
+//    argent et bronze collent (N°17 avant revue : 13 % / 13 % pressé alors que 85 % finissent).
 //    Écart minimal or → argent (revue du 23/10) : argent ≥ or × 1,08 (arrondi au dixième supérieur) ; le
 //    bronze est relevé si besoin pour garder l'argent au plus au milieu de l'intervalle or–bronze.
 //    Graines déterministes : deux lancements identiques donnent les mêmes temps.
@@ -45,7 +49,7 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 const here = dirname(fileURLToPath(import.meta.url));
 const levelsPath = join(here, '..', 'levels.js');
 export const COEF = { gold: 1.15, silver: 1.35, bronze: 1.6 };
-export const TARGET = { gold: 0.40, goldMin: 0.30, goldMax: 0.50, goldAuto: 1.03, silver: 0.5, silverPressed: 0.3, bronze: 0.85, gap: 0.5, silverMin: 1.08 };
+export const TARGET = { gold: 0.40, goldMin: 0.30, goldMax: 0.50, goldAuto: 1.03, silver: 0.5, silverPressed: 0.3, bronze: 0.85, bronzePressed: 0.32, bronzePressedMin: 0.30, bronzePressedMax: 0.35, gap: 0.5, silverMin: 1.08 };
 export const PROFILES = {
   attentif: [],
   'pressé': ['--delay', '180-250', '--jitter', '80', '--hold', '0.18-0.5', '--calm', '0', '--hesit', '0'],
@@ -98,7 +102,16 @@ export function calibrate(auto, times, pressed, autoShort) {
   const minSilver = Math.ceil(gold * TARGET.silverMin * 10 - 1e-6) / 10;
   let bronzeFloor = silver + TARGET.gap;
   if (silver < minSilver) { silver = r1(minSilver); bronzeFloor = Math.max(silver + TARGET.gap, Math.ceil((2 * silver - gold) * 10 - 1e-6) / 10); }
-  const bronze = r1(Math.max(bronzeFloor, bronze0));
+  let bronze = r1(Math.max(bronzeFloor, bronze0));
+  // bronze pressé ≈ 32 % (fenêtre 30–35 %, revue du 29/10) : si trop peu de pressés l'atteignent,
+  // on relève le seuil (médaille plus généreuse). Les règles d'écart restent le plancher.
+  if (pressed?.length) {
+    const bp = quantileUp(pressed, TARGET.bronzePressed, bronzeFloor);
+    bronze = r1(Math.max(bronze, bp));
+    // si l'argent dépasse le nouveau milieu or–bronze, on relève encore le bronze (espacement)
+    const midNeed = Math.ceil((2 * silver - gold) * 10 - 1e-6) / 10;
+    if (bronze < midNeed) bronze = r1(Math.max(bronze, midNeed));
+  }
   return sc ? { auto, autoShort, gold: r2(gold), silver, bronze } : { auto, gold: r2(gold), silver, bronze };
 }
 
@@ -188,7 +201,8 @@ for (const L of list) {
     row[prof + 'Ok'] = ts.filter((x) => x != null).length / (ts.length || 1);
     txt += `\n    ${prof.padEnd(8)} (${ts.length} essais, réussite ${pct(row[prof + 'Ok'])}) : or ${pct(row[prof][0])}, argent ${pct(row[prof][1])}, bronze ${pct(row[prof][2])}`;
   }
-  if (calib) { const g = row.attentif[0]; if (g < TARGET.goldMin || g > TARGET.goldMax) txt += `\n    ⚠ or hors de la fenêtre ${TARGET.goldMin * 100}–${TARGET.goldMax * 100} % (temps attentifs trop groupés, ou plancher auto × ${TARGET.goldAuto})`; }
+  if (calib) { const g = row.attentif[0]; if (g < TARGET.goldMin || g > TARGET.goldMax) txt += `\n    ⚠ or hors de la fenêtre ${TARGET.goldMin * 100}–${TARGET.goldMax * 100} % (temps attentifs trop groupés, ou plancher auto × ${TARGET.goldAuto})`;
+    const bp = row['pressé']?.[2]; if (bp != null && (bp < TARGET.bronzePressedMin || bp > TARGET.bronzePressedMax)) txt += `\n    ⚠ bronze pressé hors de la fenêtre ${TARGET.bronzePressedMin * 100}–${TARGET.bronzePressedMax * 100} % (plancher argent + ${TARGET.gap} s ou milieu or–bronze)`; }
   console.log(txt);
   rows.push(row);
   if (!write || !lineTxt) continue;

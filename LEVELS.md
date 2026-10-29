@@ -583,6 +583,13 @@ chute, un humain peut passer.
      profil pressé 3 % / 13 % / 50 % sur 40 essais). Le plafond au milieu évite l'excès inverse sur
      les niveaux à mécaniques, où 30 % des pressés n'arrivent qu'au-delà du bronze (N°5–7) : l'argent
      ne prend jamais plus de la moitié de l'écart or–bronze ;
+   * **cible de bronze sur le profil pressé** (revue du 29/10, `TARGET.bronzePressed` ≈ 32 %,
+     fenêtre 30–35 %) : le bronze est relevé, si besoin, jusqu'au temps atteint par ≈ 32 % des
+     essais pressés, sans jamais descendre sous argent + 0,5 s ni sous le plancher qui garde
+     l'argent ≤ milieu or–bronze. Sinon argent et bronze collent chez les pressés qui finissent
+     (N°17 avant revue : 13 % / 13 % alors que 85 % arrivent). Si la cible casse une règle
+     d'écart, on prend la valeur la plus proche qui les respecte. Ne recalibrer que le niveau du
+     jour — la règle est générale mais n'écrit pas les N°1–16 ;
    * toujours `auto ≤ or`, argent ≥ or + 0,5 s, bronze ≥ argent + 0,5 s (paliers progressivement
      plus faciles) ;
    * **écart relatif or → argent** (revue du 23/10) : **argent ≥ or × 1,08** (arrondi au dixième
@@ -748,7 +755,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 14 | Les Gorges des Vautours Fainéants | 32,3 s | 33,3 s | 36,8 s | 40,3 s | 43 % / 63 % / 85 % | 3 % / 8 % / 20 % |
 | 15 | Le Lac des Truites Bavardes | 33,8 s *(raccourcis : 32,2 s)* | 33,5 s *(exige les raccourcis)* | 36,2 s | 38,9 s | 40 % / 95 % / 98 % | 10 % / 20 % / 28 % |
 | 16 | La Forêt des Amanites Farceuses | 35,5 s *(raccourcis : 33,9 s)* | 35,1 s *(exige les raccourcis)* | 38,1 s | 41,1 s | 23 % / 55 % / 85 % | 10 % / 28 % / 35 % |
-| 17 | La Crête des Chamois Noctambules | 36,5 s *(raccourcis : 34,9 s)* | 36,4 s *(exige les raccourcis)* | 39,4 s | 42,4 s | 33 % / 78 % / 90 % | 8 % / 13 % / 13 % |
+| 17 | La Crête des Chamois Noctambules | 36,5 s *(raccourcis : 34,9 s)* | 36,4 s *(exige les raccourcis)* | 39,4 s | 48,8 s | 33 % / 78 % / 98 % | 8 % / 13 % / 33 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -910,8 +917,22 @@ jet (dents de 200 px, trous 120 → 140) : pressé 55 % / 4,10, attentif 0,85 ch
 Retenu, 40 essais : attentif **100 % / 0,30**, pressé **85 % / 3,02** (N°15 : 95 % / 2,40 ; N°13 : 88 % / 2,90 :
 règle des classiques respectée) ; points chauds pressés x≈5300 (dernier trou, 140 px), 4600, 5000. Raccourci :
 sauts réussis 47/55 (85 %) attentif, 34/60 (57 %) pressé. Pilote auto 36,5 s, 34,9 s par les raccourcis, rivaux
-0 chute. Médailles **36,4 / 39,4 / 42,4 s** (or attentif 33 %, dans la fenêtre). Aucun avertissement « balise trop
-proche d'un panneau ». **Prochain niveau (N°18) : à mécaniques.**
+0 chute. Aucun avertissement « balise trop proche d'un panneau ».
+
+**Revue Boss Bot du 29/10** (branche `revue-29-10`) :
+1. **Médailles** — avant : **36,4 / 39,4 / 42,4 s** (attentif 33 / 78 / 90 % ; pressé **8 / 13 / 13 %** alors
+   que 85 % finissent : argent et bronze collés). Règle générale `TARGET.bronzePressed` ≈ 32 % (fenêtre
+   30–35 %) ajoutée à `tools/medals.mjs` (documentée §6 étape 5b) ; recalibrage N°17 seul → **36,4 / 39,4 /
+   48,8 s** (attentif 33 / 78 / 98 % ; pressé **8 / 13 / 33 %**). Or et argent inchangés ; toutes les règles
+   d'écart respectées (argent ≥ or×1,08, or ≥ autoShort×1,03, argent ≤ milieu or–bronze, écarts ≥ 0,5 s).
+2. **Lisibilité de nuit** — les brèches de la Crête des Cairns se confondaient avec la face sombre du sol.
+   Palette `etoiles` : `dirt` / `dirtDark` relevés, clé `pit: #000106` ; rendu (`assets/game.js`) : fond de
+   trou opaque si `rim`/`pit`, liseré vertical étendu (~120 px) sur les flancs, plus d'assombrissement des
+   faces en nuit. Limité aux palettes de nuit (seul N°17 a `pit` ; `rim` aussi sur `nuit`). Captures
+   `/workspace/n17-avant.png` → `/workspace/n17-apres.png` ; panneau « Cairns au bord… » lisible.
+3. **Playtest 40 essais** après changements (géométrie inchangée) : attentif **100 % / 0,30**, pressé
+   **85 % / 3,02** — identique à l'avant (seules médailles et rendu ont bougé).
+**Prochain niveau (N°18) : à mécaniques.**
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 

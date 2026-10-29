@@ -316,16 +316,19 @@ export const THEMES = {
   etoiles: {
     // Niveau 17 : crête de nuit sous les étoiles (ciel indigo, lueur violette à l'horizon, herbe
     // givrée bleutée, cairns de pierre claire ; liseré clair obligatoire pour une palette de nuit)
+    // Revue 29/10 : dirtDark relevé + `pit` quasi noir — les flancs des dents se détachent des brèches
+    // (avant, dirtDark #2b2832 ≈ fog #03050d : trous invisibles à 1 s).
     skyTop: "#050817", skyMid: "#18204a", skyBot: "#5e4673",
     ridge: "#0d1330", ridge2: "#252d55",
     pine: "#0a1120", pine2: "#1a2838",
-    dirt: "#4a4552", dirtDark: "#2b2832",
+    dirt: "#5a5566", dirtDark: "#3e3a48",
     grass: "#8a9bb4", grassDark: "#56637c",
     wood: "#6e5640", woodDark: "#403226",
     rock: "#b2b6c8", rockDark: "#6a6e82",
     thorn: "#17131f", leaf: "#3a4a5e", berry: "#f2cc66",
     fog: "#03050d",
-    rim: "#dfe8ff",
+    pit: "#000106",
+    rim: "#e8f0ff",
   },
 };
 
@@ -1601,7 +1604,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2680, 440, 1), y(id, 5400, 440, 2), y(id, 7180, 440, 3), y(id, 10150, 330, 4)],
     finishX: 12250,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 36.5, autoShort: 34.9, gold: 36.4, silver: 39.4, bronze: 42.4 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 33 %, argent 78 %, bronze 90 % ; pressés : or 8 %, argent 13 %, bronze 13 %)
+    medals: { auto: 36.5, autoShort: 34.9, gold: 36.4, silver: 39.4, bronze: 48.8 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 33 %, argent 78 %, bronze 98 % ; pressés : or 8 %, argent 13 %, bronze 33 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "rock @3194: seulement 56 px avant le bord", reason: "Passage clé de la Crête des Cairns (29/10) : cairn planté au bord du vide, voulu ; un seul saut franchit cairn + trou (100–140 px). Validé playtest auto (0 chute, rivaux 0 chute) et humain 40 essais : attentif 100 % / 0,30, pressé 85 % / 3,02." },
