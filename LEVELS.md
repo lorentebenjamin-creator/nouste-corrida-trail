@@ -362,22 +362,38 @@ du pylône : avec 60, la poignée est 60 px au-dessus du vide, un saut pris trop
 Lisibilité : pylônes en bois haubanés, câble avec reflet, poignée jaune qui se balance, **chevrons jaunes**
 pulsés sous la poignée quand le joueur approche, chariot et sangle pendant la glisse, vibration du câble,
 son « zing » à l'accroche ; un panneau contenant « tyrolienne » doit précéder la première.
-Moteur (`assets/game.js`) : `zipGrab` / `zipStep` / `zipRemain`, liste `ziplines`, champ `e.zip`, communs à
-la boucle principale et à `simRunner` (l'IA et le pilote humain « voient » la tyrolienne ; l'horizon de
+Moteur (`assets/game.js`) : `zipGrab` / `zipStep` / `zipRemain` / `zipRelease`, liste `ziplines`, champ `e.zip`,
+communs à la boucle principale et à `simRunner` (l'IA et le pilote humain « voient » la tyrolienne ; l'horizon de
 `simRunner` est prolongé de la glisse restante quand il s'arrête à l'atterrissage), dessin `drawZip`,
-`getState().zips` / `onZip`. Niveaux sans `ziplines` : aucun effet (liste vide, toutes les branches gardées).
+`getState().zips` / `onZip`. **Lâcher volontaire** (revue 30/10) : pendant la glisse, un saut appelle
+`zipRelease` — le coureur quitte le câble en conservant sa vitesse horizontale (plafonnée à 320 px/s, plancher
+260) et une impulsion ≈ 12 % d'un saut (`j × 0,12`), `zipCool` 0,45 s. Aller jusqu'au pylône reste le chemin sûr
+(lâcher automatique inchangé). Niveaux sans `ziplines` : aucun effet (liste vide, toutes les branches gardées).
+
+**Raccourci `kind: "zipDrop"`** (revue 30/10, champ `shortcuts`) : fenêtre `[from, to]` sur le câble
+`zipX1`, corniche `(land, landY)` sous le câble (sol `ledge: true`, exclu de la chaîne de marche pour ne pas
+casser le chaînage tyrolienne). Chevrons « lâcher ici » au-dessus de la fenêtre ; panneau « corniche » /
+« lâche » dans les 1200 px avant. Pilote auto sûr = jusqu'au pylône ; `short` / `--shortcut` / `shortcutP`
+lâche dans la fenêtre s'il retombe sur la corniche (`zipDropJump`). **Or du N°18** : exige les raccourcis —
+`autoShort` passe par la **Corniche des Choucas** *et* les **Séracs Suspendus** (règle `medals.mjs` :
+plancher `autoShort × 1,03`, plafond `auto − 0,1` ; les deux familles de raccourcis comptent).
 `tools/check-levels.mjs` : erreurs si longueur hors 200–1000, pente hors 0–0,35, vitesse hors 380–560,
 grab hors 8–90, pylône sans sol, montée au point de prise hors 85–134, lâcher à plus de 80 px au-dessus du
 sol, réception à moins de 150 px, fanion sous le câble, trop près du départ, ronce à la réception ;
-avertissements : câble attrapable en marchant, autre mécanique à moins de 300 px, pas de panneau
-« tyrolienne » dans les 1500 px avant la première.
+**zipDrop** : fenêtre hors câble, corniche absente, glisseur jusqu'au pylône qui touche la corniche, lâcher
+au milieu de la fenêtre qui n'atteint pas la corniche (simu = `zipRelease`) ; avertissements : câble
+attrapable en marchant, autre mécanique à moins de 300 px, pas de panneau « tyrolienne » / « corniche » /
+« lâche ».
 
 Recette (N°18) : une tyrolienne d'apprentissage basse (104 px, 560 px de crevasse), une plus haute et plus
 longue (116 px, 680 px, poignée à 30 px), puis le **Relais des Choucas** : quatre tyroliennes enchaînées
 (128, 131, 133, 134 px, poignée à 60 px au-dessus du vide) depuis des séracs de 300 px — panneau « Relais des
-Choucas : saute à fond ×4 ». Balises le long des câbles, à hauteur du corps en glisse (câble + 90).
-Premier jet (bande ±6, câbles ≤ 124 px, 3 relais, poignée au pylône) : pressé 100 % → durci jusqu'à 88 %.
-Nouvelle palette `glacier`.
+Choucas : saute à fond ×4 ». Sur le 3ᵉ câble du Relais (x1 = 8200) : **Corniche des Choucas** (zipDrop,
+fenêtre 8480–8560 → corniche y = 490) — panneau « Corniche : lâche le câble ! ». Balises le long des câbles,
+à hauteur du corps en glisse (câble + 90). Premier jet (bande ±6, câbles ≤ 124 px, 3 relais, poignée au
+pylône) : pressé 100 % → durci jusqu'à 88 % ; après revue 30/10 (lâcher + corniche) : pressé **83 %**.
+Étiquette « **Technique** » (échelle d'engagement §8 ; N°16 Technique à 90 %, N°5 à 85 %). « Tyroliennes »
+reste dans le blurb. Nouvelle palette `glacier`.
 
 ## 4. Thèmes
 
@@ -773,7 +789,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
 | 15 | Le Lac des Truites Bavardes | Tour des lacs | 1142 m | 20 (dont 9 dans le Saute-Pierres, 3 criques) | 5 | — (classique ; passage clé : le **Saute-Pierres**, 8 pierres plates de 180 → 120 px à la même hauteur, trous de 165 px ; 27/10 : **Rochers des Truites**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 33,8 s (chemin sûr) ; 32,2 s par les raccourcis |
 | 16 | La Forêt des Amanites Farceuses | Technique | 1200 m | 15 (dont **7 rebonds d'amanite**, 3 creux) | 6 | **7 amanites rebondissantes** (1 seule, puis 1 à viser, le **Ricochet** à 3 durci, l'**Échelle** à 2 durcie) ; **Souches Moussues**, 3 raccourcis risqués ; 5 panneaux | 1 / 0.93 / 0.86 | 35,5 s (chemin sûr) ; 33,9 s par les raccourcis |
 | 17 | La Crête des Chamois Noctambules | Crête de nuit | 1225 m | 21 (dont 7 dans la Crête des Cairns, 3 brèches) | 5 | — (classique ; passage clé : la **Crête des Cairns**, 7 cairns plantés au bord du vide, trous de 100 → 140 px ; **Sauts de Chamois**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 36,5 s (chemin sûr) ; 34,9 s par les raccourcis |
-| 18 | Le Glacier des Choucas Voltigeurs | Tyroliennes | 1364 m | 18 (dont **6 crevasses à tyrolienne** de 520–680 px, 3 crevasses des Séracs) | 4 | **6 tyroliennes** (1 basse, 1 haute, le **Relais des Choucas** à 4) ; **Séracs Suspendus**, 3 raccourcis risqués ; 3 panneaux | 1 / 0.93 / 0.86 | 37,6 s (chemin sûr) ; 35,9 s par les raccourcis |
+| 18 | Le Glacier des Choucas Voltigeurs | Technique | 1364 m | 18 (dont **6 crevasses à tyrolienne** de 520–680 px, 3 crevasses des Séracs) | 4 | **6 tyroliennes** (1 basse, 1 haute, le **Relais des Choucas** à 4 + **Corniche des Choucas** zipDrop) ; **Séracs Suspendus**, 3 raccourcis ; 4 panneaux | 1 / 0.93 / 0.86 | 37,6 s (chemin sûr) ; 36,2 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -798,7 +814,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 15 | Le Lac des Truites Bavardes | 33,8 s *(raccourcis : 32,2 s)* | 33,5 s *(exige les raccourcis)* | 36,2 s | 38,9 s | 40 % / 95 % / 98 % | 10 % / 20 % / 28 % |
 | 16 | La Forêt des Amanites Farceuses | 35,5 s *(raccourcis : 33,9 s)* | 35,1 s *(exige les raccourcis)* | 38,1 s | 41,1 s | 23 % / 55 % / 85 % | 10 % / 28 % / 35 % |
 | 17 | La Crête des Chamois Noctambules | 36,5 s *(raccourcis : 34,9 s)* | 36,4 s *(exige les raccourcis)* | 39,4 s | 48,8 s | 33 % / 78 % / 98 % | 8 % / 13 % / 33 % |
-| 18 | Le Glacier des Choucas Voltigeurs | 37,6 s *(raccourcis : 35,9 s)* | 37,1 s *(exige les raccourcis)* | 40,1 s | 43,1 s | 43 % / 93 % / 98 % | 10 % / 23 % / 35 % |
+| 18 | Le Glacier des Choucas Voltigeurs | 37,6 s *(raccourcis : 36,2 s)* | 37,5 s *(exige Corniche + Séracs)* | 40,5 s | 43,5 s | 40 % / 93 % / 95 % | 13 % / 30 % / 33 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -977,17 +993,22 @@ sauts réussis 47/55 (85 %) attentif, 34/60 (57 %) pressé. Pilote auto 36,5 s, 
    **85 % / 3,02** — identique à l'avant (seules médailles et rendu ont bougé).
 **Prochain niveau (N°18) : à mécaniques.**
 
-**N°18 (30/10, à mécaniques)** : **Le Glacier des Choucas Voltigeurs**, étiquette « Tyroliennes », 1364 m,
-nouvelle palette `glacier`, mécanique v8 inédite : la **tyrolienne** (§3h). Six câbles : apprentissage (104 px à
-monter), un plus haut (116 px), puis le **Relais des Choucas** (quatre câbles enchaînés, 128 → 134 px, séracs de
-300 px entre deux). Raccourci risqué **Séracs Suspendus** (géométrie des Sauts de Chamois, l'or l'exige). Premier
-jet trop facile (pressé 100 %) : bande d'accroche ±6 → ±3 px, câbles du relais relevés, 4e câble ajouté, poignée
-garée 60 px au-dessus du vide (un saut pris trop tôt retombe avant). Retenu, 40 essais : attentif **100 % / 0,07**,
-pressé **88 % / 2,38** (20 essais : 100 % / 0,15 et 85 % / 2,10) ; chutes pressées surtout au relais (x≈6700,
-7600, 8400). Pilote auto 37,6 s, 35,9 s par les raccourcis, rivaux 0 chute, 0 erreur console. Médailles
-**37,1 / 40,1 / 43,1 s** (attentif 43 / 93 / 98 % ; pressé 10 / 23 / 35 %). Moteur v8 : temps autopilote des
-N°1–17 identiques, essais humains du N°17 identiques essai par essai.
-**Prochain niveau (N°19) : classique**, avec un raccourci risqué (étape 3c).
+**N°18 (30/10, à mécaniques)** : **Le Glacier des Choucas Voltigeurs**, étiquette « **Technique** »
+(échelle d'engagement §8 ; pressé 83 % après revue, proche du N°5 Technique à 85 % / N°16 à 90 %), 1364 m,
+nouvelle palette `glacier`, mécanique v8 : la **tyrolienne** (§3h). Six câbles : apprentissage, une plus haute,
+puis le **Relais des Choucas** (×4). « Tyroliennes » reste dans le blurb.
+
+**Revue du 30/10** (Boss Bot) :
+1. Libellé « Tyroliennes » hors échelle → **Technique** (taux pressé mesuré après le point 2).
+2. **Lâcher pendant la glisse** (`zipRelease`) + raccourci **Corniche des Choucas** (`kind: "zipDrop"`) sur le
+   3ᵉ câble du Relais (fenêtre 8480–8560 → corniche y = 490, `ledge: true`) ; panneau + chevrons ; chemin sûr =
+   jusqu'au pylône. **Or** : exige Corniche **et** Séracs Suspendus (`autoShort` 36,2 s ; règle `medals.mjs`
+   inchangée). Pilotes auto / humain gèrent le lâcher (`shortcutP`). `check-levels` contrôle atteignabilité
+   et non-collision des glisseurs. Avant → après (40 essais) : attentif 100 % / 0,07 → 100 % / 0,07 ; pressé
+   88 % / 2,38 → **83 % / 2,70**. Médailles **37,1 / 40,1 / 43,1** → **37,5 / 40,5 / 43,5** (attentif 40 / 93 /
+   95 % ; pressé 13 / 30 / 33 %). Captures `/workspace/n18-avant.png`, `n18-apres.png`, `n18-lacher.png`.
+3. Ménage : `n17-*-live.png` → `/workspace/corrida-site-shots/` ; `/*.png` dans `.gitignore`.
+N°1–17 inchangés (temps `auto` identiques). **Prochain niveau (N°19) : classique**, avec un raccourci risqué.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
@@ -1003,7 +1024,8 @@ Même cerveau que l'autopilote (simulation exacte de la physique), rendu impréc
 * **raccourcis risqués** (revue du 27/10, niveaux avec `shortcuts` seulement, §6 étape 3c) : dans
   `shortcutP` des essais (**0,6** par défaut, `--shortcut-p`, tiré avec une graine séparée), il saute de
   rocher en rocher en visant la fenêtre des sauts qui retombent sur le rocher d'arrivée (même `aimAt`,
-  jitter et appui que les autres sauts) ; sinon il prend le chemin sûr comme le pilote auto ;
+  jitter et appui que les autres sauts) ; **zipDrop** (revue 30/10) : sur une tyrolienne, il lâche dans la
+  fenêtre s'il retombe sur la corniche ; sinon il prend le chemin sûr comme le pilote auto ;
 * **attente du calme** (profil attentif) : dans une zone de rafale, il ne saute pas au-dessus du
   vide pendant la rafale ni quand les herbes couchées annoncent une rafale qui arriverait avant
   la fin du saut (≈ 0,8 s) ; `--calm 0` coupe ce comportement ;
@@ -1081,7 +1103,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 15 | Le Lac des Truites Bavardes | Tour des lacs | 100 % | 0,07 *(27/10 ; avant 0,20)* | 34,0 s | 95 % *(avant 83 %)* | 2,40 *(avant 2,88)* | 46,7 s |
 | 16 | La Forêt des Amanites Farceuses | Technique | 100 % | 0,15 | 38,2 s | 90 % | 1,68 | 49,6 s |
 | 17 | La Crête des Chamois Noctambules | Crête de nuit | 100 % | 0,30 | 38,6 s | 85 % | 3,02 | 54,5 s |
-| 18 | Le Glacier des Choucas Voltigeurs | Tyroliennes | 100 % | 0,15 *(20 essais ; 40 : 0,07)* | 38,3 s | 85 % *(40 essais : 88 %)* | 2,10 *(40 : 2,38)* | 45,4 s |
+| 18 | Le Glacier des Choucas Voltigeurs | Technique | 100 % | 0,07 | 38,2 s | 83 % | 2,70 | 48,3 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le

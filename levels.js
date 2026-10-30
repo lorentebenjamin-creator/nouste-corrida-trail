@@ -1660,8 +1660,10 @@ LEVELS.push((() => {
 // on rate le câble et on tombe. Annoncée par un panneau, câble et pylônes visibles de loin, chevrons
 // jaunes au point d'accroche. Passage clé : le RELAIS DES CHOUCAS, quatre tyroliennes enchaînées
 // depuis des séracs de 300 px (on ressaute presque dès la réception), de plus en plus hautes à
-// attraper (128 → 134 px à monter sur 137 : il faut sauter À FOND). Puis les SÉRACS SUSPENDUS
-// (raccourci risqué de bloc en bloc, §6 étape 3c : l'or l'exige). Nouvelle palette `glacier`.
+// attraper (128 → 134 px à monter sur 137 : il faut sauter À FOND). Revue 30/10 : sur la 3e du
+// Relais (Z5), lâcher le câble (saut) pour la CORNICHE DES CHOUCAS — raccourci risqué ; aller au
+// pylône reste sûr. Puis les SÉRACS SUSPENDUS (raccourci risqué de bloc en bloc, §6 étape 3c).
+// L'or exige les raccourcis (autoShort = Corniche + Séracs). Nouvelle palette `glacier`.
 // ---------------------------------------------------------------------
 LEVELS.push((() => {
   const id = "glacier-choucas", c = v(id);
@@ -1688,8 +1690,8 @@ LEVELS.push((() => {
   c.line(12880, 13100, 370, 3); c.arc(13130, 13260, 330, 3, 40); c.line(13340, 13620, 370, 3);
   return {
     id, name: "Le Glacier des Choucas Voltigeurs",
-    blurb: "Les crevasses sont trop larges ? Saute, attrape la tyrolienne et file au-dessus du vide comme les choucas.",
-    difficulty: "Tyroliennes", theme: "glacier",
+    blurb: "Tyroliennes au-dessus des crevasses : saute, accroche-toi, et lâche au bon moment pour la corniche des choucas.",
+    difficulty: "Technique", theme: "glacier",
     width: 14080, floor: 440, spawnX: 60,
     solids: [
       // Départ sur la moraine, ressauts de mise en jambes
@@ -1709,6 +1711,8 @@ LEVELS.push((() => {
       p(6100, 420, 440),
       p(7060, 300, 470),
       p(7900, 300, 500),
+      // Revue 30/10 : CORNICHE DES CHOUCAS sous Z5 — ledge:true (hors chaîne de marche ; glisseurs passent au-dessus)
+      { ...p(8480, 260, 490), ledge: true },
       p(8720, 300, 520),
       p(9560, 700, 540), _(9990, 64, 540),
       // Remontée sur la langue du glacier
@@ -1740,10 +1744,14 @@ LEVELS.push((() => {
     signs: [
       panneau(2120, 440, "Tyrolienne :|saute au câble !"),
       panneau(6140, 440, "Relais des Choucas :|saute à fond ×4"),
+      panneau(8000, 500, "Corniche :|lâche le câble !"),
       panneau(11220, 440, "Raccourci risqué :|de sérac en sérac"),
     ],
     // Raccourcis risqués (LEVELS.md §6 étape 3c) : sauts de sérac en sérac au-dessus des crevasses.
     shortcuts: [
+      // Corniche des Choucas (revue 30/10) : lâcher Z5 dans [from,to] pour atterrir sur la corniche.
+      // Compte pour autoShort avec les Séracs (l'or exige les raccourcis).
+      { name: "Corniche des Choucas", kind: "zipDrop", zipX1: 8200, from: 8480, to: 8560, land: 8480, landY: 490 },
       { name: "Séracs Suspendus 1", from: 11470, to: 11620, y: 345, land: 11890, landY: 345 },
       { name: "Séracs Suspendus 2", from: 11890, to: 12040, y: 345, land: 12310, landY: 345 },
       { name: "Séracs Suspendus 3", from: 12310, to: 12460, y: 345, land: 12730, landY: 345 },
@@ -1752,7 +1760,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2060, 440, 1), y(id, 4320, 440, 2), y(id, 6110, 440, 3), y(id, 10380, 480, 4), y(id, 13250, 440, 5)],
     finishX: 13640,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 37.6, autoShort: 35.9, gold: 37.1, silver: 40.1, bronze: 43.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 43 %, argent 93 %, bronze 98 % ; pressés : or 10 %, argent 23 %, bronze 35 %)
+    medals: { auto: 37.6, autoShort: 36.2, gold: 37.5, silver: 40.5, bronze: 43.5 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 40 %, argent 93 %, bronze 95 % ; pressés : or 13 %, argent 30 %, bronze 33 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
       { match: "ground@10830→ground@11470: marche montante sans trou (95 px)", reason: "Montée sur le premier des Séracs Suspendus avec tout l'élan (modèle des Sauts de Chamois du N°17) ; pilote auto sans perte de temps, rivaux 0 chute au playtest." },

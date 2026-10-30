@@ -98,6 +98,12 @@ LEVELS.forEach((L, idx) => {
     if (!Array.isArray(L.shortcuts)) err(tag, `shortcuts doit être un tableau (ou absent)`);
     else for (const q of L.shortcuts) {
       const nm = `raccourci « ${q?.name || "?"} »`;
+      // zipDrop (revue 30/10) : validé plus bas avec les tyroliennes (fenêtre sur câble → corniche)
+      if (q?.kind === "zipDrop") {
+        if (!q || ![q.zipX1, q.from, q.to, q.land, q.landY].every((x) => typeof x === "number" && isFinite(x)) || !(q.from < q.to))
+          err(tag, `${nm} (zipDrop) : zipX1, from < to, land, landY numériques requis`);
+        continue;
+      }
       if (!q || ![q.from, q.to, q.y, q.land, q.landY].every((x) => typeof x === "number" && isFinite(x)) || !(q.from < q.to && q.to < q.land)) { err(tag, `${nm} : from < to < land et y, landY numériques requis`); continue; }
       if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.y === q.y && sd.x === q.from && sd.x + sd.w === q.to)) err(tag, `${nm} : pas de sol de dessus y=${q.y} de ${q.from} à ${q.to} (rocher de départ)`);
       if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.y === q.landY && sd.x === q.land)) err(tag, `${nm} : pas de sol de dessus y=${q.landY} commençant en ${q.land} (rocher d'arrivée)`);
@@ -121,7 +127,7 @@ LEVELS.forEach((L, idx) => {
   if (errors > errorsBefore) return;
 
   const movers = L.solids.filter(s => s.move);
-  const walk = L.solids.filter(s => !s.move && !s.net && (s.kind === "ground" || s.kind === "plank")).sort((a, b) => a.x - b.x);
+  const walk = L.solids.filter(s => !s.move && !s.net && !s.ledge && (s.kind === "ground" || s.kind === "plank")).sort((a, b) => a.x - b.x);
   const grounds = L.solids.filter(s => s.kind === "ground");
   // Passerelles mobiles : enveloppe de leur trajet
   const env = (m) => ({ x1: m.move.x0 + Math.min(0, m.move.dx), x2: m.move.x0 + Math.max(0, m.move.dx) + m.w,
@@ -414,7 +420,7 @@ LEVELS.forEach((L, idx) => {
       if (x1 >= x2) continue;
       // pieds du coureur en glisse : câble + 118 ; il faut 20 px de marge au-dessus de tout obstacle
       if (Math.max(zy(x1), zy(x2)) + 118 + 20 > sd.y) err(tag, `${tagz}: le coureur en glisse touche ${sd.kind}@${sd.x} (câble trop bas)`);
-      if (sd.y - Math.min(zy(x1), zy(x2)) < 118 + 6 + 85 && (sd.kind === "ground" || sd.kind === "plank") && x2 - x1 > 40 && x1 > zl.x1 + 40 && x2 < zl.x2 - 70)
+      if (!sd.ledge && sd.y - Math.min(zy(x1), zy(x2)) < 118 + 6 + 85 && (sd.kind === "ground" || sd.kind === "plank") && x2 - x1 > 40 && x1 > zl.x1 + 40 && x2 < zl.x2 - 70)
         warn(tag, `${tagz}: un sol sous le câble d'où l'on peut l'attraper en marchant (mécanique sans risque)`);
     }
     for (const cp of L.checkpoints) if (cp.x > zl.x1 - 150 && cp.x < zl.x2 + 60) err(tag, `${tagz}: trop près du fanion @${cp.x}`);
@@ -425,6 +431,37 @@ LEVELS.forEach((L, idx) => {
     if (zi === 0 && !(L.signs || []).some((sn) => sn.x <= zl.x1 && sn.x >= zl.x1 - 1500 && /tyrolienne/i.test(sn.text || ""))) warn(tag, `${tagz}: première tyrolienne sans panneau (texte « tyrolienne ») dans les 1500 px avant`);
   });
   if (zls.length) info(tag, `${zls.length} tyrolienne(s) : à valider avec tools/playtest.mjs --human`);
+  // Revue 30/10 : raccourcis zipDrop (lâcher le câble vers une corniche)
+  for (const q of (L.shortcuts || []).filter((s) => s.kind === "zipDrop")) {
+    const tagz = `zipDrop « ${q.name || "?"} »`;
+    const zl = zls.find((z) => z.x1 === q.zipX1);
+    if (!zl) { err(tag, `${tagz}: aucune tyrolienne à zipX1=${q.zipX1}`); continue; }
+    if (!(q.from >= zl.x1 + 40 && q.to <= zl.x2 - 30 && q.to - q.from >= 60))
+      err(tag, `${tagz}: fenêtre [${q.from},${q.to}] hors câble ${zl.x1}–${zl.x2} ou trop courte`);
+    const corn = L.solids.find((sd) => !sd.move && (sd.kind === "ground" || sd.kind === "plank") && sd.x <= q.land + 20 && sd.x + sd.w >= q.land + 80 && Math.abs(sd.y - q.landY) <= 5);
+    if (!corn) err(tag, `${tagz}: pas de corniche (sol) à land=${q.land} landY=${q.landY}`);
+    else {
+      const zy = (x) => zl.y1 + ((zl.y2 - zl.y1) * (x - zl.x1)) / (zl.x2 - zl.x1);
+      // glisseurs : pieds câble+118 + marge 20 sous le dessus de la corniche
+      for (const x of [Math.max(corn.x, zl.x1), Math.min(corn.x + corn.w, zl.x2)]) {
+        if (x < zl.x1 || x > zl.x2) continue;
+        if (zy(x) + 118 + 20 > corn.y) err(tag, `${tagz}: un glisseur jusqu'au pylône touche la corniche @x=${Math.round(x)} (câble trop bas / corniche trop haute)`);
+      }
+      // atteignabilité approx. : même formule que zipRelease (vx plafonnée 320, vy = j×0,12)
+      const mid = (q.from + q.to) / 2, jImp = -770 * 0.12, g = 1080, feet0 = zy(mid) + 118;
+      let vx = Math.min(zl.speed || 480, 320), vy = jImp, x = mid, y = feet0, hit = false;
+      for (let i = 0; i < 120; i++) {
+        vy = Math.min(1080, vy + g / 60);
+        x += vx / 60; y += vy / 60;
+        if (y >= corn.y && x + 20 > corn.x && x < corn.x + corn.w) { hit = true; break; }
+        if (y > corn.y + 80) break;
+      }
+      if (!hit) err(tag, `${tagz}: lâcher au milieu de la fenêtre n'atteint pas la corniche (simu approx.)`);
+      else info(tag, `${tagz}: CORNICHE sous tyrolienne @${zl.x1} (fenêtre ${q.from}–${q.to}, landY ${q.landY}) — valider avec playtest --human`);
+    }
+    if (!(L.signs || []).some((sn) => sn.x <= q.from && sn.x >= q.from - 1200 && /corniche|lâche/i.test(sn.text || "")))
+      warn(tag, `${tagz}: pas de panneau (texte « corniche » / « lâche ») dans les 1200 px avant`);
+  }
   // Panneaux de sentier (facultatifs, décor) : posés sur un sol, texte court
   if (L.signs != null && !Array.isArray(L.signs)) err(tag, `signs doit être un tableau (ou absent)`);
   for (const sn of L.signs || []) {

@@ -1,1 +1,4 @@
 node_modules/
+
+# Captures locales à la racine (n*-live, etc.) — les assets suivis sont sous game/
+/*.png

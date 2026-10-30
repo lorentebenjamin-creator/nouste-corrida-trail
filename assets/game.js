@@ -494,7 +494,7 @@ function R(e, t) {
     // points d'appel (bords de sol/passerelle, trajets des bacs). Décor seul, aucun effet de jeu.
     if (e.fireflies) {
       let fr = de(s.width * 7 + 13),
-        walk = s.solids.filter((t) => !t.move && !t.net && (t.kind === `ground` || t.kind === `plank`)).sort((t, n) => t.x - n.x),
+        walk = s.solids.filter((t) => !t.move && !t.net && !t.ledge && (t.kind === `ground` || t.kind === `plank`)).sort((t, n) => t.x - n.x),
         add = (x, top, k) => {
           for (let q = 0; q < k; q++)
             flies.push({ x: x + (fr() - 0.5) * 50, y: top - 34 - fr() * 60, ph: fr() * 6.283 });
@@ -814,17 +814,19 @@ function R(e, t) {
       !e.finished &&
         e.buffer > 0 &&
         e.lock <= 0 &&
-        (e.grounded || e.coyote > 0) &&
-        ((e.vy = j),
-        (e.grounded = !1),
-        (e.coyote = 0),
-        (e.buffer = 0),
-        (e.cut = !1),
-        (e.lock = e.you ? 0 : 0.28),
-        (e.squash = -0.55),
-        e.you && r.jump()),
+        (e.zip
+          ? zipRelease(e)
+          : (e.grounded || e.coyote > 0) &&
+            ((e.vy = j),
+            (e.grounded = !1),
+            (e.coyote = 0),
+            (e.buffer = 0),
+            (e.cut = !1),
+            (e.lock = e.you ? 0 : 0.28),
+            (e.squash = -0.55),
+            e.you && r.jump())),
       (e.buffer = Math.max(0, e.buffer - t)),
-      e.you && !a && e.vy < 0 && !e.cut && ((e.vy *= 0.48), (e.cut = !0)));
+      e.you && !a && e.vy < 0 && !e.cut && !e.zip && ((e.vy *= 0.48), (e.cut = !0)));
     ziplines.length && (e.zipCool = Math.max(0, (e.zipCool || 0) - t));
     let zp = e.y;
     if (
@@ -1082,7 +1084,9 @@ function R(e, t) {
   }
   // v8 — Tyroliennes (levels.js `ziplines`, LEVELS.md §3h) : un câble tendu au-dessus d'une crevasse. En l'air,
   // les mains (≈ 62 px au-dessus du haut de la boîte) qui croisent le câble l'attrapent ; on glisse alors vers
-  // la droite sans gravité ni commandes, jusqu'au bout du câble où l'on est lâché avec l'élan de la glisse.
+  // la droite sans gravité, jusqu'au bout du câble où l'on est lâché avec l'élan de la glisse.
+  // Revue 30/10 : un SAUT pendant la glisse lâche le câble (même vx, impulsion ≈ 12 % d'un saut + vx plafonnée à 320 (viser la corniche sous le câble)) — sert au
+  // raccourci « Corniche » (`shortcuts` kind zipDrop). Aller jusqu'au pylône reste le chemin sûr.
   // Niveaux sans `ziplines` : aucun de ces chemins n'est emprunté (comportement inchangé).
   const ZH = 62;
   function zipY(zl, cx) {
@@ -1115,6 +1119,30 @@ function R(e, t) {
   }
   function zipRemain(e) {
     return e.zip ? Math.ceil(((e.zip.x2 - e.x - e.w * 0.5) / Math.max(120, Math.min(e.vx, e.zip.speed))) * 60) + 8 : 0;
+  }
+  // Lâcher volontaire (revue 30/10) : saute pendant la glisse → conserve vx, impulsion ≈ 12 % d'un saut, vx plafonnée à 320 (corniche sous le câble).
+  function zipRelease(e) {
+    if (!e.zip) return !1;
+    // vx plafonnée (320) : assez pour dépasser la course, pas trop pour viser la corniche sous le câble
+    ((e.zip = null),
+      (e.zipCool = 0.45),
+      (e.vx = Math.min(Math.max(e.vx, 260), 320)),
+      (e.vy = j * 0.12),
+      (e.grounded = !1),
+      (e.coyote = 0),
+      (e.buffer = 0),
+      (e.cut = !1),
+      (e.lock = e.you ? 0 : 0.2),
+      (e.squash = -0.5),
+      (e.zipDrop = (e.zipDrop || 0) + 1));
+    e.sim || (e.you && r.jump());
+    return !0;
+  }
+  // Raccourci kind zipDrop : fenêtre de lâcher sur un câble (from–to) vers une corniche (land, landY).
+  function zipDropAt(e) {
+    if (!e.zip || !shortcuts.length) return null;
+    let cx = e.x + e.w * 0.5, zx = e.zip.x1;
+    return shortcuts.find((q) => q.kind === `zipDrop` && q.zipX1 === zx && cx >= q.from && cx <= q.to) || null;
   }
   function dynHit(e, time) {
     for (let fl of falls) {
@@ -1243,11 +1271,16 @@ function R(e, t) {
       }
       c.coyote = c.grounded ? P : Math.max(0, c.coyote - dt);
       if (fr === jumpAt) {
-        if (!(c.lock <= 0 && (c.grounded || c.coyote > 0))) {
+        if (c.zip) {
+          if (!zipRelease(c)) {
+            invalid = !0;
+            break;
+          }
+          left = !0;
+        } else if (!(c.lock <= 0 && (c.grounded || c.coyote > 0))) {
           invalid = !0;
           break;
-        }
-        ((c.vy = j), (c.grounded = !1), (c.coyote = 0), (c.lock = c.you ? 0 : 0.28), (left = !0));
+        } else ((c.vy = j), (c.grounded = !1), (c.coyote = 0), (c.lock = c.you ? 0 : 0.28), (left = !0));
       }
       if (c.zip) zipStep(c, dt); // v8
       else {
@@ -1273,7 +1306,12 @@ function R(e, t) {
     return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, jetted, dangerX: dead >= 0 && (air < 0 || dead < air) ? c.x : air >= 0 ? airX : c.x, safe: dead < 0 && !invalid && !jetted && !sunk && (c.grounded || landed >= 0) };
   }
   function shortcutAt(e) {
-    return shortcuts.find((q) => e.x + e.w > q.from && e.x < q.to + 40 && Math.abs(e.y + e.h - q.y) < 8) || null;
+    return shortcuts.find((q) => q.kind !== `zipDrop` && e.x + e.w > q.from && e.x < q.to + 40 && Math.abs(e.y + e.h - q.y) < 8) || null;
+  }
+  // Lâcher maintenant : retombe-t-on sur la corniche du zipDrop `q` ?
+  function zipDropJump(e, q) {
+    let rs = simRunner(e, 1, 0, 100, !0);
+    return rs.safe && rs.x + e.w > q.land && Math.abs(rs.st.y + rs.st.h - q.landY) < 10 ? rs : null;
   }
   // saut (après `dl` images) qui retombe sain et sauf sur le rocher d'arrivée du raccourci `q`
   function shortcutJump(e, q, dl) {
@@ -1311,6 +1349,14 @@ function R(e, t) {
         if (simRunner(e, 1, rem, 85, !0).safe) return { dir: 1, jump: !1 };
         e.plan = null;
       }
+    }
+    // Revue 30/10 : sur une tyrolienne, le chemin sûr va jusqu'au pylône ; un coureur `short`
+    // lâche dans la fenêtre d'un zipDrop s'il retombe sur la corniche.
+    if (e.zip) {
+      e.plan = null;
+      let zd = e.short ? zipDropAt(e) : null;
+      if (zd && zipDropJump(e, zd)) return { dir: 1, jump: !0 };
+      return { dir: 1, jump: !1 };
     }
     if (!can) {
       e.plan = null;
@@ -1480,9 +1526,12 @@ function R(e, t) {
     let edge = f === H.jumpAt;
     // bilan des raccourcis tentés (sauts partis d'un rocher de départ) : posé sur le rocher d'arrivée, ou raté
     if (shortcuts.length) {
-      e.grounded && H.scFrom && !H.scAir0 && (Math.abs(e.y + e.h - H.scFrom.landY) < 3 && e.x + e.w > H.scFrom.land ? (H.scOk += 1) : (H.scKo += 1), (H.scFrom = null));
+      e.grounded && H.scFrom && !H.scAir0 && (Math.abs(e.y + e.h - H.scFrom.landY) < 12 && e.x + e.w > H.scFrom.land ? (H.scOk += 1) : (H.scKo += 1), (H.scFrom = null));
       H.scAir0 = !1;
-      edge && H.short && (H.scFrom = shortcutAt(e)) && (H.scAir0 = !0);
+      if (edge && H.short) {
+        let scg = shortcutAt(e), scz = e.zip ? zipDropAt(e) : null;
+        (H.scFrom = scg || scz) && (H.scAir0 = !0);
+      }
     }
     edge && ((H.jumps += 1), (H.holdEnd = f + Math.round((H.opt.holdMin + (H.opt.holdMax - H.opt.holdMin) * H.rnd()) * 60)));
     return { left: H.dir < 0, right: H.dir > 0, jump: f <= H.holdEnd, down: !1, edge };
@@ -1942,6 +1991,25 @@ function R(e, t) {
         n.lineTo(cx2, cy2 + 5);
         n.lineTo(cx2 - 6, cy2 + 13);
         n.fill();
+      }
+    }
+    // Revue 30/10 : chevrons « lâcher ici » au-dessus de la fenêtre zipDrop (corniche sous le câble)
+    {
+      let zd = shortcuts.find((q) => q.kind === `zipDrop` && q.zipX1 === zl.x1);
+      if (zd && d && d.x + d.w > zd.from - 280 && d.x < zd.to + 40) {
+        let pu = 0.7 + 0.3 * Math.sin(_ * 8), mid = (zd.from + zd.to) / 2;
+        n.fillStyle = `rgba(255,180,40,${pu})`;
+        for (let q = 0; q < 3; q++) {
+          let cx2 = mid - 18 + q * 18, cy2 = zipY(zl, cx2) + 52;
+          n.beginPath();
+          n.moveTo(cx2 - 7, cy2);
+          n.lineTo(cx2, cy2 + 10);
+          n.lineTo(cx2 + 7, cy2);
+          n.lineTo(cx2 + 7, cy2 - 5);
+          n.lineTo(cx2, cy2 + 5);
+          n.lineTo(cx2 - 7, cy2 - 5);
+          n.fill();
+        }
       }
     }
     // poulies des coureurs en glisse
