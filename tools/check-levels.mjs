@@ -117,7 +117,7 @@ LEVELS.forEach((L, idx) => {
   else L.rivals.forEach((r, i) => { if (!(r.speed > 0.5 && r.speed <= 1.05)) err(tag, `rivals[${i}].speed hors bornes (0.5–1.05)`); });
   if (L.width > LIMITS.maxWidth) err(tag, `width ${L.width} > ${LIMITS.maxWidth}`);
   for (const k of ["solids", "hazards", "coins", "checkpoints"]) if (!Array.isArray(L[k])) err(tag, `${k} doit être un tableau`);
-  for (const k of ["rockfalls", "patrols", "jets", "gusts", "thermals"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
+  for (const k of ["rockfalls", "patrols", "jets", "gusts", "thermals", "ziplines"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
   if (errors > errorsBefore) return;
 
   const movers = L.solids.filter(s => s.move);
@@ -195,6 +195,16 @@ LEVELS.forEach((L, idx) => {
       if (L.hazards.some((hz) => hit(hz.x, hz.x + hz.w)) || L.solids.some((sd) => (sd.kind === "rock" || sd.kind === "log") && hit(sd.x, sd.x + sd.w)) || (L.rockfalls || []).some((fl) => hit(fl.x, fl.x + fl.size)) || (L.patrols || []).some((dg) => hit(dg.x1, dg.x2)))
         warn(tag, `${w}: saut d'ascendance sans aire d'attente sûre (150 px sans danger avant le bord)`);
       info(tag, `${w}: SAUT D'ASCENDANCE (écart ${gap} px, montée ${up} ; portée en planant ≈ ${Math.round(rP + 30)} px joueur / ${Math.round(rS + 30)} px rival ${sMin}, ${fP} images ; sans ascendance ≈ ${Math.round(rNorm)} px) — valider avec tools/playtest.mjs --human`);
+      continue;
+    }
+    // Tyrolienne (v8, §3h) : câble qui part du bord de `a` et se termine au-dessus de `b` (glisse sans gravité).
+    const zlz = (L.ziplines || []).find((z) => z.x1 >= a.x + a.w - 60 && z.x1 <= a.x + a.w + 30 && z.x2 > b.x + 40 && z.x2 < b.x + b.w);
+    if (zlz) {
+      const gx = zlz.x1 + (zlz.grab ?? 8), rise = Math.round(a.y - 118 - (zlz.y1 + ((zlz.y2 - zlz.y1) * (gx - zlz.x1)) / (zlz.x2 - zlz.x1))), drop = b.y - (zlz.y2 + 118);
+      if (rise < 85 || rise > 134) err(tag, `${w}: tyrolienne à ${rise} px au-dessus des mains (il faut 85–134 : un saut complet monte de 137, prise à ±3 px du câble)`);
+      if (drop < 10 || drop > 80) err(tag, `${w}: lâcher de la tyrolienne à ${drop} px au-dessus du sol d'arrivée (il faut 10–80)`);
+      if (b.x + b.w - zlz.x2 < 150) err(tag, `${w}: sol d'arrivée trop court après le bout du câble (${b.x + b.w - zlz.x2} px < 150)`);
+      info(tag, `${w}: TYROLIENNE (écart ${gap} px, câble ${zlz.x2 - zlz.x1} px, ${rise} px à monter pour l'attraper, poignée à ${gx - zlz.x1} px, lâcher ${drop} px au-dessus du sol) — valider avec tools/playtest.mjs --human`);
       continue;
     }
     // Rebond d'amanite (v7, §3g) : depuis le chapeau, la relance (vy = −bounce) remplace le saut.
@@ -387,6 +397,34 @@ LEVELS.forEach((L, idx) => {
     if (bi === 0 && !(L.signs || []).some((sn) => sn.x <= bn.x && sn.x >= bn.x - 1500 && /amanite/i.test(sn.text || ""))) warn(tag, `${tagb}: première amanite sans panneau (texte « amanite ») dans les 1500 px avant`);
   });
   if (bns.length) info(tag, `${bns.length} amanite(s) rebondissante(s) : à valider avec tools/playtest.mjs --human`);
+  // Tyroliennes (v8, LEVELS.md §3h) : câbles attrapés en l'air au-dessus des crevasses
+  if (L.ziplines != null && !Array.isArray(L.ziplines)) err(tag, `ziplines doit être un tableau (ou absent)`);
+  const zls = (L.ziplines || []).slice().sort((a, b) => a.x1 - b.x1);
+  zls.forEach((zl, zi) => {
+    const tagz = `tyrolienne @${zl.x1}`;
+    if (!(zl.x2 - zl.x1 >= 200 && zl.x2 - zl.x1 <= 1000)) err(tag, `${tagz}: longueur ${zl.x2 - zl.x1} hors 200–1000`);
+    if (!(zl.y2 >= zl.y1 && (zl.y2 - zl.y1) / (zl.x2 - zl.x1) <= 0.35)) err(tag, `${tagz}: le câble doit descendre (pente 0–0,35)`);
+    if (!(zl.speed >= 380 && zl.speed <= 560)) err(tag, `${tagz}: speed ${zl.speed} hors 380–560`);
+    if (!((zl.grab ?? 8) >= 8 && (zl.grab ?? 8) <= 90)) err(tag, `${tagz}: grab ${zl.grab} hors 8–90 (poignée trop loin du bord)`);
+    const gr = (px) => L.solids.find((sd) => !sd.move && sd.kind === "ground" && px >= sd.x && px <= sd.x + sd.w);
+    if (!gr(zl.x1) || !gr(zl.x2)) err(tag, `${tagz}: pylône sans sol dessous (x1 et x2 doivent être au-dessus d'un sol fixe)`);
+    const zy = (x) => zl.y1 + ((zl.y2 - zl.y1) * (x - zl.x1)) / (zl.x2 - zl.x1);
+    for (const sd of L.solids) {
+      const x1 = Math.max(sd.x, zl.x1 + 8), x2 = Math.min(sd.x + sd.w, zl.x2);
+      if (x1 >= x2) continue;
+      // pieds du coureur en glisse : câble + 118 ; il faut 20 px de marge au-dessus de tout obstacle
+      if (Math.max(zy(x1), zy(x2)) + 118 + 20 > sd.y) err(tag, `${tagz}: le coureur en glisse touche ${sd.kind}@${sd.x} (câble trop bas)`);
+      if (sd.y - Math.min(zy(x1), zy(x2)) < 118 + 6 + 85 && (sd.kind === "ground" || sd.kind === "plank") && x2 - x1 > 40 && x1 > zl.x1 + 40 && x2 < zl.x2 - 70)
+        warn(tag, `${tagz}: un sol sous le câble d'où l'on peut l'attraper en marchant (mécanique sans risque)`);
+    }
+    for (const cp of L.checkpoints) if (cp.x > zl.x1 - 150 && cp.x < zl.x2 + 60) err(tag, `${tagz}: trop près du fanion @${cp.x}`);
+    if (zl.x1 < L.spawnX + 600) err(tag, `${tagz}: trop près du départ`);
+    if (L.hazards.some((hz) => hz.x < zl.x2 + 150 && hz.x + hz.w > zl.x2 - 60)) err(tag, `${tagz}: ronce sous le lâcher (150 px après le bout du câble)`);
+    if (movers.some((m) => { const e = env(m); return e.x2 > zl.x1 - 300 && e.x1 < zl.x2 + 300; }) || (L.jets || []).some((jt) => jt.x + jt.w > zl.x1 - 300 && jt.x < zl.x2 + 300) || (L.gusts || []).some((gu) => gu.x2 > zl.x1 - 300 && gu.x1 < zl.x2 + 300) || (L.thermals || []).some((tm) => tm.x2 > zl.x1 - 300 && tm.x1 < zl.x2 + 300) || L.solids.some((sd) => (sd.sink || sd.bounce) && sd.x < zl.x2 + 300 && sd.x + sd.w > zl.x1 - 300))
+      warn(tag, `${tagz}: autre mécanique à moins de 300 px (combinaison peu lisible)`);
+    if (zi === 0 && !(L.signs || []).some((sn) => sn.x <= zl.x1 && sn.x >= zl.x1 - 1500 && /tyrolienne/i.test(sn.text || ""))) warn(tag, `${tagz}: première tyrolienne sans panneau (texte « tyrolienne ») dans les 1500 px avant`);
+  });
+  if (zls.length) info(tag, `${zls.length} tyrolienne(s) : à valider avec tools/playtest.mjs --human`);
   // Panneaux de sentier (facultatifs, décor) : posés sur un sol, texte court
   if (L.signs != null && !Array.isArray(L.signs)) err(tag, `signs doit être un tableau (ou absent)`);
   for (const sn of L.signs || []) {
@@ -408,7 +446,7 @@ LEVELS.forEach((L, idx) => {
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.thermals || []).length && `${L.thermals.length} ascendance(s)`, L.solids.some((sd) => sd.bounce) && `${L.solids.filter((sd) => sd.bounce).length} amanite(s)`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.thermals || []).length && `${L.thermals.length} ascendance(s)`, L.solids.some((sd) => sd.bounce) && `${L.solids.filter((sd) => sd.bounce).length} amanite(s)`, (L.ziplines || []).length && `${L.ziplines.length} tyrolienne(s)`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
   for (const a of accepting) if (!a.used) warn(tag, `acceptedWarnings obsolète : "${a.match}" ne correspond plus à aucun avertissement (le retirer)`);
   accepting = [];
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);

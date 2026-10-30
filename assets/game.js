@@ -584,6 +584,8 @@ function R(e, t) {
         (e.y = s.floor - e.h));
     ((e.vx = 0),
       (e.vy = 0),
+      (e.zip = null), // v8
+      (e.zipCool = 0),
       (e.alive = !0),
       (e.grounded = !0),
       (e.invuln = e.you ? 0.9 : 0.45),
@@ -785,6 +787,7 @@ function R(e, t) {
       e.finished)
     )
       e.vx *= Math.exp(-6 * t);
+    else if (e.zip); // v8 : sur la tyrolienne, pas de commande
     else {
       let r = e.you ? n.left : !1,
         i = e.you ? (n.right ? 1 : 0) - !!r : (e.aiDir ?? 1),
@@ -822,10 +825,15 @@ function R(e, t) {
         e.you && r.jump()),
       (e.buffer = Math.max(0, e.buffer - t)),
       e.you && !a && e.vy < 0 && !e.cut && ((e.vy *= 0.48), (e.cut = !0)));
+    ziplines.length && (e.zipCool = Math.max(0, (e.zipCool || 0) - t));
+    let zp = e.y;
     if (
-      (fallStep(e, t, _) && (e.thermT = (e.thermT || 0) + t), // v6 : ascendance (plane)
-      jetTouch(e, _),
-      Re(e, t),
+      (e.zip
+        ? zipStep(e, t) // v8 : glisse sur la tyrolienne
+        : (fallStep(e, t, _) && (e.thermT = (e.thermT || 0) + t), // v6 : ascendance (plane)
+          jetTouch(e, _),
+          Re(e, t),
+          ziplines.length && zipGrab(e, zp)),
       e.grounded
         ? Math.abs(e.vx) < 28
           ? (e.frame = 1)
@@ -917,6 +925,7 @@ function R(e, t) {
     sinkers = [],
     thermals = [],
     bouncers = [],
+    ziplines = [],
     shortcuts = [],
     autoShort = !1,
     waterGaps = [],
@@ -1071,6 +1080,42 @@ function R(e, t) {
     if (tm) return ((e.vy = Math.min(tm.fall, e.vy + gr * tm.lift * dt)), !0);
     return ((e.vy = Math.min(ie, e.vy + gr * dt)), !1);
   }
+  // v8 — Tyroliennes (levels.js `ziplines`, LEVELS.md §3h) : un câble tendu au-dessus d'une crevasse. En l'air,
+  // les mains (≈ 62 px au-dessus du haut de la boîte) qui croisent le câble l'attrapent ; on glisse alors vers
+  // la droite sans gravité ni commandes, jusqu'au bout du câble où l'on est lâché avec l'élan de la glisse.
+  // Niveaux sans `ziplines` : aucun de ces chemins n'est emprunté (comportement inchangé).
+  const ZH = 62;
+  function zipY(zl, cx) {
+    return zl.y1 + ((zl.y2 - zl.y1) * (cx - zl.x1)) / (zl.x2 - zl.x1);
+  }
+  function zipGrab(e, prevY) {
+    if (e.zip || e.grounded || (e.zipCool || 0) > 0 || !e.alive) return !1;
+    let cx = e.x + e.w * 0.5;
+    for (let zl of ziplines) {
+      if (cx < zl.x1 + (zl.grab ?? 8) || cx > zl.x2 - 60) continue; // poignée garée à x1 + grab
+      let cy = zipY(zl, cx), h0 = prevY - ZH, h1 = e.y - ZH;
+      if (Math.min(h0, h1) <= cy + 3 && Math.max(h0, h1) >= cy - 3) {
+        ((e.zip = zl), (e.vy = 0), (e.y = cy + ZH), (e.cut = !0), (e.coyote = 0), (e.buffer = 0), (e.zips = (e.zips || 0) + 1),
+          (e.vx = Math.max(e.vx, 160)), (e.facing = 1));
+        e.sim || ((zl.zing = _), e.you && (r.burst(1.6, 0.05, 0.25), r.burst(0.8, 0.03, 0.6)));
+        return !0;
+      }
+    }
+    return !1;
+  }
+  function zipStep(e, dt) {
+    let zl = e.zip,
+      sl = (zl.y2 - zl.y1) / (zl.x2 - zl.x1),
+      dv = zl.speed - e.vx;
+    e.vx += Math.sign(dv) * Math.min(Math.abs(dv), (zl.accel || 900) * dt);
+    e.x += e.vx * dt;
+    let cx = e.x + e.w * 0.5;
+    cx >= zl.x2 - 4 && ((cx = zl.x2 - 4), (e.x = cx - e.w * 0.5), (e.zip = null), (e.zipCool = 0.4));
+    ((e.y = zipY(zl, cx) + ZH), (e.vy = e.vx * sl), (e.grounded = !1), (e.coyote = 0), (e.buffer = 0));
+  }
+  function zipRemain(e) {
+    return e.zip ? Math.ceil(((e.zip.x2 - e.x - e.w * 0.5) / Math.max(120, Math.min(e.vx, e.zip.speed))) * 60) + 8 : 0;
+  }
   function dynHit(e, time) {
     for (let fl of falls) {
       let st = fallState(fl, time);
@@ -1095,6 +1140,14 @@ function R(e, t) {
     bouncers = s.solids.filter((sd) => sd.bounce);
     for (let bn of bouncers) bn.boing = -9;
     shortcuts = s.shortcuts || [];
+    ziplines = s.ziplines || [];
+    for (let zl of ziplines) {
+      zl.zing = -9;
+      let gr = (px) => s.solids.find((sd) => !sd.move && sd.kind === `ground` && px >= sd.x && px <= sd.x + sd.w);
+      let g1 = gr(zl.x1), g2 = gr(zl.x2);
+      zl.pole1 = g1 ? g1.y : zl.y1 + 260;
+      zl.pole2 = g2 ? g2.y : zl.y2 + 260;
+    }
     for (let tm of thermals) {
       tm.wasOn = !1;
       let px = tm.x1 - 14,
@@ -1169,6 +1222,7 @@ function R(e, t) {
       air = -1,
       airX = 0,
       fr = 0;
+    c.zip && stopOnLand && (maxF += zipRemain(c)); // v8 : déjà sur le câble
     for (; fr < maxF; fr++) {
       fr > 0 &&
         ((c.lock = Math.max(0, c.lock - dt)),
@@ -1178,7 +1232,9 @@ function R(e, t) {
       c.drop = Math.max(0, c.drop - dt);
       let dd = (c.stun || 0) > 0 ? 0 : Array.isArray(dir) ? dir[Math.min(fr, dir.length - 1)] : dir,
         acc = c.grounded ? M : ae;
-      if (dd !== 0) {
+      ziplines.length && (c.zipCool = Math.max(0, (c.zipCool || 0) - dt));
+      if (c.zip); // v8 : sur la tyrolienne, pas de commande
+      else if (dd !== 0) {
         let dv = dd * k * c.speed * (dd > 0 ? gustSlow(c, _ + fr * dt) : 1) - c.vx;
         c.vx += Math.sign(dv) * Math.min(Math.abs(dv), acc * dt);
       } else {
@@ -1193,7 +1249,13 @@ function R(e, t) {
         }
         ((c.vy = j), (c.grounded = !1), (c.coyote = 0), (c.lock = c.you ? 0 : 0.28), (left = !0));
       }
-      (fallStep(c, dt, _ + fr * dt), jetPush(c, _ + fr * dt) && (jetted = !0), Re(c, dt));
+      if (c.zip) zipStep(c, dt); // v8
+      else {
+        let zp = c.y;
+        (fallStep(c, dt, _ + fr * dt), jetPush(c, _ + fr * dt) && (jetted = !0), Re(c, dt));
+        // v8 : tyrolienne attrapée : l'horizon des simulations de sûreté couvre la glisse
+        ziplines.length && zipGrab(c, zp) && stopOnLand && (maxF += zipRemain(c) + 30);
+      }
       // v7 : un rebond sur une amanite relance le vol (≈ 1 s) : on prolonge l'horizon des simulations de sûreté
       bouncers.length && (c.bounced || 0) > nb && ((nb = c.bounced), stopOnLand && (maxF += 45));
       if (c.y > se || s.hazards.some((hz) => fe(c, hz)) || dynHit(c, _ + fr * dt)) {
@@ -1527,6 +1589,7 @@ function R(e, t) {
     for (let jt of jets) drawJet(jt);
     for (let sd of sinkers) drawSinker(sd, th);
     for (let bn of bouncers) drawBouncer(bn, th);
+    for (let zl of ziplines) drawZip(zl, th);
     for (let sg of s.signs || []) drawSign(sg, th);
     for (let gu of gusts) drawGust(gu, th);
     for (let tm of thermals) drawThermal(tm, th);
@@ -1801,6 +1864,105 @@ function R(e, t) {
   // v7 — Amanite rebondissante : chapeau rouge à pois blancs sur un grand pied blanc qui plonge dans le
   // ravin ; elle « respire » doucement (spores qui montent), des chevrons « ^ » pulsent au-dessus quand on
   // approche, et elle s'écrase puis rebondit (ressort amorti) quand un coureur s'y pose.
+  // v8 : tyrolienne — pylônes de bois haubanés, câble d'acier, poignée qui se balance au départ,
+  // chevrons jaunes pulsés quand le joueur approche ; poulie + sangle au-dessus des coureurs en glisse.
+  function drawZip(zl, th) {
+    if (zl.x2 < v - 80 || zl.x1 > v + b + 80) return;
+    let pole = (x, top, base, dir) => {
+      n.fillStyle = th.woodDark;
+      n.fillRect(x - 6, top - 14, 12, base - top + 14);
+      n.fillStyle = th.wood;
+      n.fillRect(x - 4, top - 14, 6, base - top + 14);
+      n.fillRect(x - 16, top - 8, 32, 6);
+      n.strokeStyle = `rgba(30,30,30,0.55)`;
+      n.lineWidth = 1.5;
+      n.beginPath();
+      n.moveTo(x, top - 10);
+      n.lineTo(x - dir * 46, base);
+      n.stroke();
+      n.fillStyle = th.rockDark;
+      n.fillRect(x - dir * 46 - 5, base - 5, 10, 5);
+    };
+    pole(zl.x1, zl.y1, zl.pole1, 1);
+    pole(zl.x2, zl.y2, zl.pole2, -1);
+    n.lineCap = `round`;
+    n.strokeStyle = `#2b2e33`;
+    n.lineWidth = 3.5;
+    n.beginPath();
+    n.moveTo(zl.x1, zl.y1 - 6);
+    n.lineTo(zl.x2, zl.y2 - 6);
+    n.stroke();
+    n.strokeStyle = `rgba(235,240,245,0.75)`;
+    n.lineWidth = 1.2;
+    n.beginPath();
+    n.moveTo(zl.x1, zl.y1 - 7);
+    n.lineTo(zl.x2, zl.y2 - 7);
+    n.stroke();
+    // vibration du câble juste après une prise
+    let zg = _ - zl.zing;
+    if (zg >= 0 && zg < 0.6) {
+      n.strokeStyle = `rgba(255,255,255,${0.5 * (1 - zg / 0.6)})`;
+      n.lineWidth = 2;
+      n.beginPath();
+      for (let q = 0; q <= 20; q++) {
+        let x = zl.x1 + ((zl.x2 - zl.x1) * q) / 20;
+        n.lineTo(x, zipY(zl, x) - 6 + Math.sin(q * 1.7 + _ * 40) * 3 * (1 - zg / 0.6) * Math.sin((q / 20) * Math.PI));
+      }
+      n.stroke();
+    }
+    // poignée libre au départ (se balance)
+    let hx = zl.x1 + Math.max(26, (zl.grab ?? 8) + 12),
+      sw = Math.sin(_ * 2.4) * 0.25,
+      hy = zipY(zl, hx) - 6;
+    n.fillStyle = `#e8b23a`;
+    n.fillRect(hx - 7, hy - 4, 14, 6);
+    n.save();
+    n.translate(hx, hy);
+    n.rotate(sw);
+    n.strokeStyle = `#d84a2a`;
+    n.lineWidth = 3;
+    n.beginPath();
+    n.moveTo(0, 0);
+    n.lineTo(0, 30);
+    n.stroke();
+    n.fillStyle = `#2b2e33`;
+    n.fillRect(-11, 30, 22, 5);
+    n.restore();
+    // chevrons d'appel : « sauter ici » (le joueur approche du départ)
+    if (d && !d.zip && d.x + d.w > zl.x1 - 420 && d.x < zl.x1 + 20) {
+      let pu = 0.75 + 0.25 * Math.sin(_ * 7);
+      n.fillStyle = `rgba(255,214,64,${pu})`;
+      for (let q = 0; q < 3; q++) {
+        let cx2 = hx - 14 + q * 16, cy2 = zipY(zl, cx2) + 46;
+        n.beginPath();
+        n.moveTo(cx2 - 6, cy2 + 8);
+        n.lineTo(cx2, cy2);
+        n.lineTo(cx2 + 6, cy2 + 8);
+        n.lineTo(cx2 + 6, cy2 + 13);
+        n.lineTo(cx2, cy2 + 5);
+        n.lineTo(cx2 - 6, cy2 + 13);
+        n.fill();
+      }
+    }
+    // poulies des coureurs en glisse
+    for (let rr of u) {
+      if (rr.zip !== zl || !rr.alive) continue;
+      let cx = rr.x + rr.w * 0.5, cy = zipY(zl, cx) - 6;
+      n.fillStyle = `#e8b23a`;
+      n.fillRect(cx - 9, cy - 5, 18, 8);
+      n.fillStyle = `#2b2e33`;
+      n.beginPath();
+      n.arc(cx - 4, cy - 1, 3, 0, Math.PI * 2);
+      n.arc(cx + 4, cy - 1, 3, 0, Math.PI * 2);
+      n.fill();
+      n.strokeStyle = `#d84a2a`;
+      n.lineWidth = 3;
+      n.beginPath();
+      n.moveTo(cx, cy + 2);
+      n.lineTo(cx, rr.y - 44);
+      n.stroke();
+    }
+  }
   function drawBouncer(bn, th) {
     if (bn.x > v + b + 80 || bn.x + bn.w < v - 80) return;
     let cx = bn.x + bn.w / 2,
@@ -2463,6 +2625,8 @@ function R(e, t) {
         gustTime: d?.gustT ?? 0, // temps passé ralenti par une rafale (v4)
         thermTime: d?.thermT ?? 0, // temps passé à planer dans une ascendance (v6)
         bounces: d?.bounced ?? 0, // rebonds sur les amanites (v7)
+        zips: d?.zips ?? 0, // tyroliennes attrapées (v8)
+        onZip: !!d?.zip,
         deathXs: d?.deathXs ?? [],
       }),
       getRunners: () =>

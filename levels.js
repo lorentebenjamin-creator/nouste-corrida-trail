@@ -136,6 +136,21 @@ export const thermique = (x1, x2, period = 5, on = 0.55, phase = 0, warn = 1.0, 
 //   traverse pas. Toujours au-dessus du vide : la rater = chute. À mettre dans `solids` (LEVELS.md §3g).
 export const amanite = (x, y, w = 140, bounce = 1000) => ({ x, y, w, h: 18, oneWay: true, kind: "plank", bounce });
 
+// ---- Mécanique v8 ----------------------------------------------------------
+// tyro(x1, y1, x2, y2, grab=8, speed=480, accel=900) : TYROLIENNE — câble d'acier tendu de (x1, y1) à (x2, y2)
+//   (x2 > x1, y2 ≥ y1 : on descend), entre deux pylônes de bois plantés sur les sols sous ses bouts.
+//   EN L'AIR, les mains du coureur (62 px au-dessus du haut de sa boîte, ≈ le haut du sprite) qui
+//   croisent le câble (à ±3 px) l'attrapent, seulement si le centre du coureur est entre x1+grab et
+//   x2−60 (grab > 8 : la POIGNÉE jaune est garée au-dessus du vide, à x1+grab ; un saut trop tôt passe
+//   sous le câble avant elle et tombe dans la crevasse). Le pylône de départ reste au bord. On glisse alors
+//   vers la droite à `speed` px/s (plus vite qu'en courant, 352), sans gravité ni commandes, puis on
+//   est lâché au bout avec l'élan de la glisse. Au sol, les mains sont à y_sol − 118 : on règle la
+//   difficulté avec la MONTÉE à faire pour attraper le câble au point de prise (85–134 px ; un saut
+//   complet monte de 137, un appui de 0,25 s de ≈ 129, de 0,2 s de ≈ 118). Câble raté = chute.
+//   Lâcher : bout du câble ≈ 150–160 px au-dessus du sol d'arrivée (pieds à ≈ 40 px du sol).
+//   À mettre dans le tableau `ziplines` du niveau (LEVELS.md §3h).
+export const tyro = (x1, y1, x2, y2, grab = 8, speed = 480, accel = 900) => ({ x1, y1, x2, y2, grab, speed, accel });
+
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
 // On peut en ajouter ici (toutes les clés sont obligatoires) : le décor est
@@ -329,6 +344,20 @@ export const THEMES = {
     fog: "#03050d",
     pit: "#000106",
     rim: "#e8f0ff",
+  },
+  glacier: {
+    // Niveau 18 : glacier crevassé en fin d'après-midi (ciel froid qui dore à l'horizon, croûte de
+    // neige, glace bleue, moraine grise ; crevasses bleu nuit opaques grâce à `pit`)
+    skyTop: "#18324f", skyMid: "#5687ab", skyBot: "#f2cfa4",
+    ridge: "#4c6680", ridge2: "#a6bfd2",
+    pine: "#1d2d36", pine2: "#344c57",
+    dirt: "#4f93b2", dirtDark: "#2a5f7d",
+    grass: "#eef8fc", grassDark: "#a9d3e3",
+    wood: "#8a6440", woodDark: "#553f2a",
+    rock: "#8f9296", rockDark: "#56595f",
+    thorn: "#24313d", leaf: "#3f5a4c", berry: "#e8553a",
+    fog: "#0b2438",
+    pit: "#071a2a",
   },
 };
 
@@ -1618,6 +1647,118 @@ LEVELS.push((() => {
       { match: "ground@8165→ground@8210: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts de Chamois (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
       { match: "ground@8585→ground@8630: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts de Chamois (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
       { match: "ground@9005→ground@9050: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts de Chamois (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+    ],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 18 — Le Glacier des Choucas Voltigeurs (niveau du jour, 2026-10-30)
+// Niveau à mécaniques (règle d'alternance, après le N°17 classique) — mécanique INÉDITE v8 : la
+// TYROLIENNE (`tyro()`, LEVELS.md §3h). Un câble d'acier tendu au-dessus d'une crevasse trop large
+// pour un saut (520–680 px) : on saute au bord, les mains attrapent le câble et l'on glisse (480 px/s,
+// plus vite qu'en courant) jusqu'au sol d'arrivée, plus bas. Appui trop court ou saut mal placé :
+// on rate le câble et on tombe. Annoncée par un panneau, câble et pylônes visibles de loin, chevrons
+// jaunes au point d'accroche. Passage clé : le RELAIS DES CHOUCAS, quatre tyroliennes enchaînées
+// depuis des séracs de 300 px (on ressaute presque dès la réception), de plus en plus hautes à
+// attraper (128 → 134 px à monter sur 137 : il faut sauter À FOND). Puis les SÉRACS SUSPENDUS
+// (raccourci risqué de bloc en bloc, §6 étape 3c : l'or l'exige). Nouvelle palette `glacier`.
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "glacier-choucas", c = v(id);
+  // câbles (montée à faire pour les attraper, mains au sol à y − 118) : Z1 104, Z2 116 px ; relais
+  // Z3 128, Z4 131, Z5 133, Z6 134 px (un saut complet monte de 137)
+  // (au point de prise : poignée garée à 30 px du bord pour Z2, à 60 px au-dessus du vide pour le relais)
+  const Z1 = tyro(2500, 218, 3150, 312), Z2 = tyro(4800, 201, 5560, 322, 30),
+    Z3 = tyro(6520, 182, 7150, 312, 60), Z4 = tyro(7360, 208, 7980, 342, 60),
+    Z5 = tyro(8200, 236, 8800, 362, 60), Z6 = tyro(9020, 256, 9640, 382, 60);
+  // balises le long du câble, à hauteur du corps du coureur en glisse (câble + 90)
+  const along = (z, n) => { for (let k = 0; k < n; k++) { const x = z.x1 + 120 + ((z.x2 - z.x1 - 240) * k) / (n - 1); c.line(x, x, Math.round(z.y1 + ((z.y2 - z.y1) * (x - z.x1)) / (z.x2 - z.x1) + 90), 1); } };
+  c.line(160, 420, 370, 3); c.arc(760, 900, 330, 3, 40); c.arc(1040, 1180, 330, 3, 40);
+  c.arc(1400, 1520, 300, 3, 40); c.line(1560, 1640, 310, 2); c.arc(1700, 1800, 260, 3, 50);
+  c.arc(1870, 1990, 320, 3, 40); c.line(2250, 2440, 370, 3);
+  along(Z1, 5); c.line(3300, 3380, 400, 2); c.arc(3370, 3480, 360, 3, 50); c.arc(3690, 3820, 360, 3, 40);
+  c.arc(3940, 4060, 300, 3, 50); c.arc(4180, 4320, 320, 3, 40); c.line(4400, 4700, 370, 3);
+  along(Z2, 6); c.line(5650, 5780, 410, 2); c.arc(5820, 5940, 360, 3, 50); c.arc(5930, 6010, 350, 3, 40);
+  c.line(6270, 6460, 370, 3);
+  along(Z3, 5); along(Z4, 5); along(Z5, 5); along(Z6, 5);
+  c.line(9790, 9940, 470, 2); c.arc(9970, 10100, 430, 3, 50); c.arc(10270, 10370, 420, 3, 40);
+  c.line(10440, 10690, 410, 3); c.arc(10740, 10840, 390, 3, 30); c.line(10890, 11090, 370, 3); c.line(11370, 11440, 370, 2);
+  // arcs des Séracs Suspendus (trajectoire du raccourci)
+  c.arc(11645, 11865, 290, 3, 70); c.arc(12065, 12285, 290, 3, 70); c.arc(12485, 12705, 290, 3, 70);
+  c.line(12880, 13100, 370, 3); c.arc(13130, 13260, 330, 3, 40); c.line(13340, 13620, 370, 3);
+  return {
+    id, name: "Le Glacier des Choucas Voltigeurs",
+    blurb: "Les crevasses sont trop larges ? Saute, attrape la tyrolienne et file au-dessus du vide comme les choucas.",
+    difficulty: "Tyroliennes", theme: "glacier",
+    width: 14080, floor: 440, spawnX: 60,
+    solids: [
+      // Départ sur la moraine, ressauts de mise en jambes
+      p(0, 760, 440),
+      p(900, 480, 440), h(1080, 440),
+      p(1500, 420, 380),
+      // 1re TYROLIENNE (apprentissage) : 560 px de crevasse, câble bas (104 px à monter)
+      p(2040, 460, 440),
+      p(3060, 620, 470), h(3420, 470),
+      p(3800, 420, 420), h(3960, 420),
+      // 2e TYROLIENNE : 680 px de crevasse, câble plus haut (116 px)
+      p(4300, 500, 440),
+      p(5480, 520, 480),
+      // Passage clé : le RELAIS DES CHOUCAS — quatre tyroliennes enchaînées ; entre deux, un sérac
+      // de 300 px seulement (on ressaute presque dès la réception), câbles de plus en plus hauts
+      // (128 → 134 px à monter : appui long obligatoire, un saut lâché tôt passe dessous)
+      p(6100, 420, 440),
+      p(7060, 300, 470),
+      p(7900, 300, 500),
+      p(8720, 300, 520),
+      p(9560, 700, 540), _(9990, 64, 540),
+      // Remontée sur la langue du glacier
+      p(10360, 400, 480),
+      // Les SÉRACS SUSPENDUS (raccourci risqué, LEVELS.md §6 étape 3c, modèle des Sauts de Chamois du
+      // N°17) : quatre séracs (haut 345) séparés par trois crevasses. Chemin SÛR (pilote auto, rivaux) :
+      // on se laisse tomber dans la crevasse (dalle basse 500), saut sur la marche (420) collée au sérac
+      // suivant, ressaut sur place → ≈ 0,5 s perdue par crevasse. RACCOURCI (champ shortcuts) : grand
+      // saut de sérac en sérac, 270 px bord à bord ; trop tôt ou appui trop court → dans la crevasse.
+      p(10830, 640, 440),
+      p(11470, 150, 345),
+      p(11620, 155, 500), p(11845, 45, 420),
+      p(11890, 150, 345),
+      p(12040, 155, 500), p(12265, 45, 420),
+      p(12310, 150, 345),
+      p(12460, 155, 500), p(12685, 45, 420),
+      p(12730, 100, 345),
+      p(12830, 320, 440),
+      // Dernier sprint jusqu'à l'arche, au refuge
+      p(13240, 840, 440), g(13400, 440),
+    ],
+    hazards: [
+      _(470, 70, 440),
+      _(1640, 64, 380),
+      _(5720, 64, 480),
+      _(9990, 64, 540),
+    ],
+    ziplines: [Z1, Z2, Z3, Z4, Z5, Z6],
+    signs: [
+      panneau(2120, 440, "Tyrolienne :|saute au câble !"),
+      panneau(6140, 440, "Relais des Choucas :|saute à fond ×4"),
+      panneau(11220, 440, "Raccourci risqué :|de sérac en sérac"),
+    ],
+    // Raccourcis risqués (LEVELS.md §6 étape 3c) : sauts de sérac en sérac au-dessus des crevasses.
+    shortcuts: [
+      { name: "Séracs Suspendus 1", from: 11470, to: 11620, y: 345, land: 11890, landY: 345 },
+      { name: "Séracs Suspendus 2", from: 11890, to: 12040, y: 345, land: 12310, landY: 345 },
+      { name: "Séracs Suspendus 3", from: 12310, to: 12460, y: 345, land: 12730, landY: 345 },
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2060, 440, 1), y(id, 4320, 440, 2), y(id, 6110, 440, 3), y(id, 10380, 480, 4), y(id, 13250, 440, 5)],
+    finishX: 13640,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 37.6, autoShort: 35.9, gold: 37.1, silver: 40.1, bronze: 43.1 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 43 %, argent 93 %, bronze 98 % ; pressés : or 10 %, argent 23 %, bronze 35 %)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "ground@10830→ground@11470: marche montante sans trou (95 px)", reason: "Montée sur le premier des Séracs Suspendus avec tout l'élan (modèle des Sauts de Chamois du N°17) ; pilote auto sans perte de temps, rivaux 0 chute au playtest." },
+      { match: "ground@11845→ground@11890: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Séracs Suspendus (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
+      { match: "ground@12265→ground@12310: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Séracs Suspendus (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+      { match: "ground@12685→ground@12730: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Séracs Suspendus (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
     ],
   };
 })());
