@@ -111,6 +111,15 @@ LEVELS.forEach((L, idx) => {
     }
   }
   for (const k of ["id", "name", "blurb", "difficulty", "theme"]) if (typeof L[k] !== "string" || !L[k].trim()) err(tag, `champ texte manquant: ${k}`);
+  // Revue 31/10 : niveaux à MÉCANIQUE → échelle d'engagement (LEVELS.md §8). Les classiques gardent
+  // une étiquette de caractère (Balade, Canyon, Crête de nuit…) : pas de contrôle ici.
+  {
+    const ENGAGEMENT_LABELS = ["Technique", "Engagé", "Bien engagé", "Très engagé", "Extrême"];
+    const hasMech = !!(L.ziplines?.length || L.jets?.length || L.gusts?.length || L.rockfalls?.length || L.patrols?.length || L.thermals?.length
+      || L.solids?.some((sd) => sd.move || sd.sink || sd.bounce));
+    if (hasMech && !ENGAGEMENT_LABELS.includes(L.difficulty))
+      err(tag, `étiquette « ${L.difficulty} » hors de l'échelle d'engagement (Technique, Engagé, Bien engagé, Très engagé, Extrême) — obligatoire pour un niveau à mécaniques (LEVELS.md §8)`);
+  }
   for (const k of ["width", "floor", "spawnX", "finishX"]) if (typeof L[k] !== "number" || !isFinite(L[k])) err(tag, `champ numérique manquant: ${k}`);
   if (ids.has(L.id)) err(tag, `id déjà utilisé`); ids.add(L.id);
   if (!/^[a-z0-9][a-z0-9-]{0,39}$/.test(L.id || "")) err(tag, `id doit être en minuscules [a-z0-9-], 40 caractères max, sans tiret au début (sinon le classement en ligne refuse les temps)`);

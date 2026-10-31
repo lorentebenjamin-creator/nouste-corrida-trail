@@ -31,7 +31,7 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 16 | La Forêt des Amanites Farceuses | Technique | 1200 m | mécanique inédite : les **amanites rebondissantes** — des champignons géants rouges à pois blancs plantés au fond des ravins ; on **se laisse tomber dessus** et ils renvoient le coureur dans les airs (≈ 230 px), jusqu'à des corniches trop hautes pour un saut normal ; annoncées par des panneaux (« Amanites : laisse-toi tomber »), des spores qui montent et des **chevrons jaunes** qui clignotent au-dessus du chapeau, qui s'écrase en faisant « boing » ; passages clés : le **Ricochet** (trois amanites de suite au-dessus d'un long ravin) et l'**Échelle** (deux rebonds pour monter) ; à la fin, les **Souches Moussues** : chemin sûr par trois creux, ou **raccourci risqué** de souche en souche — l'or l'exige ; nouvelle palette **brume** (forêt de sapins dans la brume du crépuscule) |
 | 17 | La Crête des Chamois Noctambules | Crête de nuit | 1225 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur une **crête de nuit sous les étoiles** (nouvelle palette `etoiles`, liseré clair) ; passage clé : la **Crête des Cairns**, sept dents de crête étroites (220 px) portant chacune un **cairn planté au bord du vide** (jusqu'ici les rochers étaient toujours loin du bord), annoncées par un panneau « Cairns au bord : saute cairn et trou » : **un seul saut** doit franchir le cairn et le trou (100 → 140 px) — trop tôt on tombe, trop tard on bute contre le cairn ; puis les **Sauts de Chamois** : chemin sûr par trois brèches, ou **raccourci risqué** de bloc en bloc (270 px) — l'or l'exige |
 | 18 | Le Glacier des Choucas Voltigeurs | Technique | 1364 m | mécanique inédite : les **tyroliennes** — saute au câble, glisse, et (revue 30/10) **lâche au bon moment** pour la **Corniche des Choucas** (zipDrop sur le Relais) ; chemin sûr = jusqu'au pylône ; passage clé : le **Relais des Choucas** (×4) ; puis les **Séracs Suspendus** (raccourci) — l'or exige Corniche + Séracs ; panneau « Corniche : lâche le câble ! » ; nouvelle palette `glacier` |
-| 19 | Le Canyon des Mouflons Rigolards *(niveau du jour)* | Canyon | 1300 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) dans un **canyon de grès rouge au coucher du soleil** (nouvelle palette `gres`, gorges striées et rivière au fond) ; passage clé : les **Cheminées de fée**, colonnes étroites (110–140 px) qu'on **gravit de 60 px en 60 px puis d'où l'on plonge** (150 puis 130 px plus bas) sur une colonne étroite — on freine au plongeon pour ne pas la survoler (jusqu'ici les suites de colonnes ne plongeaient jamais aussi bas sur un appui si court) ; panneau « Cheminées de fée : freine au plongeon » ; puis les **Sauts du Mouflon** : chemin sûr par trois creux, ou **raccourci risqué** de pilier en pilier — l'or l'exige |
+| 19 | Le Canyon des Mouflons Rigolards *(niveau du jour)* | Canyon | 1300 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) dans un **canyon de grès rouge au coucher du soleil** (nouvelle palette `gres`, gorges striées, rivière ; revue 31/10 : fond foncé + liseré clair) ; passage clé : les **Cheminées de fée**, colonnes étroites (110–140 px) qu'on **gravit de 60 px en 60 px puis d'où l'on plonge** (150 puis 130 px plus bas) sur une colonne étroite — on freine au plongeon pour ne pas la survoler (jusqu'ici les suites de colonnes ne plongeaient jamais aussi bas sur un appui si court) ; panneau « Cheminées de fée : freine au plongeon » ; puis les **Sauts du Mouflon** : chemin sûr par trois creux, ou **raccourci risqué** de pilier en pilier — l'or l'exige |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
@@ -66,6 +66,7 @@ ceux des revues précédentes (20/22 oct., fenêtre tronquée), **ne pas les com
 | 16 | 100 % / 0,00 | 100 % / 0,47 |
 | 17 | 100 % / 0,30 | 85 % / 3,02 |
 | 18 | 100 % / 0,07 | 88 % / 2,38 |
+| 19 | 100 % / 0,13 | 88 % / 2,60 |
 
 Détails et méthode : LEVELS.md §8. N°12 (mottes plongeantes) : pressé 95 % / 2,45 sur 40 essais
 (graines 1–40), 85 % / 2,60 sur 40 autres (graines 41–80) soit 90 % / 2,53 sur 80 ; N°10 : 95 % / 1,98
@@ -125,6 +126,7 @@ par profil (pilote du 23/10) :
 | 16 | 35,1 s *(exige les raccourcis)* | 38,1 s | 41,1 s | 23 % / 55 % / 85 % | 10 % / 28 % / 35 % |
 | 17 | 36,4 s *(exige les raccourcis)* | 39,4 s | 48,8 s | 33 % / 78 % / 98 % | 8 % / 13 % / 33 % |
 | 18 | 37,1 s *(exige les raccourcis)* | 40,1 s | 43,1 s | 43 % / 93 % / 98 % | 10 % / 23 % / 35 % |
+| 19 | 38,0 s *(exige les raccourcis)* | 41,1 s | 45,9 s | 40 % / 88 % / 95 % | 8 % / 18 % / 33 % |
 
 Le plancher auto × 1,03 l'emporte sur la fenêtre 30–50 % : sur les niveaux sans attente (temps
 attentifs groupés à moins de 3 % du pilote auto), l'or est atteint par 65–100 % des essais attentifs

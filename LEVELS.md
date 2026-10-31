@@ -418,7 +418,7 @@ arrière-plan : rive lointaine, reflet du soleil, vaguelettes animées), `stone`
 dans la brume du crépuscule, ciel violet et cuivre ; les amanites rouges ressortent sur ce fond froid),
 `etoiles` (niv. 17, crête de nuit sous les étoiles, ciel indigo et lueur violette, herbe givrée, avec `rim`),
 `glacier` (niv. 18, glacier au soir, ciel bleu acier et pêche, glace bleue, neige givrée, crevasses opaques `pit`),
-`gres` (niv. 19, canyon de grès rouge au coucher du soleil, ciel indigo et orangé, avec `canyon` : gorges striées, rivière).
+`gres` (niv. 19, canyon de grès rouge au coucher du soleil, ciel indigo et orangé, avec `canyon` : gorges striées, rivière ; revue 31/10 : `back` foncé + `rim` clair sur le dessus des colonnes, comme `etoiles`).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -792,6 +792,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
 | 16 | La Forêt des Amanites Farceuses | Technique | 1200 m | 15 (dont **7 rebonds d'amanite**, 3 creux) | 6 | **7 amanites rebondissantes** (1 seule, puis 1 à viser, le **Ricochet** à 3 durci, l'**Échelle** à 2 durcie) ; **Souches Moussues**, 3 raccourcis risqués ; 5 panneaux | 1 / 0.93 / 0.86 | 35,5 s (chemin sûr) ; 33,9 s par les raccourcis |
 | 17 | La Crête des Chamois Noctambules | Crête de nuit | 1225 m | 21 (dont 7 dans la Crête des Cairns, 3 brèches) | 5 | — (classique ; passage clé : la **Crête des Cairns**, 7 cairns plantés au bord du vide, trous de 100 → 140 px ; **Sauts de Chamois**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 36,5 s (chemin sûr) ; 34,9 s par les raccourcis |
 | 18 | Le Glacier des Choucas Voltigeurs | Technique | 1364 m | 18 (dont **6 crevasses à tyrolienne** de 520–680 px, 3 crevasses des Séracs) | 4 | **6 tyroliennes** (1 basse, 1 haute, le **Relais des Choucas** à 4 + **Corniche des Choucas** zipDrop) ; **Séracs Suspendus**, 3 raccourcis ; 4 panneaux | 1 / 0.93 / 0.86 | 37,6 s (chemin sûr) ; 36,2 s par les raccourcis |
+| 19 | Le Canyon des Mouflons Rigolards | Canyon | 1300 m | 19 (dont colonnes des Cheminées, 3 creux des Sauts) | 6 | — (classique ; passage clé : les **Cheminées de fée**, plongeons 150/130 px ; **Sauts du Mouflon**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 38,3 s (chemin sûr) ; 36,7 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -817,6 +818,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 16 | La Forêt des Amanites Farceuses | 35,5 s *(raccourcis : 33,9 s)* | 35,1 s *(exige les raccourcis)* | 38,1 s | 41,1 s | 23 % / 55 % / 85 % | 10 % / 28 % / 35 % |
 | 17 | La Crête des Chamois Noctambules | 36,5 s *(raccourcis : 34,9 s)* | 36,4 s *(exige les raccourcis)* | 39,4 s | 48,8 s | 33 % / 78 % / 98 % | 8 % / 13 % / 33 % |
 | 18 | Le Glacier des Choucas Voltigeurs | 37,6 s *(raccourcis : 36,2 s)* | 37,5 s *(exige Corniche + Séracs)* | 40,5 s | 43,5 s | 40 % / 93 % / 95 % | 13 % / 30 % / 33 % |
+| 19 | Le Canyon des Mouflons Rigolards | 38,3 s *(raccourcis : 36,7 s)* | 38,0 s *(exige les raccourcis)* | 41,1 s | 45,9 s | 40 % / 88 % / 95 % | 8 % / 18 % / 33 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -1021,6 +1023,20 @@ pressé 88 % / 2,60 (20 essais : 85 % / 2,95), au niveau du N°17 (85 % / 3,02).
 (attentif 40 / 88 / 95 % ; pressé 8 / 18 / 33 %). 4 avertissements « marche montante » acceptés (piliers du
 raccourci). N°1–18 inchangés. **Prochain niveau (N°20) : à mécaniques.**
 
+**Revue Boss Bot 31/10 (N°19)** :
+1. **Étiquette « Canyon »** : confirmée comme étiquette de **caractère** (classique, §8) — on la garde. `check-levels.mjs`
+   refuse désormais une étiquette hors de l'échelle d'engagement **uniquement** pour les niveaux à mécaniques
+   (Technique / Engagé / Bien engagé / Très engagé / Extrême) ; les classiques ne sont pas concernés.
+2. **Difficulté** : remesure 40 essais confirme pressé **88 % / 2,60** (Boss Bot) et attentif **100 % / 0,13**
+   (les 85 % / 2,95 venaient d'un lot de 20). Tentatives de durcir les Cheminées (colonne d'arrivée 85–100 px,
+   plongeon 170–220 px, écart 160–180 px, rochers au bord) : soit le pressé **monte** (93–100 %), soit
+   l'attentif / le pilote auto cassent. ≤ 83 % via ces leviers **n'est pas raisonnable** ; géométrie **conservée**.
+   Marches montantes des piliers : acceptées (chemin sûr voulu des Sauts du Mouflon) — le coureur ne bute pas.
+3. **Palette `gres`** : fond de canyon foncé (`back` `#3a1810`) + `rim` `#f5e6c8` sur le dessus des plateformes
+   (ombre latérale conservée en jour, `!pit`) ; autres palettes inchangées. Captures
+   `/workspace/corrida-site-shots/n19-avant.png` et `n19-apres.png` (Cheminées). Médailles inchangées (géométrie
+   inchangée).
+
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
 Même cerveau que l'autopilote (simulation exacte de la physique), rendu imprécis :
@@ -1115,6 +1131,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 16 | La Forêt des Amanites Farceuses | Technique | 100 % | 0,15 | 38,2 s | 90 % | 1,68 | 49,6 s |
 | 17 | La Crête des Chamois Noctambules | Crête de nuit | 100 % | 0,30 | 38,6 s | 85 % | 3,02 | 54,5 s |
 | 18 | Le Glacier des Choucas Voltigeurs | Technique | 100 % | 0,07 | 38,2 s | 83 % | 2,70 | 48,3 s |
+| 19 | Le Canyon des Mouflons Rigolards | Canyon | 100 % | 0,13 | 39,2 s | 88 % | 2,60 | 51,8 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le
@@ -1198,6 +1215,8 @@ pressé 85 % / 3,00 → **88 % / 2,90** ; points chauds pressés x≈4600:24, 52
 4600:20 ; `p(4580,150)` seule : 93 % / 2,67 ; + ronce de la 6e à 60 px : 3,17 chutes (trop).
 
 **Règle d'attribution des étiquettes (revue du 24/10).** Les étiquettes suivent deux vocabulaires :
+*(Revue 31/10 : `tools/check-levels.mjs` erreur si un niveau **à mécaniques** a une étiquette hors de
+l'échelle d'engagement ; les classiques gardent leur étiquette de caractère — pas de contrôle.)*
 * **niveaux classiques** (alternance, §6 étape 3b : N°1–4, 9, 11, 13) : l'étiquette dit le **caractère**
   du sentier (Balade, Rythme, Hors-piste, Haute route, Endurance, Haute montagne, Grand raid) —
   terrain, longueur, endurance — pas un rang ; chaque classique doit mesurer **au moins** comme le

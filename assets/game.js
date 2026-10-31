@@ -2765,9 +2765,9 @@ function pe(e, t, n) {
   e.fillStyle = `rgba(255,255,255,0.05)`;
   for (let n = 0; n < t.w / 22; n++)
     e.fillRect(t.x + r() * t.w, t.y + 40 + r() * 70, 4, 2);
-  // Revue 29/10 : en palette de nuit, pas d'assombrissement des flancs (ça fondait dans le trou) ;
-  // le liseré rimTop marque le bord. Jour : ombre latérale inchangée.
-  if (!n.rim) {
+  // Revue 29/10 : en palette de nuit (`rim`), pas d'assombrissement des flancs (ça fondait dans le trou) ;
+  // le liseré rimTop marque le bord. Jour (y compris `gres`/`canyon` avec `rim`, revue 31/10) : ombre latérale.
+  if (!n.rim || n.canyon) {
     ((e.fillStyle = `rgba(0,0,0,0.18)`),
       e.fillRect(t.x, t.y, 7, Math.min(t.h, 220)),
       e.fillRect(t.x + t.w - 7, t.y, 7, Math.min(t.h, 220)));

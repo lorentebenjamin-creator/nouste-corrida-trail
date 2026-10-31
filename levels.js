@@ -362,17 +362,19 @@ export const THEMES = {
   gres: {
     // Niveau 19 : canyon de grès rouge au coucher du soleil (ciel bleu nuit qui flambe orange à
     // l'horizon, grès rouille, cheminées de fée ocre, genévriers sombres ; ravins en gorge de grès
-    // grâce à `canyon`, décor seul)
+    // grâce à `canyon`, décor seul). Revue 31/10 : fond de canyon foncé + `rim` clair — le dessus
+    // des colonnes ne se confond plus avec le fond orangé (comme `etoiles`).
     skyTop: "#1d2747", skyMid: "#c8704a", skyBot: "#f7c88c",
-    ridge: "#6e3326", ridge2: "#a8583a",
+    ridge: "#4a2218", ridge2: "#7a3a28",
     pine: "#26301f", pine2: "#4f5e30",
     dirt: "#b0552f", dirtDark: "#6f301c",
     grass: "#d9a85a", grassDark: "#9a6c30",
     wood: "#7a4e2e", woodDark: "#4a2e1a",
     rock: "#d6966a", rockDark: "#8e5434",
     thorn: "#2a1912", leaf: "#6a7a3a", berry: "#e8c04a",
-    fog: "#2a120c",
-    canyon: { wall: "#c9734a", wallDark: "#8a4428", strata: "rgba(90,35,20,0.45)", back: "#6a3020", deep: "#1c0b06", river: "#3f7f8c", riverHi: "#c8eef0" },
+    fog: "#1a0c08",
+    rim: "#f5e6c8",
+    canyon: { wall: "#a85a38", wallDark: "#6a3018", strata: "rgba(60,22,12,0.5)", back: "#3a1810", deep: "#0e0604", river: "#3f7f8c", riverHi: "#c8eef0" },
   },
 };
 
@@ -1796,6 +1798,9 @@ LEVELS.push((() => {
 // et les grandes descentes finissaient sur un sol large. Puis les SAUTS DU MOUFLON (raccourci risqué
 // de pilier en pilier, §6 étape 3c, modèle des Rochers des Truites : l'or l'exige). Aucune mécanique :
 // sols, ravins, ronces, rochers, troncs, fanions, sur le modèle du N°4. Nouvelle palette `gres`.
+// Revue 31/10 : étiquette « Canyon » conservée (classique, §8 caractère) ; géométrie Cheminées
+// inchangée (colonne plus étroite / plongeon plus long assouplissent le pressé avec le pilote
+// humain — ≤ 83 % non raisonnable sans casser l'attentif) ; palette `gres` : fond foncé + `rim`.
 // ---------------------------------------------------------------------
 LEVELS.push((() => {
   const id = "canyon-mouflons", c = v(id);
