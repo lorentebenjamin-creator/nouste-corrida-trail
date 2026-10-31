@@ -417,7 +417,8 @@ arrière-plan : rive lointaine, reflet du soleil, vaguelettes animées), `stone`
 (couleurs des sols `pierre(…)`). Ces clés n'existent que dans `lac` : aucun autre niveau ne change), `brume` (niv. 16, vieille forêt de sapins
 dans la brume du crépuscule, ciel violet et cuivre ; les amanites rouges ressortent sur ce fond froid),
 `etoiles` (niv. 17, crête de nuit sous les étoiles, ciel indigo et lueur violette, herbe givrée, avec `rim`),
-`glacier` (niv. 18, glacier au soir, ciel bleu acier et pêche, glace bleue, neige givrée, crevasses opaques `pit`).
+`glacier` (niv. 18, glacier au soir, ciel bleu acier et pêche, glace bleue, neige givrée, crevasses opaques `pit`),
+`gres` (niv. 19, canyon de grès rouge au coucher du soleil, ciel indigo et orangé, avec `canyon` : gorges striées, rivière).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -508,7 +509,8 @@ chute, un humain peut passer.
    rebondissantes, §3g, 28/10) → **le N°17 DOIT être classique** (avec un raccourci risqué, étape 3c). N°17 classique (Crête des
    Chamois Noctambules, 29/10, raccourci « Sauts de Chamois ») → **le N°18 DOIT être à mécaniques**. N°18 à mécaniques
    (Glacier des Choucas Voltigeurs, tyroliennes, §3h, 30/10, raccourci « Séracs Suspendus ») → **le N°19 DOIT être classique**
-   (avec un raccourci risqué, étape 3c).
+   (avec un raccourci risqué, étape 3c). N°19 classique (Canyon des Mouflons Rigolards, 31/10, raccourci « Sauts du
+   Mouflon ») → **le N°20 DOIT être à mécaniques**.
 3c. **Raccourci risqué pour les classiques** (revue du 27/10, règle à appliquer à **tous les futurs
    niveaux classiques**, N°17, 19, 21…) : sur un classique, le pilote auto ne ralentit jamais (temps ≈
    distance / 352 px/s) et un humain attentif le suit à 3 % près, donc l'or (plancher auto × 1,03) tombe
@@ -1009,6 +1011,15 @@ puis le **Relais des Choucas** (×4). « Tyroliennes » reste dans le blurb.
    95 % ; pressé 13 / 30 / 33 %). Captures `/workspace/n18-avant.png`, `n18-apres.png`, `n18-lacher.png`.
 3. Ménage : `n17-*-live.png` → `/workspace/corrida-site-shots/` ; `/*.png` dans `.gitignore`.
 N°1–17 inchangés (temps `auto` identiques). **Prochain niveau (N°19) : classique**, avec un raccourci risqué.
+
+**N°19 (31/10, classique)** : **Le Canyon des Mouflons Rigolards**, étiquette « **Canyon** », 1300 m, nouvelle
+palette `gres`. Passage clé : les **Cheminées de fée** (colonnes 110–140 px, montées de 60 px, trous de 120 px,
+plongeons de 150 puis 130 px sur une colonne étroite), panneau « Cheminées de fée : freine au plongeon ».
+Raccourci « **Sauts du Mouflon** » (×3, piliers à y 345 au-dessus de creux) : auto 38,3 s, autoShort 36,7 s.
+Essais : v1 (montées 40) pressé 100 % trop facile → v4 retenue (montées 60). 40 essais : attentif 100 % / 0,13,
+pressé 88 % / 2,60 (20 essais : 85 % / 2,95), au niveau du N°17 (85 % / 3,02). Médailles **38 / 41,1 / 45,9**
+(attentif 40 / 88 / 95 % ; pressé 8 / 18 / 33 %). 4 avertissements « marche montante » acceptés (piliers du
+raccourci). N°1–18 inchangés. **Prochain niveau (N°20) : à mécaniques.**
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 

@@ -359,6 +359,21 @@ export const THEMES = {
     fog: "#0b2438",
     pit: "#071a2a",
   },
+  gres: {
+    // Niveau 19 : canyon de grès rouge au coucher du soleil (ciel bleu nuit qui flambe orange à
+    // l'horizon, grès rouille, cheminées de fée ocre, genévriers sombres ; ravins en gorge de grès
+    // grâce à `canyon`, décor seul)
+    skyTop: "#1d2747", skyMid: "#c8704a", skyBot: "#f7c88c",
+    ridge: "#6e3326", ridge2: "#a8583a",
+    pine: "#26301f", pine2: "#4f5e30",
+    dirt: "#b0552f", dirtDark: "#6f301c",
+    grass: "#d9a85a", grassDark: "#9a6c30",
+    wood: "#7a4e2e", woodDark: "#4a2e1a",
+    rock: "#d6966a", rockDark: "#8e5434",
+    thorn: "#2a1912", leaf: "#6a7a3a", berry: "#e8c04a",
+    fog: "#2a120c",
+    canyon: { wall: "#c9734a", wallDark: "#8a4428", strata: "rgba(90,35,20,0.45)", back: "#6a3020", deep: "#1c0b06", river: "#3f7f8c", riverHi: "#c8eef0" },
+  },
 };
 
 // =====================================================================
@@ -1767,6 +1782,117 @@ LEVELS.push((() => {
       { match: "ground@11845→ground@11890: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Séracs Suspendus (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
       { match: "ground@12265→ground@12310: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Séracs Suspendus (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
       { match: "ground@12685→ground@12730: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Séracs Suspendus (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+    ],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 19 — Le Canyon des Mouflons Rigolards (niveau du jour, 2026-10-31)
+// Niveau classique (règle d'alternance, après le N°18 à mécaniques) — nouveauté : un seul passage
+// clé inédit, les CHEMINÉES DE FÉE : des colonnes de grès étroites (110–140 px) au-dessus du vide
+// qu'on gravit de 60 px en 60 px, puis des PLONGEONS de 130–150 px sur une colonne étroite : en
+// descente un saut porte bien plus loin (≈ 300 px), il faut appeler tôt ou freiner en l'air, sinon
+// on survole la colonne et on tombe. Jusqu'ici les descentes faisaient 35–40 px par marche (N°13)
+// et les grandes descentes finissaient sur un sol large. Puis les SAUTS DU MOUFLON (raccourci risqué
+// de pilier en pilier, §6 étape 3c, modèle des Rochers des Truites : l'or l'exige). Aucune mécanique :
+// sols, ravins, ronces, rochers, troncs, fanions, sur le modèle du N°4. Nouvelle palette `gres`.
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "canyon-mouflons", c = v(id);
+  c.line(160, 400, 370, 3); c.arc(760, 940, 330, 3, 40); c.arc(1020, 1150, 330, 3, 40);
+  c.arc(1380, 1540, 290, 3, 40); c.line(1760, 1900, 300, 2); c.arc(1930, 2090, 220, 3, 40);
+  c.line(2280, 2460, 230, 2); c.arc(2500, 2660, 260, 3, 40); c.line(2700, 2880, 370, 3);
+  // arcs des Cheminées de fée (montées de 60 px, plongeons de 150 et 130 px)
+  c.arc(3210, 3430, 270, 3, 40); c.arc(3440, 3660, 210, 3, 40); c.arc(3670, 3890, 150, 3, 40); c.arc(3930, 4150, 150, 3, 40); c.arc(4180, 4400, 240, 3, 40);
+  c.arc(4410, 4630, 180, 3, 40); c.arc(4640, 4860, 180, 3, 40); c.arc(4890, 5110, 250, 3, 40); c.arc(5120, 5340, 250, 3, 40);
+  c.line(5600, 5960, 370, 4); c.arc(5990, 6200, 300, 3, 40); c.arc(6540, 6740, 230, 3, 40);
+  c.line(6900, 7060, 240, 2); c.arc(7060, 7260, 270, 3, 40); c.line(7280, 7500, 370, 3);
+  // arcs des Sauts du Mouflon (trajectoire du raccourci)
+  c.arc(8035, 8255, 290, 3, 70); c.arc(8455, 8675, 290, 3, 70); c.arc(8875, 9095, 290, 3, 70);
+  c.line(9320, 9500, 370, 2);
+  c.arc(9500, 9700, 320, 3, 40); c.arc(10040, 10240, 250, 3, 40); c.line(10280, 10560, 260, 3);
+  c.arc(10560, 10760, 260, 3, 40); c.arc(11200, 11400, 240, 3, 40); c.line(11420, 11480, 250, 1);
+  c.arc(11760, 11960, 250, 3, 40); c.line(12000, 12300, 370, 3); c.line(12480, 12700, 370, 3);
+  return {
+    id, name: "Le Canyon des Mouflons Rigolards",
+    blurb: "Grès rouge au coucher du soleil : grimpe les cheminées de fée, plonge sans survoler la colonne, les mouflons se marrent.",
+    difficulty: "Canyon", theme: "gres",
+    width: 13520, floor: 440, spawnX: 60,
+    solids: [
+      // Départ au pied du canyon, ressauts de mise en jambes
+      p(0, 760, 440),
+      p(900, 500, 440), h(1060, 440),
+      p(1525, 420, 370),
+      p(2070, 440, 300), h(2170, 300),
+      p(2650, 600, 440),
+      // Passage clé : les CHEMINÉES DE FÉE — colonnes étroites (110–140 px) au-dessus du vide (trous de 120 px) :
+      // on grimpe de 60 px en 60 px (appui long obligatoire, un saut lâché tôt retombe dans le trou) et l'on
+      // PLONGE deux fois (150 puis 130 px) sur une colonne étroite — en descente le saut porte ≈ 300 px :
+      // appeler tôt ou freiner en l'air, sinon on survole la colonne
+      p(3370, 110, 380),
+      p(3600, 110, 320),
+      p(3830, 140, 260),
+      p(4090, 130, 410),
+      p(4340, 110, 350),
+      p(4570, 110, 290),
+      p(4800, 130, 420),
+      p(5050, 110, 360),
+      p(5280, 760, 440),
+      // Montée vers le belvédère
+      p(6160, 420, 380),
+      p(6700, 400, 310), g(6820, 310),
+      // Descente sur le replat des mouflons
+      p(7220, 640, 440),
+      // Les SAUTS DU MOUFLON (raccourci risqué, LEVELS.md §6 étape 3c, modèle des Rochers des Truites du N°15) :
+      // quatre piliers de grès (haut 345) séparés par trois fissures. Chemin SÛR (pilote auto, rivaux) : on se
+      // laisse tomber dans la fissure (dalle basse 500), saut par-dessus le trou sur la marche (420) collée au
+      // pilier suivant, ressaut sur place → ≈ 0,5 s perdue par fissure. RACCOURCI (champ shortcuts) : grand
+      // saut de pilier en pilier, 270 px bord à bord ; trop tôt ou appui trop court → retombée dans la fissure.
+      p(7860, 150, 345),
+      p(8010, 155, 500), p(8235, 45, 420),
+      p(8280, 150, 345),
+      p(8430, 155, 500), p(8655, 45, 420),
+      p(8700, 150, 345),
+      p(8850, 155, 500), p(9075, 45, 420),
+      p(9120, 100, 345),
+      p(9220, 320, 440),
+      // Remontée par les vires
+      p(9660, 420, 400),
+      p(10200, 400, 330),
+      p(10720, 520, 380), h(10920, 380),
+      p(11360, 440, 320),
+      // Dernier sprint au fond du canyon jusqu'à l'arche
+      p(11920, 1500, 440), g(12760, 440),
+    ],
+    hazards: [
+      _(470, 70, 440),
+      _(1640, 64, 370),
+      _(6280, 64, 380),
+      _(9770, 64, 400),
+      _(11500, 64, 320),
+      _(12360, 70, 440),
+    ],
+    signs: [
+      panneau(3050, 440, "Cheminées de fée :|freine au plongeon"),
+      panneau(7670, 440, "Raccourci risqué :|de pilier en pilier"),
+    ],
+    // Raccourcis risqués (LEVELS.md §6 étape 3c) : sauts de pilier en pilier au-dessus des fissures.
+    shortcuts: [
+      { name: "Sauts du Mouflon 1", from: 7860, to: 8010, y: 345, land: 8280, landY: 345 },
+      { name: "Sauts du Mouflon 2", from: 8280, to: 8430, y: 345, land: 8700, landY: 345 },
+      { name: "Sauts du Mouflon 3", from: 8700, to: 8850, y: 345, land: 9120, landY: 345 },
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2680, 440, 1), y(id, 5300, 440, 2), y(id, 7240, 440, 3), y(id, 10220, 330, 4), y(id, 11940, 440, 5)],
+    finishX: 13000,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 38.3, autoShort: 36.7, gold: 38, silver: 41.1, bronze: 45.9 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 40 %, argent 88 %, bronze 95 % ; pressés : or 8 %, argent 18 %, bronze 33 %)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "ground@7220→ground@7860: marche montante sans trou (95 px)", reason: "Montée sur le premier des Sauts du Mouflon avec tout l'élan (modèle des Sauts de Chamois du N°17) ; pilote auto sans perte de temps, rivaux 0 chute au playtest." },
+      { match: "ground@8235→ground@8280: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts du Mouflon (ressaut sur place ≈ 0,5 s) — c'est le temps que fait gagner le raccourci risqué (shortcuts)." },
+      { match: "ground@8655→ground@8700: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts du Mouflon (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
+      { match: "ground@9075→ground@9120: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts du Mouflon (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
     ],
   };
 })());
