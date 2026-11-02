@@ -18,8 +18,8 @@ const LIMITS = {
 // Portée horizontale d'un saut complet (pieds revenus à la hauteur d'arrivée, `up` px plus haut),
 // même intégration que le moteur (pas 1/60 s, LEVELS.md §5), course à 352 px/s × `slow` dès l'appel
 // (rafale qui souffle pendant tout le saut ; slow = 1 : calme).
-function jumpReach(slow = 1, up = 0) {
-  let vx = 352, vy = -770, x = 0, yy = 0; const dt = 1 / 60;
+function jumpReach(slow = 1, up = 0, v0 = 352) {
+  let vx = v0, vy = -770, x = 0, yy = 0; const dt = 1 / 60;
   for (let f = 0; f < 300; f++) {
     const dv = 352 * slow - vx; vx += Math.sign(dv) * Math.min(Math.abs(dv), 2100 * dt);
     let gr = vy < 0 ? 2100 : 4700; if (Math.abs(vy) < 110) gr = 1200; vy = Math.min(1080, vy + gr * dt);
@@ -105,8 +105,11 @@ LEVELS.forEach((L, idx) => {
         continue;
       }
       if (!q || ![q.from, q.to, q.y, q.land, q.landY].every((x) => typeof x === "number" && isFinite(x)) || !(q.from < q.to && q.to < q.land)) { err(tag, `${nm} : from < to < land et y, landY numériques requis`); continue; }
-      if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.y === q.y && sd.x === q.from && sd.x + sd.w === q.to)) err(tag, `${nm} : pas de sol de dessus y=${q.y} de ${q.from} à ${q.to} (rocher de départ)`);
-      if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.y === q.landY && sd.x === q.land)) err(tag, `${nm} : pas de sol de dessus y=${q.landY} commençant en ${q.land} (rocher d'arrivée)`);
+      // Revue 2/11 : un pad de raccourci peut être un sol `ground` OU une croûte de lave (`plank`+`crumb`)
+      // — la Ligne des Braises du N°20 exploite la croûte elle-même comme appui du raccourci.
+      const isScPad = (sd) => !sd.move && (sd.kind === "ground" || (sd.kind === "plank" && sd.crumb));
+      if (!L.solids.some((sd) => isScPad(sd) && sd.y === q.y && sd.x === q.from && sd.x + sd.w === q.to)) err(tag, `${nm} : pas de sol de dessus y=${q.y} de ${q.from} à ${q.to} (rocher de départ)`);
+      if (!L.solids.some((sd) => isScPad(sd) && sd.y === q.landY && sd.x === q.land)) err(tag, `${nm} : pas de sol de dessus y=${q.landY} commençant en ${q.land} (rocher d'arrivée)`);
       if (q.land - q.to > 285) err(tag, `${nm} : ${q.land - q.to} px bord à bord, infranchissable (≤ 285)`);
     }
   }
@@ -116,7 +119,7 @@ LEVELS.forEach((L, idx) => {
   {
     const ENGAGEMENT_LABELS = ["Technique", "Engagé", "Bien engagé", "Très engagé", "Extrême"];
     const hasMech = !!(L.ziplines?.length || L.jets?.length || L.gusts?.length || L.rockfalls?.length || L.patrols?.length || L.thermals?.length
-      || L.solids?.some((sd) => sd.move || sd.sink || sd.bounce));
+      || L.solids?.some((sd) => sd.move || sd.sink || sd.bounce || sd.crumb));
     if (hasMech && !ENGAGEMENT_LABELS.includes(L.difficulty))
       err(tag, `étiquette « ${L.difficulty} » hors de l'échelle d'engagement (Technique, Engagé, Bien engagé, Très engagé, Extrême) — obligatoire pour un niveau à mécaniques (LEVELS.md §8)`);
   }
@@ -412,6 +415,56 @@ LEVELS.forEach((L, idx) => {
     if (bi === 0 && !(L.signs || []).some((sn) => sn.x <= bn.x && sn.x >= bn.x - 1500 && /amanite/i.test(sn.text || ""))) warn(tag, `${tagb}: première amanite sans panneau (texte « amanite ») dans les 1500 px avant`);
   });
   if (bns.length) info(tag, `${bns.length} amanite(s) rebondissante(s) : à valider avec tools/playtest.mjs --human`);
+  // Croûtes de lave (v9, LEVELS.md §3i) : dalles qui s'effondrent `delay` s après la réception de chaque coureur
+  const crs = L.solids.filter((sd) => sd.crumb).sort((a, b) => a.x - b.x);
+  const sMinC = Math.min(...(L.rivals || []).map((r) => r.speed));
+  crs.forEach((cr, ci) => {
+    const tagc = `croûte @${cr.x}`, cm = cr.crumb;
+    if (cr.kind !== "plank" || !cr.oneWay || cr.move || cr.sink || cr.bounce) err(tag, `${tagc}: doit être une passerelle fixe (helper croute())`);
+    if (!(cm.delay >= 0.4 && cm.delay <= 1.2)) err(tag, `${tagc}: delay ${cm.delay} hors 0,4–1,2 s`);
+    if (!(cm.regrow >= 1.5 && cm.regrow <= 6)) err(tag, `${tagc}: regrow ${cm.regrow} hors 1,5–6 s`);
+    if (cr.w < 80 || cr.w > 400) err(tag, `${tagc}: largeur ${cr.w} hors 80–400`);
+    if (cr.y < 200 || cr.y > 600) err(tag, `${tagc}: hauteur hors [200, 600]`);
+    if (L.hazards.some((hz) => hz.x < cr.x + cr.w && hz.x + hz.w > cr.x && hz.y + hz.h === cr.y)) err(tag, `${tagc}: pas de ronce sur une croûte (elle flotterait après l'effondrement)`);
+    if (L.solids.some((o) => (o.kind === "rock" || o.kind === "log") && o.x < cr.x + cr.w && o.x + o.w > cr.x && o.y + o.h === cr.y)) err(tag, `${tagc}: pas de rocher/tronc sur une croûte`);
+    if (L.solids.some((o) => o !== cr && !o.crumb && o.x < cr.x + cr.w && o.x + o.w > cr.x && o.y > cr.y && o.y - cr.y < 200 && (o.kind === "ground" || o.kind === "plank")))
+      warn(tag, `${tagc}: un sol juste dessous (la croûte doit être au-dessus de la lave : mécanique sans risque)`);
+    for (const cp of L.checkpoints) if (cp.x + 60 > cr.x - 120 && cp.x < cr.x + cr.w + 60) err(tag, `${tagc}: trop près du fanion @${cp.x}`);
+    if (cr.x < L.spawnX + 600) err(tag, `${tagc}: trop près du départ`);
+    if (movers.some((m) => { const e = env(m); return e.x2 > cr.x - 300 && e.x1 < cr.x + cr.w + 300; }) || (L.jets || []).some((jt) => jt.x + jt.w > cr.x - 300 && jt.x < cr.x + cr.w + 300) || (L.gusts || []).some((gu) => gu.x2 > cr.x - 300 && gu.x1 < cr.x + cr.w + 300) || (L.thermals || []).some((tm) => tm.x2 > cr.x - 300 && tm.x1 < cr.x + cr.w + 300) || (L.ziplines || []).some((zl) => zl.x2 > cr.x - 300 && zl.x1 < cr.x + cr.w + 300) || L.solids.some((sd) => (sd.sink || sd.bounce) && sd.x < cr.x + cr.w + 300 && sd.x + sd.w > cr.x - 300))
+      warn(tag, `${tagc}: autre mécanique à moins de 300 px (combinaison peu lisible)`);
+    if (ci === 0 && !(L.signs || []).some((sn) => sn.x <= cr.x && sn.x >= cr.x - 1500 && /croûte/i.test(sn.text || ""))) warn(tag, `${tagc}: première croûte sans panneau (texte « croûte ») dans les 1500 px avant`);
+    if (ci === 0) {
+      // Repartir à temps (chaîne) : l'IA (rivaux) saute avant la casse ou le bord, sans « coyote » planifié ;
+      // on suit, élément par élément, la réception la plus profonde possible (saut le plus tardif) et l'on
+      // vérifie qu'on atteint l'appui suivant, avec le rival le plus lent et le joueur.
+      for (const sp of [sMinC, 1]) {
+        const vf = 352 * sp, who = sp === 1 ? "joueur" : `rival ${sp}`;
+        let take = null, prevEl = null;
+        for (const a of walk) {
+          if (take != null && prevEl) {
+            const contiguous = a.x <= prevEl.x + prevEl.w && a.y === prevEl.y;
+            let land;
+            if (contiguous) land = a.x - 29;
+            else {
+              const R = jumpReach(sp, prevEl.y - a.y, vf), margin = take + R + 30 - (a.x + 5);
+              if (prevEl.crumb || a.crumb) {
+                const wtag = `${prevEl.crumb ? "croûte" : prevEl.kind}@${prevEl.x}→${a.crumb ? "croûte" : a.kind}@${a.x}`;
+                if (margin < 10) err(tag, `${wtag}: ${who} n'atteint pas l'appui suivant en partant avant la casse (marge ${Math.round(margin)} px)`);
+                else if (margin < 40 && sp !== 1) warn(tag, `${wtag}: marge faible depuis la croûte (${who} : ${Math.round(margin)} px)`);
+              }
+              land = Math.max(a.x - 29, take + R);
+            }
+            take = a.crumb ? Math.min(a.x + a.w - 1, land + vf * a.crumb.delay - vf / 60) : a.x + a.w - 1;
+            if (a.crumb && !contiguous && sp === 1 && a.w > 352 * a.crumb.delay)
+              info(tag, `croûte @${a.x}: CROÛTE LARGE (${a.w} px > course avant la casse ${Math.round(352 * a.crumb.delay)} px) — atterrir loin et repartir à temps, à valider avec tools/playtest.mjs --human`);
+          } else take = a.x + a.w - 1;
+          prevEl = a;
+        }
+      }
+    }
+  });
+  if (crs.length) info(tag, `${crs.length} croûte(s) de lave : à valider avec tools/playtest.mjs --human`);
   // Tyroliennes (v8, LEVELS.md §3h) : câbles attrapés en l'air au-dessus des crevasses
   if (L.ziplines != null && !Array.isArray(L.ziplines)) err(tag, `ziplines doit être un tableau (ou absent)`);
   const zls = (L.ziplines || []).slice().sort((a, b) => a.x1 - b.x1);
@@ -476,6 +529,8 @@ LEVELS.forEach((L, idx) => {
   for (const sn of L.signs || []) {
     if (typeof sn.text !== "string" || !sn.text.trim()) { err(tag, `panneau @${sn.x}: texte manquant`); continue; }
     if (!L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.y === sn.y && sn.x - 10 >= sd.x && sn.x + 10 <= sd.x + sd.w)) err(tag, `panneau @${sn.x}: pas planté sur un sol de dessus y=${sn.y}`);
+    // Revue Boss 2/11 : panneau trop près du spawn → caché par le peloton au départ
+    if (sn.x - L.spawnX < 400) warn(tag, `panneau @${sn.x}: à moins de 400 px du spawn (risque d'être caché par le peloton au départ)`);
     const lines = sn.text.split("|");
     if (lines.length > 2 || lines.some((t) => t.trim().length > 20)) warn(tag, `panneau @${sn.x}: texte trop long (2 lignes de 20 caractères max, séparées par « | »)`);
     // Balise trop proche d'un panneau (revue 28/10) : planche 164×(16+16·lignes), texte à
@@ -492,7 +547,7 @@ LEVELS.forEach((L, idx) => {
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.thermals || []).length && `${L.thermals.length} ascendance(s)`, L.solids.some((sd) => sd.bounce) && `${L.solids.filter((sd) => sd.bounce).length} amanite(s)`, (L.ziplines || []).length && `${L.ziplines.length} tyrolienne(s)`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.thermals || []).length && `${L.thermals.length} ascendance(s)`, L.solids.some((sd) => sd.bounce) && `${L.solids.filter((sd) => sd.bounce).length} amanite(s)`, (L.ziplines || []).length && `${L.ziplines.length} tyrolienne(s)`, crs.length && `${crs.length} croûte(s) de lave`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
   for (const a of accepting) if (!a.used) warn(tag, `acceptedWarnings obsolète : "${a.match}" ne correspond plus à aucun avertissement (le retirer)`);
   accepting = [];
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);

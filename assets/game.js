@@ -466,7 +466,7 @@ function R(e, t) {
       }
     }
     for (let t of s.solids)
-      t.move || t.sink || t.bounce
+      t.move || t.sink || t.bounce || t.crumb
         ? 0
         : t.kind === `ground`
         ? pe(n, t, e)
@@ -586,6 +586,7 @@ function R(e, t) {
       (e.vy = 0),
       (e.zip = null), // v8
       (e.zipCool = 0),
+      (e.cr = null), // v9 : croûtes intactes après une chute
       (e.alive = !0),
       (e.grounded = !0),
       (e.invuln = e.you ? 0.9 : 0.45),
@@ -731,6 +732,8 @@ function R(e, t) {
       if (fe(e, n)) {
         if (n.oneWay) {
           if ((e.drop > 0 && !n.bounce) || e.vy < 0 || t > n.y + 3) continue;
+          // v9 — Croûte de lave (`croute()`, LEVELS.md §3i) : effondrée sous CE coureur → on passe au travers.
+          if (n.crumb && crumbGone(e, n)) continue;
           // v7 — Amanite rebondissante (`amanite()` de levels.js, LEVELS.md §3g) : se poser dessus relance
           // vers le haut (vy = −bounce), sans appui ni « saut court » (cut) ; ↓ ne la traverse pas.
           if (n.bounce) {
@@ -744,6 +747,7 @@ function R(e, t) {
             (e.vy = 0),
             (e.grounded = !0),
             (e.cut = !1));
+          n.crumb && crumbTouch(e, n);
           continue;
         }
         e.vy >= 0 && t <= n.y + 8
@@ -834,6 +838,7 @@ function R(e, t) {
         ? zipStep(e, t) // v8 : glisse sur la tyrolienne
         : (fallStep(e, t, _) && (e.thermT = (e.thermT || 0) + t), // v6 : ascendance (plane)
           jetTouch(e, _),
+          crumbs.length && (crNow = _), // v9
           Re(e, t),
           ziplines.length && zipGrab(e, zp)),
       e.grounded
@@ -928,6 +933,8 @@ function R(e, t) {
     thermals = [],
     bouncers = [],
     ziplines = [],
+    crumbs = [],
+    crNow = 0,
     shortcuts = [],
     autoShort = !1,
     waterGaps = [],
@@ -1144,6 +1151,54 @@ function R(e, t) {
     let cx = e.x + e.w * 0.5, zx = e.zip.x1;
     return shortcuts.find((q) => q.kind === `zipDrop` && q.zipX1 === zx && cx >= q.from && cx <= q.to) || null;
   }
+  // v9 — Croûtes de lave (levels.js `croute()`, LEVELS.md §3i) : dalle (planche traversable par-dessous)
+  // au-dessus de la lave. Intacte tant qu'on ne s'y est pas posé ; la PREMIÈRE réception d'un coureur
+  // démarre SA minuterie (e.cr[ci] = instant du contact) : elle se fissure puis cède `delay` s plus tard
+  // SOUS CE COUREUR (chacun la sienne : les rivaux ne cassent pas la tienne, l'IA reste déterministe),
+  // et se reforme `regrow` s après. Horloge `crNow` = temps du monde (moteur) ou de l'image simulée.
+  // Niveaux sans croûte : aucune de ces fonctions n'est appelée (comportement inchangé).
+  function crumbGone(e, n) {
+    let t0 = e.cr?.[n.ci];
+    if (t0 == null) return !1;
+    let dt = crNow - t0;
+    if (dt >= n.crumb.delay + n.crumb.regrow) return (delete e.cr[n.ci], !1);
+    return dt >= n.crumb.delay;
+  }
+  function crumbTouch(e, n) {
+    e.cr || (e.cr = {});
+    e.cr[n.ci] == null && ((e.cr[n.ci] = crNow), (e.crusts = (e.crusts || 0) + 1));
+  }
+  function crumbUnder(c) {
+    let feet = c.y + c.h;
+    return crumbs.find((q) => Math.abs(feet - q.y) < 3 && c.x + c.w > q.x && c.x < q.x + q.w) || null;
+  }
+  // Après une réception (simulée) sur une croûte : peut-on encore en repartir ? Elle doit tenir ≥ 0,2 s,
+  // et un saut tardif (juste avant qu'elle cède, ou avant le bord) doit retomber sain et sauf.
+  // Un seul niveau de profondeur (crTest) : la croûte suivante est jugée sur sa seule tenue.
+  function crumbTrap(c) {
+    let cb = crumbUnder(c);
+    if (!cb) return !1;
+    let t0 = c.cr?.[cb.ci] ?? crNow,
+      left = t0 + cb.crumb.delay - crNow;
+    if (left < 0.2) return !0;
+    // réception au ras du bord : on la refuse (la moindre gigue fait tomber, et l'on repart de trop loin)
+    if (c.x + c.w < cb.x + 24) return !0;
+    if (c.crTest) return !1;
+    let kc = Math.floor(left * 60),
+      ke = Math.floor((cb.x + cb.w - c.x) / ((k * c.speed) / 60)),
+      k1 = Math.min(kc, ke) - 1, // l'IA saute avant la casse ou le bord (pas de « coyote » planifié, cf. aiDecide)
+      t0w = _, ok = !1, now = crNow;
+    _ = now;
+    for (let kk of [k1, k1 - 5, k1 - 14]) {
+      if (kk < 0) continue;
+      if (simRunner({ ...c, crTest: !0 }, 1, kk, kk + 85, !0).safe) {
+        ok = !0;
+        break;
+      }
+    }
+    ((_ = t0w), (crNow = now));
+    return !ok;
+  }
   function dynHit(e, time) {
     for (let fl of falls) {
       let st = fallState(fl, time);
@@ -1169,6 +1224,8 @@ function R(e, t) {
     for (let bn of bouncers) bn.boing = -9;
     shortcuts = s.shortcuts || [];
     ziplines = s.ziplines || [];
+    crumbs = s.solids.filter((sd) => sd.crumb);
+    crumbs.forEach((cb, i) => ((cb.ci = i), (cb.ph = 0)));
     for (let zl of ziplines) {
       zl.zing = -9;
       let gr = (px) => s.solids.find((sd) => !sd.move && sd.kind === `ground` && px >= sd.x && px <= sd.x + sd.w);
@@ -1229,6 +1286,11 @@ function R(e, t) {
       (on && !tm.wasOn && o !== `count` && tm.x1 < v + b * 1.1 && tm.x2 > v - b * 0.1 && (r.burst(1.1, 0.03, 0.25), r.burst(0.5, 0.015, 0.9)),
         (tm.wasOn = on));
     }
+    for (let cb of crumbs) {
+      let ph = crumbPhase(cb, d, _).ph;
+      (o !== `count` && ph !== cb.ph && (ph === 1 ? r.burst(0.07, 0.03, 2.2) : ph === 2 && (r.burst(0.32, 0.06, 0.5), (z = Math.max(z, 0.08)))),
+        (cb.ph = ph));
+    }
     for (let gu of gusts) {
       let on = gustState(gu, _).on;
       (on && !gu.wasOn && o !== `count` && gu.x1 < v + b * 1.1 && gu.x2 > v - b * 0.1 && (r.burst(0.9, 0.04, 0.35), r.burst(0.6, 0.02, 1.1)),
@@ -1238,7 +1300,7 @@ function R(e, t) {
   // --- IA : simulation exacte de la même physique ---------------------
   function simRunner(e, dir, jumpAt, maxF, stopOnLand) {
     let c = { ...e, sim: !0 },
-      nb = e.bounced || 0,
+      nb = (crumbs.length && (c.cr = { ...(e.cr || {}) }), e.bounced || 0),
       dt = 1 / 60,
       saved = movers.length ? movers.map((m) => [m.x, m.y]) : null,
       dead = -1,
@@ -1285,7 +1347,7 @@ function R(e, t) {
       if (c.zip) zipStep(c, dt); // v8
       else {
         let zp = c.y;
-        (fallStep(c, dt, _ + fr * dt), jetPush(c, _ + fr * dt) && (jetted = !0), Re(c, dt));
+        (fallStep(c, dt, _ + fr * dt), jetPush(c, _ + fr * dt) && (jetted = !0), crumbs.length && (crNow = _ + fr * dt), Re(c, dt));
         // v8 : tyrolienne attrapée : l'horizon des simulations de sûreté couvre la glisse
         ziplines.length && zipGrab(c, zp) && stopOnLand && (maxF += zipRemain(c) + 30);
       }
@@ -1296,12 +1358,14 @@ function R(e, t) {
         break;
       }
       if (!c.grounded) ((left = !0), air < 0 && ((air = fr), (airX = c.x)));
-      else if (left && landed < 0) ((landed = fr), sinkers.length && sinkSoon(c, _ + fr * dt) && (sunk = !0));
+      else if (left && landed < 0) ((landed = fr), sinkers.length && sinkSoon(c, _ + fr * dt) && (sunk = !0), crumbs.length && crumbTrap(c) && (sunk = !0));
       // après la réception, encore 6 images : se poser juste devant une ronce n'est pas « sûr »
       if (stopOnLand && landed >= 0 && fr - landed >= 6) break;
     }
     if (saved) movers.forEach((m, ix) => ((m.x = saved[ix][0]), (m.y = saved[ix][1])));
     sinkers.length && setSinkers(_);
+    // v9 : s'arrêter (ou reculer) sur une croûte n'est jamais « sûr »
+    crumbs.length && !stopOnLand && c.grounded && Math.abs(c.vx) < 120 && crumbUnder(c) && (sunk = !0);
     // « sûr » = ni mort ni saut impossible, et on finit posé (pas en pleine chute à l'horizon)
     return { dead, invalid, landed, air, frames: fr + 1, x: c.x, st: c, jetted, dangerX: dead >= 0 && (air < 0 || dead < air) ? c.x : air >= 0 ? airX : c.x, safe: dead < 0 && !invalid && !jetted && !sunk && (c.grounded || landed >= 0) };
   }
@@ -1378,7 +1442,15 @@ function R(e, t) {
       if (dl > 0 && walk.air >= 0 && walk.air <= dl) continue;
       let rs = simRunner(e, 1, dl, 85, !0);
       // un saut « sûr » qui retombe avant l'endroit où la marche échoue ne règle rien (petit saut inutile)
-      if (rs.safe && (walk.safe || rs.x > walk.dangerX + e.w)) return (dl > 0 && (e.plan = _ + dl / 60), { dir: 1, jump: dl === 0 });
+      if (rs.safe && (walk.safe || rs.x > walk.dangerX + e.w)) {
+        // v9 : réception sur une croûte de lave → sauter le plus tard possible (atterrir loin = plus de temps
+        // avant qu'elle cède), tant qu'un saut plus tardif reste sûr. Niveaux sans croûte : inchangé.
+        if (crumbs.length && !walk.safe && crumbUnder(rs.st)) {
+          let lim = Math.min(walk.air >= 0 ? walk.air : 99, walk.dead >= 0 ? walk.dead : 99);
+          if (dl + 4 < lim - 1 && simRunner(e, 1, dl + 4, dl + 89, !0).safe) return ((e.plan = null), { dir: 1, jump: !1 });
+        }
+        return (dl > 0 && (e.plan = _ + dl / 60), { dir: 1, jump: dl === 0 });
+      }
     }
     // Bloqué sans danger (contre un rocher) : on continue d'avancer, la situation change.
     if (walk.safe) return { dir: 1, jump: !1 };
@@ -1638,6 +1710,7 @@ function R(e, t) {
     for (let jt of jets) drawJet(jt);
     for (let sd of sinkers) drawSinker(sd, th);
     for (let bn of bouncers) drawBouncer(bn, th);
+    for (let cb of crumbs) drawCrumb(cb, th);
     for (let zl of ziplines) drawZip(zl, th);
     for (let sg of s.signs || []) drawSign(sg, th);
     for (let gu of gusts) drawGust(gu, th);
@@ -2086,7 +2159,7 @@ function R(e, t) {
   function drawSign(sg, th) {
     if (sg.x < v - 160 || sg.x > v + b + 160) return;
     let lines = String(sg.text).split(`|`).map((t) => t.trim()),
-      bw = 164, bh = 16 + lines.length * 16, top = sg.y - 64 - bh, x0 = sg.x - bw / 2;
+      bw = 164, bh = 16 + lines.length * 16, top = sg.y - 64 - (sg.lift || 0) - bh, x0 = sg.x - bw / 2;
     ((n.fillStyle = `rgba(0,0,0,0.22)`), n.beginPath(), n.ellipse(sg.x, sg.y + 1, 18, 4, 0, 0, Math.PI * 2), n.fill());
     ((n.fillStyle = th.woodDark), n.fillRect(sg.x - 3, top + bh - 4, 6, sg.y - top - bh + 4));
     ((n.fillStyle = th.woodDark), n.beginPath(),
@@ -2163,6 +2236,77 @@ function R(e, t) {
           let ph = (_ * 2.2 + q / 5) % 1;
           (n.beginPath(), n.arc(x0 + 10 + ((q * 41) % (w - 20)), wy - ph * 26, 2 + (q % 2), 0, Math.PI * 2), n.fill());
         }
+      }
+    }
+  }
+  // v9 — Croûte de lave : état vu par un coureur `e` (le joueur pour le dessin et les sons).
+  // ph 0 = intacte, 1 = fissurée (k : 0 → 1 jusqu'à l'effondrement), 2 = effondrée (since, toBack).
+  function crumbPhase(cb, e, time) {
+    let t0 = e?.cr?.[cb.ci];
+    if (t0 == null) return { ph: 0, k: 0 };
+    let dt = time - t0, dl = cb.crumb.delay, rg = cb.crumb.regrow;
+    if (dt < dl) return { ph: 1, k: Math.max(0, dt / dl) };
+    if (dt < dl + rg) return { ph: 2, k: 1, since: dt - dl, toBack: dl + rg - dt };
+    return { ph: 0, k: 0 };
+  }
+  // Dessin : dalle de basalte sombre, liseré de cendre claire dessus, veines de lave qui rougeoient
+  // doucement (intacte) ; posé dessus : elle tremble, s'affaisse de 3 px, les veines s'élargissent et
+  // virent au jaune, des braises montent ; effondrée : blocs qui tombent dans la lave, puis contour
+  // en pointillés orange ; 0,6 s avant de se reformer, le contour s'éclaire et la dalle réapparaît.
+  function drawCrumb(cb, th) {
+    let x0 = cb.x, w = cb.w, y0 = cb.y, h = cb.h;
+    if (x0 + w < v - 60 || x0 > v + b + 60) return;
+    let st = crumbPhase(cb, d, _);
+    if (!cb.cracks) {
+      let rn = de(cb.ci * 97 + Math.round(x0)), cr = [];
+      for (let q = 0; q < Math.max(2, Math.round(w / 38)); q++) {
+        let px = x0 + ((q + 0.3 + rn() * 0.4) * w) / Math.max(2, Math.round(w / 38)), pts = [[px, 0]];
+        for (let yy = 5; yy <= h; yy += 5 + rn() * 3) pts.push([px + (rn() - 0.5) * 12, Math.min(h, yy)]);
+        cr.push(pts);
+      }
+      cb.cracks = cr;
+    }
+    if (st.ph === 2) {
+      let back = st.toBack < 0.6 ? 1 - st.toBack / 0.6 : 0;
+      if (st.since < 0.8) {
+        let nP = Math.max(2, Math.round(w / 32)), pw = w / nP, fy = 0.5 * 1500 * st.since * st.since;
+        n.globalAlpha = Math.max(0, 1 - st.since / 0.8);
+        for (let q = 0; q < nP; q++) {
+          let px = x0 + q * pw + (q - nP / 2) * st.since * 30, py = y0 + fy * (0.8 + (q % 3) * 0.15);
+          ((n.fillStyle = th.crust || `#2b2224`), n.fillRect(px + 2, py, pw - 4, 14), (n.fillStyle = `#ff8a2a`), n.fillRect(px + 2, py + 11, pw - 4, 3));
+        }
+        n.globalAlpha = 1;
+      }
+      ((n.strokeStyle = `rgba(255,170,80,${0.3 + back * 0.6})`), (n.lineWidth = 2), n.setLineDash([7, 7]),
+        n.strokeRect(x0 + 1, y0 + 1, w - 2, h - 2), n.setLineDash([]));
+      back > 0 && ((n.globalAlpha = back * 0.7), (n.fillStyle = th.crust || `#2b2224`), n.fillRect(x0, y0, w, h), (n.globalAlpha = 1));
+      return;
+    }
+    let k = st.k,
+      jx = k > 0 ? Math.sin(_ * 52) * (0.6 + 2.2 * k) : 0,
+      x = x0 + jx, yy = y0 + k * 3,
+      pulse = 0.5 + 0.5 * Math.sin(_ * 2.4 + cb.ci);
+    // lueur de la lave sous la dalle
+    ((n.fillStyle = `rgba(255,120,30,${0.16 + 0.1 * pulse + 0.3 * k})`), n.beginPath(), n.ellipse(x0 + w / 2, y0 + h + 8, w * 0.55, 12, 0, 0, Math.PI * 2), n.fill());
+    // dalle de basalte, bord inférieur rougeoyant, dessus de cendre (liseré clair)
+    ((n.fillStyle = th.crust || `#2b2224`), n.beginPath(), n.roundRect ? n.roundRect(x, yy, w, h, 5) : n.rect(x, yy, w, h), n.fill());
+    ((n.fillStyle = th.crustTop || `#5a4c48`), n.fillRect(x + 2, yy, w - 4, 6));
+    ((n.fillStyle = `rgba(255,${110 + 90 * k},40,${0.55 + 0.4 * k})`), n.fillRect(x + 3, yy + h - 4, w - 6, 3));
+    ((n.fillStyle = `rgba(245,230,215,0.75)`), n.fillRect(x + 2, yy, w - 4, 2));
+    // veines de lave (fissures)
+    ((n.strokeStyle = `rgba(255,${140 + 100 * k},${50 + 60 * k},${0.35 + 0.25 * pulse * (1 - k) + 0.6 * k})`), (n.lineWidth = 1.5 + 2.5 * k), n.beginPath());
+    for (let pts of cb.cracks) {
+      n.moveTo(pts[0][0] + jx, yy + pts[0][1]);
+      for (let [px, py] of pts) n.lineTo(px + jx, yy + py);
+    }
+    n.stroke();
+    // plots orange aux deux bouts (élément vivant, comme mottes et passerelles mobiles)
+    ((n.fillStyle = `#f26522`), n.fillRect(x + 4, yy + 8, 5, 5), n.fillRect(x + w - 9, yy + 8, 5, 5));
+    if (k > 0) {
+      n.fillStyle = `rgba(255,${180 + 60 * k},90,0.9)`;
+      for (let q = 0; q < 6; q++) {
+        let ph = (_ * 1.6 + q / 6) % 1;
+        n.fillRect(x0 + 8 + ((q * 41 + cb.ci * 13) % Math.max(10, w - 16)), yy - 4 - ph * 30, 3, 3);
       }
     }
   }
@@ -2694,6 +2838,7 @@ function R(e, t) {
         thermTime: d?.thermT ?? 0, // temps passé à planer dans une ascendance (v6)
         bounces: d?.bounced ?? 0, // rebonds sur les amanites (v7)
         zips: d?.zips ?? 0, // tyroliennes attrapées (v8)
+        crusts: d?.crusts ?? 0, // croûtes de lave foulées (v9)
         onZip: !!d?.zip,
         deathXs: d?.deathXs ?? [],
       }),

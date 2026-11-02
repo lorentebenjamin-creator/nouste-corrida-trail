@@ -395,6 +395,34 @@ pylône) : pressé 100 % → durci jusqu'à 88 % ; après revue 30/10 (lâcher +
 Étiquette « **Technique** » (échelle d'engagement §8 ; N°16 Technique à 90 %, N°5 à 85 %). « Tyroliennes »
 reste dans le blurb. Nouvelle palette `glacier`.
 
+## 3i. Mécanique v9 : croûtes de lave (`croute`, niveau 20)
+
+`croute(x, y, w, delay = 0.6, regrow = 3)` (dans `solids`) : dalle de lave refroidie (planche 22 px de
+dessus `y`, traversable par-dessous, ↓ pour descendre) posée au-dessus d'une coulée. **Intacte** tant
+qu'aucun coureur ne s'y est posé ; dès qu'un coureur s'y pose, **sa** minuterie démarre (`e.cr[ci]`) :
+elle se **fissure** (veines qui virent au jaune, tremblement, braises) puis **s'effondre sous lui**
+`delay` s plus tard — chacun la sienne : les rivaux ne cassent pas la tienne ; elle se reforme
+`regrow` s après. On ne s'arrête donc jamais dessus : on la traverse en courant (dalles accolées =
+pont qui s'écroule derrière soi), ou, si elle est plus large que la course possible avant la casse
+(352 px/s × delay), on atterrit loin et on repart d'un saut à temps (coyote 0,11 s compris). Plots
+orange aux deux bouts. Champ `crumb: { delay, regrow }` sur un solid `kind: "plank"`.
+
+Moteur (`assets/game.js`) : `crumbTouch` / `crumbGone` / `crumbUnder` / `crumbTrap` / `crumbPhase` /
+`drawCrumb`, liste `crumbs`, état `e.cr` (réinitialisé après une chute), branches dans la boucle
+principale et dans `simRunner` (une croûte sous les pieds avec vx trop faible = piège, comme une
+motte qui plonge). Niveaux sans croûte : aucun effet.
+
+Lisibilité : panneau contenant « croûte » / « lave » avant la première ; veines, tremblement et
+braises pendant la fissure ; silhouette effondrée puis reforme. `tools/check-levels.mjs` : un pad de
+raccourci (`shortcuts`) peut être un sol **ou** une planche `crumb` (Ligne des Braises) ; avertissement
+si un panneau est à moins de 400 px du spawn (risque d'être caché par le peloton — remonter avec
+`panneau(..., lift)` / `sg.lift` dans `drawSign`).
+
+Recette (N°20) : croûtes d'initiation, **Gué des Salamandres** (quatre croûtes larges 0,6 s), escalier,
+plongeons, puis la **Ligne des Braises** (six croûtes courtes 150 px / 0,55 s en ligne haute = raccourci
+qui **exploite** la mécanique) et le pont final. Palette `volcan`. Étiquette « **Bien engagé** »
+(échelle §8 ; pressé 73 %, proche du N°10 à 75 % sur l'ancienne mesure).
+
 ## 4. Thèmes
 
 Le décor est **100 % procédural** (dégradé de ciel, crêtes, sapins, sol, ronces) : un thème
@@ -419,6 +447,7 @@ dans la brume du crépuscule, ciel violet et cuivre ; les amanites rouges ressor
 `etoiles` (niv. 17, crête de nuit sous les étoiles, ciel indigo et lueur violette, herbe givrée, avec `rim`),
 `glacier` (niv. 18, glacier au soir, ciel bleu acier et pêche, glace bleue, neige givrée, crevasses opaques `pit`),
 `gres` (niv. 19, canyon de grès rouge au coucher du soleil, ciel indigo et orangé, avec `canyon` : gorges striées, rivière ; revue 31/10 : `back` foncé + `rim` clair sur le dessus des colonnes, comme `etoiles`).
+`volcan` (niv. 20, coulée de lave sous un ciel de cendre, `rim` cendre claire, clés `crust`/`crustTop` pour les croûtes de lave).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -510,7 +539,9 @@ chute, un humain peut passer.
    Chamois Noctambules, 29/10, raccourci « Sauts de Chamois ») → **le N°18 DOIT être à mécaniques**. N°18 à mécaniques
    (Glacier des Choucas Voltigeurs, tyroliennes, §3h, 30/10, raccourci « Séracs Suspendus ») → **le N°19 DOIT être classique**
    (avec un raccourci risqué, étape 3c). N°19 classique (Canyon des Mouflons Rigolards, 31/10, raccourci « Sauts du
-   Mouflon ») → **le N°20 DOIT être à mécaniques**.
+   Mouflon ») → **le N°20 DOIT être à mécaniques**. N°20 à mécaniques (Coulée des Salamandres Pressées, croûtes de
+   lave, §3i, 2/11, raccourci « Ligne des Braises ») → **le N°21 DOIT être classique** (avec un raccourci risqué,
+   étape 3c).
 3c. **Raccourci risqué pour les classiques** (revue du 27/10, règle à appliquer à **tous les futurs
    niveaux classiques**, N°17, 19, 21…) : sur un classique, le pilote auto ne ralentit jamais (temps ≈
    distance / 352 px/s) et un humain attentif le suit à 3 % près, donc l'or (plancher auto × 1,03) tombe
@@ -545,6 +576,11 @@ chute, un humain peut passer.
      l'or sous … (il faut les raccourcis) » et, toutes médailles prises, les deux temps du pilote auto.
    * Viser **≥ 1,2 s d'écart** auto − autoShort (sinon la fenêtre [autoShort × 1,03, auto − 0,1] est vide)
      et un taux de réussite du saut ≈ 80–90 % attentif, 50–65 % pressé (N°15 : 84 % / 58 %).
+   * **Ne pas réutiliser le même modèle de raccourci deux niveaux de suite** (revue 2/11) : N°17
+     Sauts de Chamois / N°18 Séracs Suspendus / N°19 Sauts du Mouflon enchaînaient le même schéma
+     « colonnes / failles / ressaut ». Le N°20 remplace ce clone (Orgues Basaltiques) par la **Ligne
+     des Braises** (raccourci sur croûtes de lave qui exploite la mécanique v9). À chaque nouveau
+     niveau à raccourci, choisir un modèle distinct du précédent.
    **À faire pour les classiques existants** (non modifiés le 27/10, or attentif trop généreux) :
    * **N°11 Névé des Marmottes** (or 73 % attentif) : remplacer les ponts de neige (passerelles au-dessus
      de la grande crevasse, après les Dents de la Marmotte) par 3 séracs-rochers séparés de criques de neige
@@ -762,6 +798,10 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
   (pylônes haubanés, câble, poignée, chevrons, chariot et sangle), son à l'accroche, `getState().zips` /
   `onZip`. Niveaux sans tyrolienne : inchangés (temps autopilote des N°1–17 identiques au dixième, essais
   humains du N°17 identiques essai par essai après la modification).
+* **v9 (2/11)** : croûtes de lave (`croute`, champ `crumb` d'une planche, §3i) — `crumbTouch` / `crumbGone` /
+  `crumbTrap` / `drawCrumb`, liste `crumbs`, état `e.cr` (par coureur, remis à zéro après une chute),
+  branches dans la boucle et `simRunner`. Niveaux sans croûte : inchangés (temps autopilote des N°1–19
+  identiques au dixième).
 * `assets/routes-x3PbsDEU.css` : URLs des polices relatives. `custom.css` : liste de niveaux
   défilante, badge, bouton ↓, médailles (disques CSS, sans emoji).
 * Médailles (revue du 20/10) : `medalTargets` / `medalOf` / `medalNext` dans `assets/game.js` lisent
@@ -770,7 +810,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–18)
+## 8. Courbe de difficulté (niveaux 1–20)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -793,6 +833,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
 | 17 | La Crête des Chamois Noctambules | Crête de nuit | 1225 m | 21 (dont 7 dans la Crête des Cairns, 3 brèches) | 5 | — (classique ; passage clé : la **Crête des Cairns**, 7 cairns plantés au bord du vide, trous de 100 → 140 px ; **Sauts de Chamois**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 36,5 s (chemin sûr) ; 34,9 s par les raccourcis |
 | 18 | Le Glacier des Choucas Voltigeurs | Technique | 1364 m | 18 (dont **6 crevasses à tyrolienne** de 520–680 px, 3 crevasses des Séracs) | 4 | **6 tyroliennes** (1 basse, 1 haute, le **Relais des Choucas** à 4 + **Corniche des Choucas** zipDrop) ; **Séracs Suspendus**, 3 raccourcis ; 4 panneaux | 1 / 0.93 / 0.86 | 37,6 s (chemin sûr) ; 36,2 s par les raccourcis |
 | 19 | Le Canyon des Mouflons Rigolards | Canyon | 1300 m | 19 (dont colonnes des Cheminées, 3 creux des Sauts) | 6 | — (classique ; passage clé : les **Cheminées de fée**, plongeons 150/130 px ; **Sauts du Mouflon**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 38,3 s (chemin sûr) ; 36,7 s par les raccourcis |
+| 20 | La Coulée des Salamandres Pressées | Bien engagé | 1550 m | 26 croûtes (Gué, escalier, plongeons, Ligne des Braises ×6, pont) | 3 | **26 croûtes de lave** (mécanique v9) ; **Gué des Salamandres** ; **Ligne des Braises**, 6 raccourcis sur croûtes ; 3 panneaux | 1 / 0.93 / 0.86 | 45,8 s (chemin sûr) ; 43,8 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -819,6 +860,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 17 | La Crête des Chamois Noctambules | 36,5 s *(raccourcis : 34,9 s)* | 36,4 s *(exige les raccourcis)* | 39,4 s | 48,8 s | 33 % / 78 % / 98 % | 8 % / 13 % / 33 % |
 | 18 | Le Glacier des Choucas Voltigeurs | 37,6 s *(raccourcis : 36,2 s)* | 37,5 s *(exige Corniche + Séracs)* | 40,5 s | 43,5 s | 40 % / 93 % / 95 % | 13 % / 30 % / 33 % |
 | 19 | Le Canyon des Mouflons Rigolards | 38,3 s *(raccourcis : 36,7 s)* | 38,0 s *(exige les raccourcis)* | 41,1 s | 45,9 s | 40 % / 88 % / 95 % | 8 % / 18 % / 33 % |
+| 20 | La Coulée des Salamandres Pressées | 45,8 s *(raccourcis : 43,8 s)* | 45,7 s *(exige la Ligne des Braises)* | 49,4 s | 58 s | 38 % / 100 % / 100 % | 5 % / 15 % / 33 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -1037,6 +1079,23 @@ raccourci). N°1–18 inchangés. **Prochain niveau (N°20) : à mécaniques.**
    `/workspace/corrida-site-shots/n19-avant.png` et `n19-apres.png` (Cheminées). Médailles inchangées (géométrie
    inchangée).
 
+
+**N°20 (2/11, à mécaniques)** : **La Coulée des Salamandres Pressées**, étiquette « **Bien engagé** »
+(échelle d'engagement §8 ; pressé **73 %** / 3,38, proche du N°10 Bien engagé à 75 % sur l'ancienne mesure ;
+Technique à 83–90 % serait hors ±5), 1550 m, nouvelle palette `volcan`, mécanique v9 : les **croûtes de
+lave** (§3i). Passage clé : le **Gué des Salamandres** (quatre croûtes larges 0,6 s). Raccourci « **Ligne
+des Braises** » (×6, croûtes courtes 150 px / 0,55 s en ligne haute — le raccourci **exploite** la croûte,
+pas un clone Orgues/Séracs/Mouflon) : auto 45,8 s, autoShort 43,8 s. Médailles **45,7 / 49,4 / 58 s**
+(attentif 38 / 100 / 100 % ; pressé 5 / 15 / 33 %). Panneau « Croûte de lave » relevé (`lift: 96`) au-dessus
+du peloton ; `check-levels` avertit si panneau < 400 px du spawn. N°1–19 inchangés (temps `auto` identiques).
+**Prochain niveau (N°21) : classique**, avec un raccourci risqué (modèle distinct de la Ligne des Braises).
+
+**Revue Boss Bot 2/11 (N°20)** :
+1. **autoShort** manquant → ajouté ; or exige la Ligne des Braises (plancher autoShort × 1,03, plafond auto − 0,1).
+2. Panneau d'initiation caché par le peloton → `panneau(..., lift)` + `drawSign` ; warn spawn < 400 px.
+3. Clone « Orgues Basaltiques » (modèle Séracs/Mouflon) → remplacé par la **Ligne des Braises** sur croûtes ;
+   règle « pas le même modèle de raccourci deux niveaux de suite » (§6 étape 3c).
+
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
 Même cerveau que l'autopilote (simulation exacte de la physique), rendu imprécis :
@@ -1132,6 +1191,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 17 | La Crête des Chamois Noctambules | Crête de nuit | 100 % | 0,30 | 38,6 s | 85 % | 3,02 | 54,5 s |
 | 18 | Le Glacier des Choucas Voltigeurs | Technique | 100 % | 0,07 | 38,2 s | 83 % | 2,70 | 48,3 s |
 | 19 | Le Canyon des Mouflons Rigolards | Canyon | 100 % | 0,13 | 39,2 s | 88 % | 2,60 | 51,8 s |
+| 20 | La Coulée des Salamandres Pressées | Bien engagé | 100 % | 0,05 | 46,0 s | 73 % | 3,38 | 59,7 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le

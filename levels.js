@@ -100,7 +100,8 @@ export const rafale = (x1, x2, period = 4.2, on = 0.4, phase = 0, warn = 1.0, sl
 //   (décor seul, aucun effet de jeu ; « | » sépare les lignes, 2 lignes de ≈ 18 caractères max).
 //   À mettre dans le tableau `signs` du niveau. Obligatoire avant un « ravin au calme » (§3d) :
 //   ravin sous une rafale que l'on ne franchit qu'au calme (la rafale fait tomber).
-export const panneau = (x, yDuSol, text) => ({ x, y: yDuSol, text });
+export const panneau = (x, yDuSol, text, lift = 0) => ({ x, y: yDuSol, text, ...(lift ? { lift } : {}) });
+//   `lift` (optionnel, px) : remonte le panneau au-dessus des têtes du peloton (drawSign).
 
 // ---- Mécanique v5 ----------------------------------------------------------
 // motte(x, y, w, period=4.4, on=0.6, phase=0, warn=0.9) : MOTTE PLONGEANTE — passerelle (planche
@@ -150,6 +151,17 @@ export const amanite = (x, y, w = 140, bounce = 1000) => ({ x, y, w, h: 18, oneW
 //   Lâcher : bout du câble ≈ 150–160 px au-dessus du sol d'arrivée (pieds à ≈ 40 px du sol).
 //   À mettre dans le tableau `ziplines` du niveau (LEVELS.md §3h).
 export const tyro = (x1, y1, x2, y2, grab = 8, speed = 480, accel = 900) => ({ x1, y1, x2, y2, grab, speed, accel });
+
+// ---- Mécanique v9 ----------------------------------------------------------
+// croute(x, y, w, delay=0.6, regrow=3) : CROÛTE DE LAVE — dalle de lave refroidie (planche 22 px de dessus `y`,
+//   traversable par-dessous, ↓ pour descendre) posée au-dessus d'une coulée de lave. Intacte tant qu'on ne
+//   s'y est pas posé ; dès qu'un coureur s'y pose, elle se fissure (veines qui virent au jaune, tremblement,
+//   braises) et S'EFFONDRE SOUS LUI `delay` s plus tard (chacun la sienne : les rivaux ne cassent pas la
+//   tienne) ; elle se reforme `regrow` s après. On ne s'arrête donc jamais dessus : on la traverse en
+//   courant (dalles accolées = pont qui s'écroule derrière soi), ou, si elle est plus large que la course
+//   possible avant la casse (352 px/s × delay), on atterrit LOIN et on repart d'un saut à temps (« coyote »
+//   de 0,11 s compris). Plots orange aux deux bouts. À mettre dans `solids` (LEVELS.md §3i).
+export const croute = (x, y, w, delay = 0.6, regrow = 3) => ({ x, y, w, h: 22, oneWay: true, kind: "plank", crumb: { delay, regrow } });
 
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
@@ -375,6 +387,24 @@ export const THEMES = {
     fog: "#1a0c08",
     rim: "#f5e6c8",
     canyon: { wall: "#a85a38", wallDark: "#6a3018", strata: "rgba(60,22,12,0.5)", back: "#3a1810", deep: "#0e0604", river: "#3f7f8c", riverHi: "#c8eef0" },
+  },
+  volcan: {
+    // Niveau 20 : coulée volcanique au crépuscule (ciel de cendre violet qui rougeoie à l'horizon, basalte
+    // noir, cendre grise, arbres calcinés ; trous opaques avec la LAVE au fond — `water`/`waterHi`
+    // animés — ; `rim` cendre claire pour lire les bords dans le sombre ; `crust`/`crustTop` = croûtes de lave)
+    skyTop: "#1c1226", skyMid: "#6a2c34", skyBot: "#e9824a",
+    ridge: "#2a1a20", ridge2: "#4e2a2a",
+    pine: "#1a1416", pine2: "#352826",
+    dirt: "#45393a", dirtDark: "#261e20",
+    grass: "#8c8478", grassDark: "#5c564e",
+    wood: "#6a4a34", woodDark: "#3a281c",
+    rock: "#5a5056", rockDark: "#2e282c",
+    thorn: "#160c0a", leaf: "#4a3426", berry: "#ffb03a",
+    fog: "#2a0a04",
+    pit: "#140402",
+    rim: "#efe0d0",
+    water: "#e0501a", waterHi: "#ffd060",
+    crust: "#2b2224", crustTop: "#5a4c48",
   },
 };
 
@@ -1899,5 +1929,144 @@ LEVELS.push((() => {
       { match: "ground@8655→ground@8700: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts du Mouflon (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
       { match: "ground@9075→ground@9120: marche montante sans trou (75 px)", reason: "Marche voulue du chemin sûr des Sauts du Mouflon (ressaut sur place) — temps gagné par le raccourci risqué (shortcuts)." },
     ],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 20 — La Coulée des Salamandres Pressées (niveau du jour, 2026-11-02)
+// Niveau à mécaniques (règle d'alternance, après le N°19 classique) — mécanique INÉDITE v9 : les
+// CROÛTES DE LAVE (`croute()`, LEVELS.md §3i). Une dalle de lave refroidie tient tant qu'on ne s'y est
+// pas posé ; la première réception démarre SA minuterie : elle se fissure et s'effondre sous toi
+// `delay` s plus tard (puis se reforme). Jusqu'ici tout ce qui bougeait suivait une horloge (passerelles,
+// mottes, jets, rafales, ascendances) : ici c'est TOI qui déclenches le piège, on ne peut ni attendre
+// ni hésiter. Annoncée par un panneau, d'abord en douceur (dalles courtes, 0,8 s), puis le pont qui
+// s'écroule derrière toi, puis le passage clé — le GUÉ DES SALAMANDRES : quatre croûtes larges
+// (250–270 px, 0,55 s) plus longues que la course possible avant la casse : atterrir loin, repartir à
+// temps —, l'escalier de croûtes, les plongeons sur croûte, la LIGNE DES BRAISES (raccourci sur
+// croûtes courtes/rapides) et le pont final. Palette `volcan`.
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "coulee-salamandres", c = v(id);
+  c.line(160, 400, 370, 3); c.arc(800, 960, 330, 3, 40); c.arc(1110, 1250, 330, 3, 40);
+  c.arc(1420, 1600, 290, 3, 40); c.line(1680, 1900, 310, 2);
+  // croûtes d'initiation
+  c.arc(2460, 2620, 270, 3, 40); c.arc(2780, 2940, 270, 3, 40); c.arc(3120, 3280, 270, 3, 40);
+  c.line(3320, 3440, 310, 2); c.arc(3470, 3630, 260, 3, 40);
+  // le pont qui s'écroule
+  c.arc(3800, 3990, 270, 3, 40); c.line(4100, 4500, 320, 4); c.arc(4560, 4740, 270, 3, 40);
+  c.arc(5220, 5400, 320, 3, 40);
+  // Gué des Salamandres
+  c.arc(5920, 6120, 330, 3, 40); c.arc(6300, 6500, 330, 3, 40); c.arc(6690, 6890, 310, 3, 40);
+  c.arc(7070, 7270, 310, 3, 40); c.arc(7460, 7660, 330, 3, 40);
+  c.line(7700, 7820, 370, 2); c.arc(7860, 8020, 330, 3, 40);
+  // escalier de croûtes
+  c.arc(8180, 8380, 320, 3, 40); c.arc(8470, 8670, 270, 3, 40); c.arc(8760, 8960, 220, 3, 40); c.arc(9050, 9250, 170, 3, 40);
+  c.arc(9370, 9530, 220, 3, 40);
+  // plongeons sur croûte
+  c.arc(9580, 9790, 240, 3, 40); c.arc(10020, 10220, 290, 3, 40); c.arc(10360, 10560, 330, 3, 40); c.arc(10680, 10880, 330, 3, 40);
+  c.line(10950, 11100, 370, 3); c.line(11420, 11540, 370, 2);
+  // Ligne des Braises (arcs du raccourci, croûte en croûte)
+  c.arc(11540, 11860, 240, 4, 60); c.arc(11960, 12280, 240, 4, 60); c.arc(12380, 12700, 240, 4, 60);
+  c.arc(12800, 13120, 240, 4, 60); c.arc(13220, 13540, 240, 4, 60); c.arc(13640, 13960, 240, 4, 60);
+  c.line(14120, 14320, 370, 2);
+  // pont final
+  c.arc(13220, 13440, 330, 3, 40); c.arc(13560, 13760, 330, 3, 40);
+  c.line(13900, 14100, 370, 2); c.arc(14060, 14200, 330, 3, 40);
+  const pont = (x0, n, yy, w, delay) => Array.from({ length: n }, (_, i) => croute(x0 + i * w, yy, w, delay));
+  return {
+    id, name: "La Coulée des Salamandres Pressées",
+    blurb: "Lave sous les pieds : les croûtes craquent dès que tu te poses. Ne t'arrête jamais, les salamandres n'attendent pas.",
+    difficulty: "Bien engagé", theme: "volcan",
+    width: 16000, floor: 440, spawnX: 60,
+    solids: [
+      // Départ sur le basalte, mise en jambes classique
+      p(0, 820, 440),
+      p(940, 520, 440), h(1150, 440),
+      p(1580, 860, 380),
+      // Croûtes d'initiation : courtes (220 px) et lentes (0,8 s) — on les traverse sans y penser
+      croute(2560, 380, 220, 0.8),
+      croute(2900, 380, 220, 0.8),
+      p(3240, 600, 380), g(3500, 380),
+      // Le pont qui s'écroule derrière toi : six dalles accolées de 100 px (0,5 s) — ne t'arrête pas
+      ...pont(3970, 6, 380, 100, 0.5),
+      p(4700, 560, 380),
+      p(5360, 600, 440),
+      // Passage clé — le GUÉ DES SALAMANDRES : quatre croûtes larges (250–270 px, 0,6 s), plus longues
+      // que la course possible avant la casse depuis une réception courte : atterrir loin, repartir à temps
+      croute(6080, 440, 260, 0.6),
+      croute(6460, 440, 260, 0.6),
+      croute(6850, 400, 250, 0.6),
+      croute(7230, 440, 270, 0.6),
+      p(7620, 600, 440), h(7900, 440),
+      // Escalier de croûtes (+50 px par marche, 0,55 s)
+      croute(8340, 390, 180, 0.55),
+      croute(8630, 340, 180, 0.55),
+      croute(8920, 290, 180, 0.55),
+      p(9210, 420, 290),
+      // Plongeons sur croûte (0,5 s)
+      p(9760, 300, 360),
+      croute(10200, 440, 200, 0.5),
+      croute(10520, 440, 200, 0.5),
+      // La LIGNE DES BRAISES (raccourci risqué, LEVELS.md §6 étape 3c) : au lieu du modèle
+      // « 4 colonnes / 3 failles / ressaut » des N°18–19, le raccourci EXPLOITE la croûte —
+      // six croûtes COURTES (150 px, 0,55 s) en ligne haute. Chemin SÛR : chaque fossé a trois
+      // dalles basses (sauts répétés) + marche + ressaut — nettement plus lent. RACCOURCI :
+      // sauts de 270 px de braise en braise ; l'or l'exige (autoShort). Un même modèle de
+      // raccourci ne doit pas servir deux niveaux d'affilée (LEVELS.md §6).
+      p(10840, 640, 440),
+      p(11480, 150, 345),
+      // Fossé 1 (11630→11900 = 270) : 3 dalles + marche
+      p(11640, 70, 560), p(11730, 70, 560), p(11820, 50, 560), p(11855, 45, 420),
+      croute(11900, 345, 150, 0.55),
+      p(12060, 70, 560), p(12150, 70, 560), p(12240, 50, 560), p(12275, 45, 420),
+      croute(12320, 345, 150, 0.55),
+      p(12480, 70, 560), p(12570, 70, 560), p(12660, 50, 560), p(12695, 45, 420),
+      croute(12740, 345, 150, 0.55),
+      p(12900, 70, 560), p(12990, 70, 560), p(13080, 50, 560), p(13115, 45, 420),
+      croute(13160, 345, 150, 0.55),
+      p(13320, 70, 560), p(13410, 70, 560), p(13500, 50, 560), p(13535, 45, 420),
+      croute(13580, 345, 150, 0.55),
+      p(13740, 70, 560), p(13830, 70, 560), p(13920, 50, 560), p(13955, 45, 420),
+      p(14000, 150, 345),
+      p(14150, 500, 440),
+      // Pont final qui s'écroule (dalles de 100 px, 0,5 s)
+      ...pont(14660, 4, 440, 100, 0.5),
+      // Sprint jusqu'à l'arche
+      p(15160, 540, 440),
+    ],
+    hazards: [
+      _(480, 70, 440),
+      _(9380, 64, 290),
+      _(15280, 70, 440),
+    ],
+    signs: [
+      // lift 96 : au-dessus des têtes du peloton (sinon le panneau est caché au départ — revue Boss 2/11)
+      panneau(2200, 380, "Croûte de lave :|ne t'arrête pas !", 96),
+      panneau(5700, 440, "Gué des Salamandres|vite, ça craque !"),
+      panneau(11230, 440, "Raccourci risqué :|ligne de braises"),
+    ],
+    // Raccourcis risqués (LEVELS.md §6 étape 3c) : sauts de braise en braise au-dessus des fossés.
+    shortcuts: [
+      { name: "Ligne des Braises 1", from: 11480, to: 11630, y: 345, land: 11900, landY: 345 },
+      { name: "Ligne des Braises 2", from: 11900, to: 12050, y: 345, land: 12320, landY: 345 },
+      { name: "Ligne des Braises 3", from: 12320, to: 12470, y: 345, land: 12740, landY: 345 },
+      { name: "Ligne des Braises 4", from: 12740, to: 12890, y: 345, land: 13160, landY: 345 },
+      { name: "Ligne des Braises 5", from: 13160, to: 13310, y: 345, land: 13580, landY: 345 },
+      { name: "Ligne des Braises 6", from: 13580, to: 13730, y: 345, land: 14000, landY: 345 },
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 1600, 380, 1), y(id, 5380, 440, 2), y(id, 7640, 440, 3), y(id, 10860, 440, 4), y(id, 14180, 440, 5)],
+    finishX: 15500,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 45.8, autoShort: 43.8, gold: 45.7, silver: 49.4, bronze: 58 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 38 %, argent 100 %, bronze 100 % ; pressés : or 5 %, argent 15 %, bronze 33 %)
+    acceptedWarnings: [
+      { match: "ground@10840→ground@11480: marche montante sans trou (95 px)", reason: "Montée sur le premier pad de la Ligne des Braises avec tout l'élan (modèle des Séracs Suspendus du N°18) ; pilote auto sans perte de temps, rivaux 0 chute au playtest." },
+      { match: "ground@11855→plank@11900: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (ressaut ≈ 0,5 s) — temps gagné par le raccourci sur croûtes (shortcuts)." },
+      { match: "ground@12275→plank@12320: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (ressaut) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@12695→plank@12740: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (ressaut) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@13115→plank@13160: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (ressaut) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@13535→plank@13580: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (ressaut) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@13955→ground@14000: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (ressaut) — temps gagné par le raccourci (shortcuts)." },
+    ]
   };
 })());
