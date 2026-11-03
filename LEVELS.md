@@ -418,10 +418,10 @@ raccourci (`shortcuts`) peut être un sol **ou** une planche `crumb` (Ligne des 
 si un panneau est à moins de 400 px du spawn (risque d'être caché par le peloton — remonter avec
 `panneau(..., lift)` / `sg.lift` dans `drawSign`).
 
-Recette (N°20) : croûtes d'initiation, **Gué des Salamandres** (quatre croûtes larges 0,6 s), escalier,
-plongeons, puis la **Ligne des Braises** (six croûtes courtes 150 px / 0,55 s en ligne haute = raccourci
-qui **exploite** la mécanique) et le pont final. Palette `volcan`. Étiquette « **Bien engagé** »
-(échelle §8 ; pressé 73 %, proche du N°10 à 75 % sur l'ancienne mesure).
+Recette (N°20) : croûtes d'initiation, **Gué des Salamandres** (quatre croûtes 300 px / 0,7 s, revue 3/11),
+escalier, plongeons, puis la **Ligne des Braises** (croûtes 200 px / 0,65 s en ligne haute = raccourci
+qui **exploite** la mécanique ; gain attentif ≥ 1,5 s) et le pont final. Palette `volcan`. Étiquette
+« **Bien engagé** » (échelle §8 ; pressé 93 % après revue 3/11, cohérent avec N°12 à 95 %).
 
 ## 4. Thèmes
 
@@ -833,7 +833,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
 | 17 | La Crête des Chamois Noctambules | Crête de nuit | 1225 m | 21 (dont 7 dans la Crête des Cairns, 3 brèches) | 5 | — (classique ; passage clé : la **Crête des Cairns**, 7 cairns plantés au bord du vide, trous de 100 → 140 px ; **Sauts de Chamois**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 36,5 s (chemin sûr) ; 34,9 s par les raccourcis |
 | 18 | Le Glacier des Choucas Voltigeurs | Technique | 1364 m | 18 (dont **6 crevasses à tyrolienne** de 520–680 px, 3 crevasses des Séracs) | 4 | **6 tyroliennes** (1 basse, 1 haute, le **Relais des Choucas** à 4 + **Corniche des Choucas** zipDrop) ; **Séracs Suspendus**, 3 raccourcis ; 4 panneaux | 1 / 0.93 / 0.86 | 37,6 s (chemin sûr) ; 36,2 s par les raccourcis |
 | 19 | Le Canyon des Mouflons Rigolards | Canyon | 1300 m | 19 (dont colonnes des Cheminées, 3 creux des Sauts) | 6 | — (classique ; passage clé : les **Cheminées de fée**, plongeons 150/130 px ; **Sauts du Mouflon**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 38,3 s (chemin sûr) ; 36,7 s par les raccourcis |
-| 20 | La Coulée des Salamandres Pressées | Bien engagé | 1550 m | 26 croûtes (Gué, escalier, plongeons, Ligne des Braises ×6, pont) | 3 | **26 croûtes de lave** (mécanique v9) ; **Gué des Salamandres** ; **Ligne des Braises**, 6 raccourcis sur croûtes ; 3 panneaux | 1 / 0.93 / 0.86 | 45,8 s (chemin sûr) ; 43,8 s par les raccourcis |
+| 20 | La Coulée des Salamandres Pressées | Bien engagé | 1600 m | 26 croûtes (Gué, escalier, plongeons, Ligne des Braises ×6, pont) | 3 | **26 croûtes de lave** (mécanique v9) ; **Gué des Salamandres** (revue 3/11 : 300 px / 0,7 s) ; **Ligne des Braises**, 6 raccourcis sur croûtes 200 px ; 3 panneaux | 1 / 0.93 / 0.86 | 47,3 s (chemin sûr) ; 45,2 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -860,7 +860,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 17 | La Crête des Chamois Noctambules | 36,5 s *(raccourcis : 34,9 s)* | 36,4 s *(exige les raccourcis)* | 39,4 s | 48,8 s | 33 % / 78 % / 98 % | 8 % / 13 % / 33 % |
 | 18 | Le Glacier des Choucas Voltigeurs | 37,6 s *(raccourcis : 36,2 s)* | 37,5 s *(exige Corniche + Séracs)* | 40,5 s | 43,5 s | 40 % / 93 % / 95 % | 13 % / 30 % / 33 % |
 | 19 | Le Canyon des Mouflons Rigolards | 38,3 s *(raccourcis : 36,7 s)* | 38,0 s *(exige les raccourcis)* | 41,1 s | 45,9 s | 40 % / 88 % / 95 % | 8 % / 18 % / 33 % |
-| 20 | La Coulée des Salamandres Pressées | 45,8 s *(raccourcis : 43,8 s)* | 45,7 s *(exige la Ligne des Braises)* | 49,4 s | 58 s | 38 % / 100 % / 100 % | 5 % / 15 % / 33 % |
+| 20 | La Coulée des Salamandres Pressées | 47,3 s *(raccourcis : 45,2 s)* | 47,2 s *(exige la Ligne des Braises)* | 51 s | 59,2 s | 33 % / 80 % / 100 % | 3 % / 8 % / 33 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -1096,6 +1096,11 @@ du peloton ; `check-levels` avertit si panneau < 400 px du spawn. N°1–19 inch
 3. Clone « Orgues Basaltiques » (modèle Séracs/Mouflon) → remplacé par la **Ligne des Braises** sur croûtes ;
    règle « pas le même modèle de raccourci deux niveaux de suite » (§6 étape 3c).
 
+**Revue Boss Bot 3/11 (N°20, non publiée — branche `revue-03-11`)** :
+1. **Ligne des Braises** : gain attentif avant 0,2 s (médianes 45,8 avec / 46,0 sans) → fossés sûrs allongés (micro-dalles) + croûtes 200 px / 0,65 s → **après 4,1 s** (46,7 avec / 50,8 sans). Auto 45,8/43,8 → **47,3/45,2**.
+2. **Gué (x≈6500)** : avant 49 chutes pressées sur les hotspots 6200/6500/6900 (sur 135) → croûtes 300 px, délai 0,7 s, y 440 plat, chevrons d'approche, appui stable + panneau clarifié → **après** hotspots Gué dispersés (plus dans le top 3 ; zone 6100–7300 : 18/108). Pressé 73 % / 3,38 → **93 % / 2,70**.
+3. Médailles recalibrées : **47,2 / 51 / 59,2** (attentif or 33 % dans 30–50 % ; bronze pressé 33 %). Étiquette **Bien engagé** conservée (93 % ≈ N°12 Bien engagé à 95 %, ±5).
+
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
 Même cerveau que l'autopilote (simulation exacte de la physique), rendu imprécis :
@@ -1191,7 +1196,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 17 | La Crête des Chamois Noctambules | Crête de nuit | 100 % | 0,30 | 38,6 s | 85 % | 3,02 | 54,5 s |
 | 18 | Le Glacier des Choucas Voltigeurs | Technique | 100 % | 0,07 | 38,2 s | 83 % | 2,70 | 48,3 s |
 | 19 | Le Canyon des Mouflons Rigolards | Canyon | 100 % | 0,13 | 39,2 s | 88 % | 2,60 | 51,8 s |
-| 20 | La Coulée des Salamandres Pressées | Bien engagé | 100 % | 0,05 | 46,0 s | 73 % | 3,38 | 59,7 s |
+| 20 | La Coulée des Salamandres Pressées | Bien engagé | 100 % | 0,03 | 48,9 s | 93 % | 2,70 | 66,3 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le

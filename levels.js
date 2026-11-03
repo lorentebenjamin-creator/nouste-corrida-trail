@@ -2060,7 +2060,7 @@ LEVELS.push((() => {
     checkpoints: [y(id, 1600, 380, 1), y(id, 5380, 440, 2), y(id, 7640, 440, 3), y(id, 10860, 440, 4), y(id, 14420, 440, 5)],
     finishX: 16000,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 45.8, autoShort: 43.8, gold: 45.7, silver: 49.4, bronze: 58 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 38 %, argent 100 %, bronze 100 % ; pressés : or 5 %, argent 15 %, bronze 33 %)
+    medals: { auto: 47.3, autoShort: 45.2, gold: 47.2, silver: 51, bronze: 59.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 33 %, argent 80 %, bronze 100 % ; pressés : or 3 %, argent 8 %, bronze 33 %)
     acceptedWarnings: [
       { match: "ground@10840→ground@11480: marche montante sans trou (95 px)", reason: "Montée sur le premier pad de la Ligne des Braises avec tout l'élan (modèle des Séracs Suspendus du N°18) ; pilote auto sans perte de temps, rivaux 0 chute au playtest." },
       { match: "ground@11855→plank@11900: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (crique N°19, revue 3/11) — temps gagné par le raccourci sur croûtes (shortcuts)." },
