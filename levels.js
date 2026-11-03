@@ -1991,13 +1991,14 @@ LEVELS.push((() => {
       ...pont(3970, 6, 380, 100, 0.5),
       p(4700, 560, 380),
       p(5360, 600, 440),
-      // Passage clé — le GUÉ DES SALAMANDRES (revue 3/11) : quatre croûtes plus larges (300 px, 0,6 s),
-      // toutes à y 440 (la 3e était à 400 — marche confuse) ; chevrons d'approche dans drawCrumb.
-      // Plus longues que la course possible avant la casse : atterrir loin, repartir à temps.
-      croute(6080, 440, 300, 0.6),
-      croute(6460, 440, 300, 0.6),
-      croute(6850, 440, 300, 0.6),
-      croute(7230, 440, 300, 0.6),
+      // Passage clé — le GUÉ DES SALAMANDRES (revue 3/11) : croûtes 300 px, délai 0,7 s (246 px de
+      // course avant casse — lisibilité, étaler les chutes pressées x≈6500), y 440 plat, chevrons.
+      // Appui stable juste avant la 1re croûte pour lire l'annonce.
+      p(5920, 140, 440),
+      croute(6080, 440, 300, 0.7),
+      croute(6460, 440, 300, 0.7),
+      croute(6850, 440, 300, 0.7),
+      croute(7230, 440, 300, 0.7),
       p(7620, 600, 440), h(7900, 440),
       // Escalier de croûtes (+50 px par marche, 0,55 s)
       croute(8340, 390, 180, 0.55),
@@ -2043,7 +2044,7 @@ LEVELS.push((() => {
     signs: [
       // lift 96 : au-dessus des têtes du peloton (sinon le panneau est caché au départ — revue Boss 2/11)
       panneau(2200, 380, "Croûte de lave :|ne t'arrête pas !", 96),
-      panneau(5700, 440, "Gué des Salamandres|vite, ça craque !"),
+      panneau(5750, 440, "Gué : atterris loin|et reparts vite"),
       panneau(11230, 440, "Raccourci risqué :|ligne de braises"),
     ],
     // Raccourcis risqués (LEVELS.md §6 étape 3c) : sauts de braise en braise au-dessus des fossés.
