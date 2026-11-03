@@ -1966,18 +1966,18 @@ LEVELS.push((() => {
   c.arc(9580, 9790, 240, 3, 40); c.arc(10020, 10220, 290, 3, 40); c.arc(10360, 10560, 330, 3, 40); c.arc(10680, 10880, 330, 3, 40);
   c.line(10950, 11100, 370, 3); c.line(11420, 11540, 370, 2);
   // Ligne des Braises (arcs du raccourci, croûte en croûte)
-  c.arc(11540, 11860, 240, 4, 60); c.arc(11960, 12280, 240, 4, 60); c.arc(12380, 12700, 240, 4, 60);
-  c.arc(12800, 13120, 240, 4, 60); c.arc(13220, 13540, 240, 4, 60); c.arc(13640, 13960, 240, 4, 60);
-  c.line(14120, 14320, 370, 2);
+  c.arc(11540, 11880, 240, 4, 60); c.arc(11960, 12340, 240, 4, 60); c.arc(12430, 12810, 240, 4, 60);
+  c.arc(12900, 13280, 240, 4, 60); c.arc(13370, 13750, 240, 4, 60); c.arc(13840, 14220, 240, 4, 60);
+  c.line(14320, 14520, 370, 2);
   // pont final
-  c.arc(13220, 13440, 330, 3, 40); c.arc(13560, 13760, 330, 3, 40);
-  c.line(13900, 14100, 370, 2); c.arc(14060, 14200, 330, 3, 40);
+  c.arc(13420, 13640, 330, 3, 40); c.arc(13760, 13960, 330, 3, 40);
+  c.line(14100, 14300, 370, 2); c.arc(14260, 14400, 330, 3, 40);
   const pont = (x0, n, yy, w, delay) => Array.from({ length: n }, (_, i) => croute(x0 + i * w, yy, w, delay));
   return {
     id, name: "La Coulée des Salamandres Pressées",
     blurb: "Lave sous les pieds : les croûtes craquent dès que tu te poses. Ne t'arrête jamais, les salamandres n'attendent pas.",
     difficulty: "Bien engagé", theme: "volcan",
-    width: 16000, floor: 440, spawnX: 60,
+    width: 16500, floor: 440, spawnX: 60,
     solids: [
       // Départ sur le basalte, mise en jambes classique
       p(0, 820, 440),
@@ -2009,35 +2009,35 @@ LEVELS.push((() => {
       croute(10200, 440, 200, 0.5),
       croute(10520, 440, 200, 0.5),
       // La LIGNE DES BRAISES (raccourci risqué, LEVELS.md §6 étape 3c ; revue 3/11) : le raccourci
-      // EXPLOITE la croûte — six croûtes COURTES (150 px, 0,55 s) en ligne haute. Chemin SÛR :
-      // criques classiques (dalle basse + marche, modèle N°15/N°19) — chaque ressaut ≈ 0,5 s ;
-      // les 3 micro-dalles du 2/11 laissaient courir trop vite (gain attentif 0,2 s seulement).
-      // RACCOURCI : sauts de 270 px de braise en braise ; l'or l'exige (autoShort).
+      // EXPLOITE la croûte — cinq croûtes (200 px, 0,65 s) + pad d'arrivée, 6 sauts de 270 px.
+      // Chemin SÛR : fond de fossé allongé (4 dalles) + marche haute (125 px) — chaque fossé
+      // coûte ≈ 0,5–0,6 s (les criques courtes du jet précédent ne perdaient presque rien).
+      // Croûtes élargies pour que l'attentif convertisse le raccourci (gain visé ≥ 1,5 s).
       p(10840, 640, 440),
       p(11480, 150, 345),
-      // Fossé 1 (11630→11900 = 270) : crique (basse + marche)
-      p(11630, 155, 500), p(11855, 45, 420),
-      croute(11900, 345, 150, 0.55),
-      p(12050, 155, 500), p(12275, 45, 420),
-      croute(12320, 345, 150, 0.55),
-      p(12470, 155, 500), p(12695, 45, 420),
-      croute(12740, 345, 150, 0.55),
-      p(12890, 155, 500), p(13115, 45, 420),
-      croute(13160, 345, 150, 0.55),
-      p(13310, 155, 500), p(13535, 45, 420),
-      croute(13580, 345, 150, 0.55),
-      p(13730, 155, 500), p(13955, 45, 420),
-      p(14000, 150, 345),
-      p(14150, 500, 440),
+      // Fossé 1 (11630→11900 = 270) : 3 dalles basses + marche (125 px)
+      p(11640, 80, 560), p(11730, 80, 560), p(11820, 35, 560), p(11855, 45, 450),
+      croute(11900, 345, 200, 0.65),
+      p(12110, 80, 560), p(12200, 80, 560), p(12290, 35, 560), p(12325, 45, 450),
+      croute(12370, 345, 200, 0.65),
+      p(12580, 80, 560), p(12670, 80, 560), p(12760, 35, 560), p(12795, 45, 450),
+      croute(12840, 345, 200, 0.65),
+      p(13050, 80, 560), p(13140, 80, 560), p(13230, 35, 560), p(13265, 45, 450),
+      croute(13310, 345, 200, 0.65),
+      p(13520, 80, 560), p(13610, 80, 560), p(13700, 35, 560), p(13735, 45, 450),
+      croute(13780, 345, 200, 0.65),
+      p(13990, 80, 560), p(14080, 80, 560), p(14170, 35, 560), p(14205, 45, 450),
+      p(14250, 150, 345),
+      p(14400, 500, 440),
       // Pont final qui s'écroule (dalles de 100 px, 0,5 s)
-      ...pont(14660, 4, 440, 100, 0.5),
+      ...pont(14920, 4, 440, 100, 0.5),
       // Sprint jusqu'à l'arche
-      p(15160, 540, 440),
+      p(15400, 800, 440),
     ],
     hazards: [
       _(480, 70, 440),
       _(9380, 64, 290),
-      _(15280, 70, 440),
+      _(15520, 70, 440),
     ],
     signs: [
       // lift 96 : au-dessus des têtes du peloton (sinon le panneau est caché au départ — revue Boss 2/11)
@@ -2048,25 +2048,31 @@ LEVELS.push((() => {
     // Raccourcis risqués (LEVELS.md §6 étape 3c) : sauts de braise en braise au-dessus des fossés.
     shortcuts: [
       { name: "Ligne des Braises 1", from: 11480, to: 11630, y: 345, land: 11900, landY: 345 },
-      { name: "Ligne des Braises 2", from: 11900, to: 12050, y: 345, land: 12320, landY: 345 },
-      { name: "Ligne des Braises 3", from: 12320, to: 12470, y: 345, land: 12740, landY: 345 },
-      { name: "Ligne des Braises 4", from: 12740, to: 12890, y: 345, land: 13160, landY: 345 },
-      { name: "Ligne des Braises 5", from: 13160, to: 13310, y: 345, land: 13580, landY: 345 },
-      { name: "Ligne des Braises 6", from: 13580, to: 13730, y: 345, land: 14000, landY: 345 },
+      { name: "Ligne des Braises 2", from: 11900, to: 12100, y: 345, land: 12370, landY: 345 },
+      { name: "Ligne des Braises 3", from: 12370, to: 12570, y: 345, land: 12840, landY: 345 },
+      { name: "Ligne des Braises 4", from: 12840, to: 13040, y: 345, land: 13310, landY: 345 },
+      { name: "Ligne des Braises 5", from: 13310, to: 13510, y: 345, land: 13780, landY: 345 },
+      { name: "Ligne des Braises 6", from: 13780, to: 13980, y: 345, land: 14250, landY: 345 },
     ],
     coins: c.list,
-    checkpoints: [y(id, 1600, 380, 1), y(id, 5380, 440, 2), y(id, 7640, 440, 3), y(id, 10860, 440, 4), y(id, 14180, 440, 5)],
-    finishX: 15500,
+    checkpoints: [y(id, 1600, 380, 1), y(id, 5380, 440, 2), y(id, 7640, 440, 3), y(id, 10860, 440, 4), y(id, 14420, 440, 5)],
+    finishX: 16000,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
     medals: { auto: 45.8, autoShort: 43.8, gold: 45.7, silver: 49.4, bronze: 58 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 38 %, argent 100 %, bronze 100 % ; pressés : or 5 %, argent 15 %, bronze 33 %)
     acceptedWarnings: [
       { match: "ground@10840→ground@11480: marche montante sans trou (95 px)", reason: "Montée sur le premier pad de la Ligne des Braises avec tout l'élan (modèle des Séracs Suspendus du N°18) ; pilote auto sans perte de temps, rivaux 0 chute au playtest." },
-      { match: "ground@11855→plank@11900: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (crique classique, ressaut ≈ 0,5 s, revue 3/11) — temps gagné par le raccourci sur croûtes (shortcuts)." },
-      { match: "ground@12275→plank@12320: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (crique, revue 3/11) — temps gagné par le raccourci (shortcuts)." },
-      { match: "ground@12695→plank@12740: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (crique, revue 3/11) — temps gagné par le raccourci (shortcuts)." },
-      { match: "ground@13115→plank@13160: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (crique, revue 3/11) — temps gagné par le raccourci (shortcuts)." },
-      { match: "ground@13535→plank@13580: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (crique, revue 3/11) — temps gagné par le raccourci (shortcuts)." },
-      { match: "ground@13955→ground@14000: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (crique, revue 3/11) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@11855→plank@11900: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (fossé lent + marche 105 px, revue 3/11) — temps gagné par le raccourci sur croûtes (shortcuts)." },
+      { match: "ground@12325→plank@12370: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (revue 3/11) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@12795→plank@12840: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (revue 3/11) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@13265→plank@13310: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (revue 3/11) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@13735→plank@13780: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (revue 3/11) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@14205→ground@14250: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (revue 3/11) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@11820→ground@11855: marche montante sans trou", reason: "Ressaut bas→marche du fossé sûr Braises (revue 3/11) ; voulu." },
+      { match: "ground@12290→ground@12325: marche montante sans trou", reason: "Ressaut bas→marche du fossé sûr Braises (revue 3/11) ; voulu." },
+      { match: "ground@12760→ground@12795: marche montante sans trou", reason: "Ressaut bas→marche du fossé sûr Braises (revue 3/11) ; voulu." },
+      { match: "ground@13230→ground@13265: marche montante sans trou", reason: "Ressaut bas→marche du fossé sûr Braises (revue 3/11) ; voulu." },
+      { match: "ground@13700→ground@13735: marche montante sans trou", reason: "Ressaut bas→marche du fossé sûr Braises (revue 3/11) ; voulu." },
+      { match: "ground@14170→ground@14205: marche montante sans trou", reason: "Ressaut bas→marche du fossé sûr Braises (revue 3/11) ; voulu." },
     ]
   };
 })());
