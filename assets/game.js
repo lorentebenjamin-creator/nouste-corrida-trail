@@ -2309,6 +2309,15 @@ function R(e, t) {
         n.fillRect(x0 + 8 + ((q * 41 + cb.ci * 13) % Math.max(10, w - 16)), yy - 4 - ph * 30, 3, 3);
       }
     }
+    // Revue 3/11 : chevrons « ^ » quand le joueur approche d'une croûte intacte (lisibilité du Gué)
+    if (st.ph === 0 && d && d.x + d.w > cb.x - 420 && d.x < cb.x + cb.w * 0.35) {
+      let a2 = 0.55 + 0.45 * Math.sin(_ * 6), cx = cb.x + cb.w / 2;
+      ((n.strokeStyle = `rgba(255,200,80,${a2})`), (n.lineWidth = 4), (n.lineCap = `round`));
+      for (let q = 0; q < 2; q++) {
+        let cy = cb.y - 28 - q * 16 - ((_ * 40) % 16);
+        (n.beginPath(), n.moveTo(cx - 12, cy + 8), n.lineTo(cx, cy - 2), n.lineTo(cx + 12, cy + 8), n.stroke());
+      }
+    }
   }
   // Panneau « bulles » (rond brun, trois bulles et une vague) en haut de l'écran : la motte va plonger.
   function drawSinkSign(cx, a) {
