@@ -406,6 +406,19 @@ export const THEMES = {
     water: "#e0501a", waterHi: "#ffd060",
     crust: "#2b2224", crustTop: "#5a4c48",
   },
+  melezes: {
+    // Niveau 21 : mélézin d'automne en plein après-midi (ciel bleu franc, mélèzes dorés qui flambent,
+    // aiguilles rousses au sol, souches et vires de granite clair). Palette de jour : aucune clé facultative.
+    skyTop: "#2a5f9e", skyMid: "#8fc3e6", skyBot: "#f4e3b0",
+    ridge: "#3d5a6e", ridge2: "#7f98a6",
+    pine: "#b8781a", pine2: "#e3ad35",
+    dirt: "#7a5634", dirtDark: "#4e3520",
+    grass: "#c9a447", grassDark: "#94742c",
+    wood: "#8a5a32", woodDark: "#55361d",
+    rock: "#b8b2a6", rockDark: "#7a746a",
+    thorn: "#3a2416", leaf: "#d29a2a", berry: "#c8402e",
+    fog: "#1f2a30",
+  },
 };
 
 // =====================================================================
@@ -2070,5 +2083,113 @@ LEVELS.push((() => {
       { match: "ground@13735→plank@13780: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (revue 3/11) — temps gagné par le raccourci (shortcuts)." },
       { match: "ground@14205→ground@14250: marche montante sans trou", reason: "Marche voulue du chemin sûr de la Ligne des Braises (revue 3/11) — temps gagné par le raccourci (shortcuts)." },
     ]
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 21 — Le Mélézin des Écureuils Distraits (niveau du jour, 2026-11-09)
+// Niveau classique (règle d'alternance, après le N°20 à mécaniques) — nouveauté : les SOUCHES DE
+// L'ÉCUREUIL, six souches de mélèze au-dessus du vide, de 110 à 80 px de large (les appuis de saut
+// les plus étroits du jeu : jusqu'ici 110 px au moins), en dents de scie de 20 px, trous de 160 px :
+// on n'a jamais le temps de s'y arrêter, il faut viser chaque souche et enchaîner d'un seul élan. Aucune mécanique. Raccourci risqué (étape 3c)
+// d'un modèle distinct du précédent (Ligne des Braises, N°20) et des piliers à hauteur égale (N°15–19) :
+// les PLONGEONS DE L'ÉCUREUIL, trois vires qui DESCENDENT de 40 px chacune, séparées de ravines ; on
+// plonge de vire en vire (280 px bord à bord, en descente) au lieu de descendre dans la ravine et de
+// remonter par la marche. Nouvelle palette `melezes` (mélèzes dorés d'automne).
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "melezin-ecureuils", c = v(id);
+  c.line(160, 400, 370, 3); c.arc(720, 940, 330, 3, 40); c.arc(1380, 1590, 270, 3, 40);
+  c.arc(1930, 2140, 210, 3, 40); c.line(2300, 2500, 250, 2); c.arc(2520, 2740, 260, 3, 40);
+  c.line(2760, 2900, 370, 2);
+  // arcs des Souches de l'Écureuil
+  c.arc(3320, 3520, 300, 3, 40); c.arc(3590, 3790, 290, 3, 40); c.arc(3850, 4050, 300, 3, 40);
+  c.arc(4110, 4310, 290, 3, 40); c.arc(4360, 4560, 300, 3, 40); c.arc(4610, 4810, 290, 3, 40);
+  c.arc(4850, 5050, 300, 3, 40);
+  c.line(5120, 5380, 350, 3); c.arc(5420, 5590, 250, 3, 40); c.arc(5970, 6140, 200, 3, 40);
+  c.arc(6540, 6720, 250, 3, 40); c.line(6900, 7200, 370, 3); c.arc(7270, 7440, 250, 3, 40);
+  c.arc(7660, 7830, 190, 3, 40);
+  // arcs des Plongeons de l'Écureuil (trajectoire du raccourci, de vire en vire)
+  c.arc(8010, 8290, 230, 3, 70); c.arc(8440, 8720, 270, 3, 70); c.arc(8870, 9150, 310, 3, 70);
+  c.line(9300, 9560, 360, 3);
+  c.arc(9630, 9800, 250, 3, 40); c.arc(10200, 10370, 180, 3, 40); c.arc(10750, 10920, 250, 3, 40);
+  c.arc(11280, 11450, 310, 3, 40); c.line(11600, 11900, 370, 3); c.line(12300, 12600, 370, 3);
+  c.line(12900, 13200, 370, 3);
+  return {
+    id, name: "Le Mélézin des Écureuils Distraits",
+    blurb: "Mélèzes dorés d'automne : saute de souche en souche sans jamais t'arrêter, et plonge de vire en vire si tu oses.",
+    difficulty: "Haute futaie", theme: "melezes",
+    width: 13730, floor: 440, spawnX: 60,
+    solids: [
+      // Départ dans les aiguilles rousses, mise en jambes
+      p(0, 760, 440),
+      p(900, 520, 440), h(1080, 440),
+      p(1550, 420, 380),
+      p(2100, 460, 320), g(2200, 320),
+      p(2700, 640, 440),
+      // Passage clé : les SOUCHES DE L'ÉCUREUIL — six souches de 110 → 80 px (jamais si étroit), trous de
+      // 160 px, en dents de scie (420 / 400) : sur 80 px on ne tient que 0,3 s à pleine vitesse, on
+      // enchaîne d'un seul élan ; trop tôt on tombe dans le trou, trop tard on survole la souche.
+      // (Mise au point : trous de 120–130 px + souches de 70 px → un coureur qui hésite au bord ne peut
+      // plus repartir sans élan, il survole la souche suivante ; trous de 160 px = on repart toujours.)
+      p(3500, 110, 420),
+      p(3770, 100, 400),
+      p(4030, 100, 420),
+      p(4290, 90, 400),
+      p(4540, 90, 420),
+      p(4790, 80, 400),
+      p(5030, 410, 420),
+      // Montée vers les vires
+      p(5570, 420, 380),
+      p(6120, 440, 330), h(6260, 330),
+      p(6690, 600, 440),
+      p(7420, 260, 380),
+      // Les PLONGEONS DE L'ÉCUREUIL (raccourci risqué, LEVELS.md §6 étape 3c) : trois vires qui descendent
+      // de 40 px chacune (310 → 350 → 390 → 430), séparées de ravines. Chemin SÛR (pilote auto, rivaux) :
+      // on se laisse tomber sur la dalle du fond, saut par-dessus le ruisseau sur la marche collée à la vire
+      // suivante, ressaut sur place → ≈ 0,5 s perdue par ravine. RACCOURCI (champ shortcuts) : plongeon
+      // de vire en vire, 280 px bord à bord en descente ; trop tôt ou appui trop court → dans la ravine.
+      p(7810, 200, 310),
+      p(8010, 155, 520), p(8245, 45, 440),   // ravine : dalle 520, ruisseau 80 px, marche 440, ressaut de 90 px
+      p(8290, 150, 350),
+      p(8440, 155, 560), p(8675, 45, 480),
+      p(8720, 150, 390),
+      p(8870, 155, 600), p(9105, 45, 520),
+      p(9150, 500, 430),
+      // Retour sous les mélèzes
+      p(9780, 440, 370),
+      p(10350, 420, 300), g(10460, 300),
+      p(10900, 400, 380),
+      // Dernier sprint jusqu'à l'arche
+      p(11430, 2200, 440), h(12700, 440),
+    ],
+    hazards: [
+      _(470, 70, 440),
+      _(1680, 64, 380),
+      _(5700, 64, 380),
+      _(9900, 64, 370),
+      _(12100, 70, 440),
+    ],
+    signs: [
+      panneau(3100, 440, "Souches étroites :|ne t'arrête pas"),
+      panneau(7520, 380, "Raccourci risqué :|plonge vire à vire"),
+    ],
+    // Raccourcis risqués (LEVELS.md §6 étape 3c) : plongeons de vire en vire au-dessus des ravines.
+    shortcuts: [
+      { name: "Plongeons de l'Écureuil 1", from: 7810, to: 8010, y: 310, land: 8290, landY: 350 },
+      { name: "Plongeons de l'Écureuil 2", from: 8290, to: 8440, y: 350, land: 8720, landY: 390 },
+      { name: "Plongeons de l'Écureuil 3", from: 8720, to: 8870, y: 390, land: 9150, landY: 430 },
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2720, 440, 1), y(id, 5050, 420, 2), y(id, 6710, 440, 3), y(id, 9170, 430, 4), y(id, 11450, 440, 5)],
+    finishX: 13300,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 39.2, autoShort: 37.6, gold: 38.8, silver: 42, bronze: 45.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 45 %, argent 90 %, bronze 98 % ; pressés : or 5 %, argent 23 %, bronze 40 %)
+    // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
+    acceptedWarnings: [
+      { match: "ground@8245→ground@8290: marche montante sans trou (90 px)", reason: "Marche voulue du chemin sûr des Plongeons de l'Écureuil (ressaut sur place) — c'est le temps que fait gagner le raccourci (shortcuts) ; pilote auto et rivaux 0 chute au playtest." },
+      { match: "ground@8675→ground@8720: marche montante sans trou (90 px)", reason: "Marche voulue du chemin sûr des Plongeons de l'Écureuil (ressaut sur place) — temps gagné par le raccourci (shortcuts) ; rivaux 0 chute." },
+      { match: "ground@9105→ground@9150: marche montante sans trou (90 px)", reason: "Marche voulue du chemin sûr des Plongeons de l'Écureuil (ressaut sur place) — temps gagné par le raccourci (shortcuts) ; rivaux 0 chute." },
+    ],
   };
 })());

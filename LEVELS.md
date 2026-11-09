@@ -541,7 +541,8 @@ chute, un humain peut passer.
    (avec un raccourci risqué, étape 3c). N°19 classique (Canyon des Mouflons Rigolards, 31/10, raccourci « Sauts du
    Mouflon ») → **le N°20 DOIT être à mécaniques**. N°20 à mécaniques (Coulée des Salamandres Pressées, croûtes de
    lave, §3i, 2/11, raccourci « Ligne des Braises ») → **le N°21 DOIT être classique** (avec un raccourci risqué,
-   étape 3c).
+   étape 3c). N°21 classique (Mélézin des Écureuils Distraits, 9/11, raccourci « Plongeons de l'Écureuil », vires
+   en descente) → **le N°22 DOIT être à mécaniques**.
 3c. **Raccourci risqué pour les classiques** (revue du 27/10, règle à appliquer à **tous les futurs
    niveaux classiques**, N°17, 19, 21…) : sur un classique, le pilote auto ne ralentit jamais (temps ≈
    distance / 352 px/s) et un humain attentif le suit à 3 % près, donc l'or (plancher auto × 1,03) tombe
@@ -810,7 +811,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–20)
+## 8. Courbe de difficulté (niveaux 1–21)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -834,6 +835,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
 | 18 | Le Glacier des Choucas Voltigeurs | Technique | 1364 m | 18 (dont **6 crevasses à tyrolienne** de 520–680 px, 3 crevasses des Séracs) | 4 | **6 tyroliennes** (1 basse, 1 haute, le **Relais des Choucas** à 4 + **Corniche des Choucas** zipDrop) ; **Séracs Suspendus**, 3 raccourcis ; 4 panneaux | 1 / 0.93 / 0.86 | 37,6 s (chemin sûr) ; 36,2 s par les raccourcis |
 | 19 | Le Canyon des Mouflons Rigolards | Canyon | 1300 m | 19 (dont colonnes des Cheminées, 3 creux des Sauts) | 6 | — (classique ; passage clé : les **Cheminées de fée**, plongeons 150/130 px ; **Sauts du Mouflon**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 38,3 s (chemin sûr) ; 36,7 s par les raccourcis |
 | 20 | La Coulée des Salamandres Pressées | Bien engagé | 1600 m | 26 croûtes (Gué, escalier, plongeons, Ligne des Braises ×6, pont) | 3 | **26 croûtes de lave** (mécanique v9) ; **Gué des Salamandres** (revue 3/11 : 300 px / 0,7 s) ; **Ligne des Braises**, 6 raccourcis sur croûtes 200 px ; 3 panneaux | 1 / 0.93 / 0.86 | 47,3 s (chemin sûr) ; 45,2 s par les raccourcis |
+| 21 | Le Mélézin des Écureuils Distraits | Haute futaie | 1330 m | 23 (dont 7 trous des Souches, 3 ravines des Plongeons) | 5 | — (classique ; passage clé : les **Souches de l'Écureuil**, 6 souches de 110 → 80 px, trous de 160 px ; **Plongeons de l'Écureuil**, 3 raccourcis risqués en descente ; 2 panneaux) | 1 / 0.93 / 0.86 | 39,2 s (chemin sûr) ; 37,6 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -861,6 +863,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 18 | Le Glacier des Choucas Voltigeurs | 37,6 s *(raccourcis : 36,2 s)* | 37,5 s *(exige Corniche + Séracs)* | 40,5 s | 43,5 s | 40 % / 93 % / 95 % | 13 % / 30 % / 33 % |
 | 19 | Le Canyon des Mouflons Rigolards | 38,3 s *(raccourcis : 36,7 s)* | 38,0 s *(exige les raccourcis)* | 41,1 s | 45,9 s | 40 % / 88 % / 95 % | 8 % / 18 % / 33 % |
 | 20 | La Coulée des Salamandres Pressées | 47,3 s *(raccourcis : 45,2 s)* | 47,2 s *(exige la Ligne des Braises)* | 51 s | 59,2 s | 33 % / 80 % / 100 % | 3 % / 8 % / 33 % |
+| 21 | Le Mélézin des Écureuils Distraits | 39,2 s *(raccourcis : 37,6 s)* | 38,8 s *(exige les Plongeons)* | 42 s | 45,2 s | 45 % / 90 % / 98 % | 5 % / 23 % / 40 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -1100,6 +1103,22 @@ du peloton ; `check-levels` avertit si panneau < 400 px du spawn. N°1–19 inch
 1. **Ligne des Braises** : gain attentif avant 0,2 s (médianes 45,8 avec / 46,0 sans) → fossés sûrs allongés (micro-dalles) + croûtes 200 px / 0,65 s → **après 4,1 s** (46,7 avec / 50,8 sans). Auto 45,8/43,8 → **47,3/45,2**.
 2. **Gué (x≈6500)** : avant 49 chutes pressées sur les hotspots 6200/6500/6900 (sur 135) → croûtes 300 px, délai 0,7 s, y 440 plat, chevrons d'approche, appui stable + panneau clarifié → **après** hotspots Gué dispersés (plus dans le top 3 ; zone 6100–7300 : 18/108). Pressé 73 % / 3,38 → **93 % / 2,70**.
 3. Médailles recalibrées : **47,2 / 51 / 59,2** (attentif or 33 % dans 30–50 % ; bronze pressé 33 %). Étiquette **Bien engagé** conservée (93 % ≈ N°12 Bien engagé à 95 %, ±5).
+
+**N°21 (9/11, classique)** : **Le Mélézin des Écureuils Distraits**, étiquette de caractère « **Haute futaie** »,
+1330 m, nouvelle palette `melezes` (mélèzes dorés d'automne). Passage clé : les **Souches de l'Écureuil** (six souches
+110, 100, 100, 90, 90, 80 px en dents de scie 420/400, trous de 160 px ; panneau « Souches étroites : ne t'arrête pas »).
+Mise au point : trous de 120–130 px avec souches de 70–110 px → 40–50 % d'essais attentifs **bloqués** au bord d'une
+souche après une hésitation (depuis l'arrêt, le saut survole la souche suivante, trop proche) ; trous de 160 px → on
+repart toujours (souches de 70 px avec 160 : de nouveau bloqué). Raccourci « **Plongeons de l'Écureuil** » (×3) :
+modèle distinct de la Ligne des Braises (N°20) et des piliers à hauteur égale (N°15–19) — vires qui **descendent** de
+40 px (310 → 350 → 390 → 430), 280 px bord à bord en descente ; chemin sûr par la ravine (dalle, ruisseau 80 px,
+marche, **ressaut de 90 px** ; avec un ressaut de 60 px le chemin sûr ne coûtait rien, auto = autoShort). Pilote auto
+39,2 s, 37,6 s par les raccourcis, rivaux 0 chute. 40 essais : attentif **100 % / 0,10** ; pressé **83 % / 2,45**
+(N°19 : 88 % / 2,60 ; N°17 : 85 % / 3,02 : règle des classiques respectée) ; points chauds pressés x≈9800 (montée de
+60 px après les Plongeons), 5500, 900. Raccourci : sauts réussis 45/49 attentif, 29/44 pressé ; médianes attentives
+avec 38,3 s / sans 39,8 s. Médailles **38,8 / 42 / 45,2 s** (attentif 45 / 90 / 98 % ; pressé 5 / 23 / 40 % — bronze
+pressé au-dessus de 30–35 % : plancher argent + 0,5 s / milieu or–bronze, ⚠ de l'outil). N°1–20 inchangés (seuls
+un bloc `LEVELS.push` et une palette ajoutés). **Prochain niveau (N°22) : à mécaniques.**
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
