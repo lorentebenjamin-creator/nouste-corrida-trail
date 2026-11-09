@@ -52,6 +52,7 @@ Le menu affiche les niveaux du N°1 (en haut) au plus récent (en bas) (liste d�
   medals: { auto: 30.8, gold: 35.5, silver: 42, bronze: 49.5 }, // OPTIONNEL : écrit par tools/medals.mjs (§6 étape 5b)
                            // niveau à raccourcis : + autoShort (pilote auto par les raccourcis), or < auto
   acceptedWarnings: [ { match: "…", reason: "…" } ],           // OPTIONNEL : avertissements check-levels acceptés (§6b)
+  acceptedMedalWarnings: [ { match: "…", reason: "…" } ],      // OPTIONNEL : ⚠ calibrage médailles acceptés (§6c)
 }
 ```
 
@@ -448,12 +449,16 @@ dans la brume du crépuscule, ciel violet et cuivre ; les amanites rouges ressor
 `glacier` (niv. 18, glacier au soir, ciel bleu acier et pêche, glace bleue, neige givrée, crevasses opaques `pit`),
 `gres` (niv. 19, canyon de grès rouge au coucher du soleil, ciel indigo et orangé, avec `canyon` : gorges striées, rivière ; revue 31/10 : `back` foncé + `rim` clair sur le dessus des colonnes, comme `etoiles`).
 `volcan` (niv. 20, coulée de lave sous un ciel de cendre, `rim` cendre claire, clés `crust`/`crustTop` pour les croûtes de lave).
+`melezes` (niv. 21, mélézin d'automne en plein après-midi, ciel bleu franc, mélèzes dorés ; clé facultative
+`melezeGrove: true` — revue 9/11 : rangée dense de mélèzes sur deux plans avec troncs visibles, menu densifié ;
+n'existe que dans `melezes`, aucun autre niveau ne change).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
 mobiles comprises), `water` + `waterHi` (gave visible au fond des ravins, avec reflets animés ; la
 chute reste mortelle sous y = 700), `fireflies: true` (lucioles à positions déterministes au-dessus
-des trous, des points d'appel et des trajets des bacs). **Un niveau de nuit doit avoir `rim`.**
+des trous, des points d'appel et des trajets des bacs), `melezeGrove: true` (futaie dense à troncs,
+palette `melezes` seulement). **Un niveau de nuit doit avoir `rim`.**
 
 ## 5. Physique (extraite du code, `assets/game.js`)
 
@@ -680,6 +685,12 @@ chute, un humain peut passer.
      (N°17 avant revue : 13 % / 13 % alors que 85 % arrivent). Si la cible casse une règle
      d'écart, on prend la valeur la plus proche qui les respecte. Ne recalibrer que le niveau du
      jour — la règle est générale mais n'écrit pas les N°1–16 ;
+   * **priorité des règles d'écart** (revue du 9/11) : quand argent ≥ or × 1,08 + le plancher
+     « argent ≤ milieu or–bronze » (bronze ≥ 2×argent − or) forcent un bronze tel que la part
+     pressée sort de 30–35 %, **les planchers d'écart l'emportent**. Le calibrage ne baisse jamais
+     le bronze sous ces planchers pour « rentrer » dans la fenêtre ; `medals.mjs` affiche ⚠
+     (ou « accepté médailles » si `acceptedMedalWarnings`, §6c). Cible or attentif inchangée :
+     **40 %**, fenêtre **30–50 %** (ne pas revenir à 10–25 %) ;
    * toujours `auto ≤ or`, argent ≥ or + 0,5 s, bronze ≥ argent + 0,5 s (paliers progressivement
      plus faciles) ;
    * **écart relatif or → argent** (revue du 23/10) : **argent ≥ or × 1,08** (arrondi au dixième
@@ -743,6 +754,26 @@ Revue du 20/10 : 27 avertissements avant ; corrigés dans la géométrie : N°3 
 vers le ressaut, ce qui supprime aussi la montée 60/140) et N°8 (`gue-lucioles`, passerelles de
 la nuit 115/125 → 140/140 px : écart 130 au lieu de 155 pour la montée de 40, et 160 au lieu de 175
 vers la terrasse) ; les 23 restants sont acceptés (niveaux 1–3 d'origine, radeaux rapides du N°8).
+
+## 6c. Avertissements de calibrage médailles (`acceptedMedalWarnings`)
+
+Quand `tools/medals.mjs --calibrate` affiche un ⚠ (or hors 30–50 %, bronze pressé hors 30–35 %)
+**parce qu'un plancher d'écart l'emporte** (§6 étape 5b, priorité revue 9/11), on peut le déclarer
+dans le bloc du niveau pour que l'écart reste visible et justifié aux prochaines calibrations :
+
+```js
+acceptedMedalWarnings: [
+  { match: "bronze pressé hors de la fenêtre", reason: "Planchers argent ≥ or×1,08 et milieu or–bronze forcent …" },
+],
+```
+
+* `match` = début exact du message ⚠ (sans le préfixe `⚠ `).
+* `reason` obligatoire (≥ 10 caractères).
+* `medals.mjs --calibrate` imprime alors `accepté médailles : … — raison` au lieu de ⚠.
+* `check-levels.mjs` vérifie la forme (`match` + `reason`) et liste l'entrée en `info` ; il ne
+  rejoue pas les essais humains, donc pas de contrôle d'obsolescence ici.
+* Ne change pas les médailles des autres niveaux. Ne pas l'utiliser pour contourner la cible or
+  attentif 30–50 % sans plancher qui l'explique.
 
 ### Contrôle « balise trop proche d'un panneau » (revue du 28/10)
 
@@ -1119,6 +1150,19 @@ marche, **ressaut de 90 px** ; avec un ressaut de 60 px le chemin sûr ne coûta
 avec 38,3 s / sans 39,8 s. Médailles **38,8 / 42 / 45,2 s** (attentif 45 / 90 / 98 % ; pressé 5 / 23 / 40 % — bronze
 pressé au-dessus de 30–35 % : plancher argent + 0,5 s / milieu or–bronze, ⚠ de l'outil). N°1–20 inchangés (seuls
 un bloc `LEVELS.push` et une palette ajoutés). **Prochain niveau (N°22) : à mécaniques.**
+
+**Revue Boss Bot 9/11 (N°21, non publiée — branche `revue-09-11`)** :
+1. **Point chaud x≈9800** : montée après les Plongeons 60→**35 px** (`y` 370→395) **et** ronce 9900→**10050**.
+   Chutes pressées zone 9600–10200 : **22 → 8**. Pressé 83 % → trop haut après adoucissement → récupération
+   dans les **Souches** (trous 160→**200 px**, dents de scie 20→**40 px**) : pressé final **80 % / 3,20**,
+   attentif **100 % / 0,42**. Hotspot pressé déplacé vers les Souches (x≈3500/3800).
+2. **Médailles** : priorité documentée (§6 étape 5b + `medals.mjs` + §6c `acceptedMedalWarnings`) —
+   planchers d'écart > fenêtre bronze pressé 30–35 % ; or attentif cible **40 %**, fenêtre **30–50 %**.
+   Recalibrage N°21 seul : **39 / 42,5 / 46,3** (auto 39,3 / autoShort 37,8 ; attentif 35 / 73 / 88 % ;
+   pressé 0 / 10 / **33 %** — bronze rentré dans 30–35 %, pas besoin d'`acceptedMedalWarnings` sur ce niveau).
+   N°1–20 non recalibrés.
+3. **Ambiance** : clé facultative `melezeGrove` sur palette `melezes` — futaie dense en espace écran sur
+   deux plans avec troncs + menu densifié ; branche de rendu des autres palettes inchangée (N°1–20).
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 

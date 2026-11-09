@@ -483,11 +483,13 @@ function R(e, t) {
     h = t;
     let i = de(s.width + s.floor);
     m = [];
-    for (let e = 0; e < 46; e++)
+    // Revue 9/11 : palette `melezeGrove` (N°21 seulement) — rangée dense sur deux plans ; sinon 46 sapins.
+    let nTrees = e.melezeGrove ? 120 : 46;
+    for (let k = 0; k < nTrees; k++)
       m.push({
         x: i() * s.width,
-        h: 64 + i() * 120,
-        layer: i() > 0.45 ? 0.32 : 0.52,
+        h: e.melezeGrove ? 78 + i() * 140 : 64 + i() * 120,
+        layer: e.melezeGrove ? (i() > 0.5 ? 0.28 : 0.55) : i() > 0.45 ? 0.32 : 0.52,
         kind: i(),
       });
     // Lucioles (thème avec `fireflies`) : positions déterministes au-dessus des trous et des
@@ -2530,10 +2532,13 @@ function R(e, t) {
       r = (Math.random() - 0.5) * t,
       a = (Math.random() - 0.5) * t;
     (Ke(e, _, v), qe(e, v, b));
-    for (let t of m) {
-      let n = t.x - v * t.layer;
-      n < -60 || n > b + 60 || Xe(n, 250 + t.kind * 40, t.h, e, t.kind);
-    }
+    // Revue 9/11 : futaie dense en espace écran (comme Ye) si `melezeGrove` — sinon sapins monde `m`.
+    if (e.melezeGrove) melezeGroveBg(e, v);
+    else
+      for (let t of m) {
+        let n = t.x - v * t.layer;
+        n < -60 || n > b + 60 || Xe(n, 250 + t.kind * 40, t.h, e, t.kind);
+      }
     e.lakeBg && lakeBg(e);
     (n.save(),
       n.translate(-Math.round(v) + r, -Math.round(y) + a),
@@ -2613,11 +2618,34 @@ function R(e, t) {
     }
     (n.lineTo(o, E), n.fill());
   }
+  // Revue 9/11 — palette `melezeGrove` (N°21) : deux rangées de mélèzes en espace écran, troncs visibles.
+  // Densité constante quelle que soit la largeur du sentier (les sapins monde `m` restent trop clairsemés
+  // sur 13 km). Décor seul, aucun effet de jeu. Autres palettes : branche Ye/Xe inchangée.
+  function melezeGroveBg(e, scroll) {
+    // Modulo positif : en JS `(-840 % 1080) === -840`, sinon tous les mélèzes partent hors écran.
+    let wrap = (x, span) => ((((x % span) + span) % span));
+    for (let r = 0; r < 20; r++) {
+      let x = wrap(r * 68 - scroll * 0.2, b + 120) - 50;
+      Xe(x, 218 + (r % 3) * 6, 95 + (r % 4) * 18, e, r);
+    }
+    for (let r = 0; r < 16; r++) {
+      let x = wrap(r * 84 - scroll * 0.48 + 40, b + 140) - 60;
+      Xe(x, 278 + (r % 3) * 10, 115 + (r % 5) * 20, e, r + 5);
+    }
+  }
   function Ye(e, t, n) {
-    for (let r = 0; r < 9; r++)
-      Xe(((r * 140 - t * n) % (b + 160)) - 40, 390, 90 + (r % 3) * 24, e, r);
+    // Revue 9/11 : menu densifié si palette `melezeGrove` (N°21).
+    let nTrees = e.melezeGrove ? 22 : 9, step = e.melezeGrove ? 62 : 140;
+    for (let r = 0; r < nTrees; r++)
+      Xe(((r * step - t * n) % (b + 160)) - 40, 390, 90 + (r % 3) * 24, e, r);
   }
   function Xe(e, t, r, i, a) {
+    // Revue 9/11 : troncs visibles si `melezeGrove` (clé facultative, N°21 seulement).
+    if (i.melezeGrove) {
+      let tw = 5 + (a % 3), th = 14 + (a % 4) * 3;
+      ((n.fillStyle = i.woodDark), n.fillRect(e - tw / 2, t - 2, tw, th));
+      ((n.fillStyle = i.wood), n.fillRect(e - tw / 2 + 1, t - 2, Math.max(1, tw - 2), th));
+    }
     ((n.fillStyle = i.pine),
       n.beginPath(),
       n.moveTo(e, t - r),
@@ -2630,6 +2658,15 @@ function R(e, t) {
       n.lineTo(e + 13, t - r * 0.28),
       n.lineTo(e - 13, t - r * 0.28),
       n.fill());
+    // Second étage de feuillage (futaie) uniquement pour melezeGrove.
+    if (i.melezeGrove) {
+      ((n.fillStyle = i.pine),
+        n.beginPath(),
+        n.moveTo(e, t - r * 0.95),
+        n.lineTo(e + 11 + (a % 3), t - r * 0.45),
+        n.lineTo(e - 11, t - r * 0.45),
+        n.fill());
+    }
   }
   function Ze(e) {
     let t = 1 + e.squash * 0.1,

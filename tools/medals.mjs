@@ -25,6 +25,12 @@
 //    argent et bronze collent (N°17 avant revue : 13 % / 13 % pressé alors que 85 % finissent).
 //    Écart minimal or → argent (revue du 23/10) : argent ≥ or × 1,08 (arrondi au dixième supérieur) ; le
 //    bronze est relevé si besoin pour garder l'argent au plus au milieu de l'intervalle or–bronze.
+//    PRIORITÉ (revue du 9/11) : les planchers d'écart (argent ≥ or×1,08, bronze ≥ argent+0,5 s, bronze ≥
+//    2×argent−or pour garder l'argent ≤ milieu or–bronze) PRIMENT sur la fenêtre bronze pressé 30–35 %.
+//    Le calibrage ne baisse JAMAIS le bronze sous ces planchers pour « rentrer » dans 30–35 % ; si le
+//    bronze pressé reste hors fenêtre, le script affiche ⚠ (ou « accepté » si le niveau a un
+//    `acceptedMedalWarnings` dont le match couvre le message — LEVELS.md §6c). Cible or attentif
+//    inchangée : 40 %, fenêtre 30–50 % (ne PAS revenir à 10–25 %).
 //    Graines déterministes : deux lancements identiques donnent les mêmes temps.
 // 2) Ancienne règle (multiplicateurs, sans pilote humain) : or = auto × 1,15 ; argent × 1,35 ;
 //    bronze × 1,6, arrondis à la demi-seconde supérieure :
@@ -201,8 +207,23 @@ for (const L of list) {
     row[prof + 'Ok'] = ts.filter((x) => x != null).length / (ts.length || 1);
     txt += `\n    ${prof.padEnd(8)} (${ts.length} essais, réussite ${pct(row[prof + 'Ok'])}) : or ${pct(row[prof][0])}, argent ${pct(row[prof][1])}, bronze ${pct(row[prof][2])}`;
   }
-  if (calib) { const g = row.attentif[0]; if (g < TARGET.goldMin || g > TARGET.goldMax) txt += `\n    ⚠ or hors de la fenêtre ${TARGET.goldMin * 100}–${TARGET.goldMax * 100} % (temps attentifs trop groupés, ou plancher auto × ${TARGET.goldAuto})`;
-    const bp = row['pressé']?.[2]; if (bp != null && (bp < TARGET.bronzePressedMin || bp > TARGET.bronzePressedMax)) txt += `\n    ⚠ bronze pressé hors de la fenêtre ${TARGET.bronzePressedMin * 100}–${TARGET.bronzePressedMax * 100} % (plancher argent + ${TARGET.gap} s ou milieu or–bronze)`; }
+  if (calib) {
+    const acceptMedal = (msg) => {
+      const a = (L.acceptedMedalWarnings || []).find((x) => typeof x?.match === 'string' && msg.startsWith(x.match));
+      if (a) { txt += `\n    accepté médailles : ${msg} — ${a.reason}`; return true; }
+      return false;
+    };
+    const g = row.attentif[0];
+    if (g < TARGET.goldMin || g > TARGET.goldMax) {
+      const msg = `or hors de la fenêtre ${TARGET.goldMin * 100}–${TARGET.goldMax * 100} % (temps attentifs trop groupés, ou plancher auto × ${TARGET.goldAuto})`;
+      if (!acceptMedal(msg)) txt += `\n    ⚠ ${msg}`;
+    }
+    const bp = row['pressé']?.[2];
+    if (bp != null && (bp < TARGET.bronzePressedMin || bp > TARGET.bronzePressedMax)) {
+      const msg = `bronze pressé hors de la fenêtre ${TARGET.bronzePressedMin * 100}–${TARGET.bronzePressedMax * 100} % (plancher argent + ${TARGET.gap} s ou milieu or–bronze)`;
+      if (!acceptMedal(msg)) txt += `\n    ⚠ ${msg}`;
+    }
+  }
   console.log(txt);
   rows.push(row);
   if (!write || !lineTxt) continue;

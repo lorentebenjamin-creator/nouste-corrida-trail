@@ -74,6 +74,16 @@ LEVELS.forEach((L, idx) => {
       else accepting.push({ match: a.match, reason: a.reason.trim(), used: false });
     }
   }
+  // Avertissements de calibrage médailles (revue 9/11, LEVELS.md §6c) : forme seule ici ;
+  // le match est vérifié par tools/medals.mjs --calibrate (check-levels ne rejoue pas les essais).
+  if (L.acceptedMedalWarnings != null) {
+    if (!Array.isArray(L.acceptedMedalWarnings)) err(tag, `acceptedMedalWarnings doit être un tableau de { match, reason }`);
+    else for (const a of L.acceptedMedalWarnings) {
+      if (!a || typeof a.match !== "string" || !a.match.trim()) err(tag, `acceptedMedalWarnings : chaque entrée doit avoir un "match" non vide`);
+      else if (typeof a.reason !== "string" || a.reason.trim().length < 10) err(tag, `acceptedMedalWarnings "${a.match}" : raison manquante ou trop courte`);
+      else info(tag, `acceptedMedalWarnings "${a.match}" — ${a.reason.trim()}`);
+    }
+  }
   // Médailles (facultatives) : medals: { auto, gold, silver, bronze } écrit par tools/medals.mjs
   if (L.medals != null) {
     const md = L.medals, okNum = (x) => typeof x === "number" && isFinite(x) && x > 0;
