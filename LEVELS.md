@@ -424,6 +424,44 @@ escalier, plongeons, puis la **Ligne des Braises** (croûtes 200 px / 0,65 s en 
 qui **exploite** la mécanique ; gain attentif ≥ 1,5 s) et le pont final. Palette `volcan`. Étiquette
 « **Bien engagé** » (échelle §8 ; pressé 93 % après revue 3/11, cohérent avec N°12 à 95 %).
 
+## 3j. Mécanique v10 : geysers (`geyser`, niveau 22)
+
+`geyser(x, w, y, period = 4.4, on = 0.24, phase = 0, warn = 0.8, boost = 1000, push = 420)`
+(dans le champ `geysers` du niveau) : évent thermal. Cycle déterministe de `period` s
+(phase 0–1) : pendant `on` s le jet érupte ; `warn` s avant, le bassin fume et un panneau
+« souffle » clignote. Un coureur dont les pieds sont dans la colonne (`[gy.x, gy.x+gy.w]`)
+et dans `[gy.y − 90, gy.y + 16]` est **lancé une fois** par cycle (`vy = −boost`, `vx` au moins
+`push`). Verrou `e.geyLock` : on n'est pas recollé au jet. `e.geyFly` maintient la poussée
+avant jusqu'à la réception.
+
+Portée typique : `boost` 1000 → apogée ≈ 231 px ; `push` 420 → portée à hauteur égale ≈ 378 px
+(`push` 480 ≈ 432 px). Un trou trop large pour un saut normal (285–500 px) peut donc être
+franchi en attendant le souffle.
+
+Moteur (`assets/game.js`) : `geyState` / `geyLaunch` / `geyserShortOK`, liste `geysers`,
+état `e.geyLock` / `e.geyFly` (remis à zéro après une chute), branches dans la boucle
+principale et dans `simRunner` (horizon prolongé d'un lancer). Dessin `drawGeyser` (bassin
+turquoise, dépôts de soufre, vapeur, jet, chevrons), son au lancer, `getState().geysers`.
+Niveaux sans geyser : aucun effet.
+
+Lisibilité : panneau contenant « geyser » / « souffle » avant le premier ; vapeur d'avertissement
+puis jet visible. `tools/check-levels.mjs` : period 3–6, on 0,18–0,4, boost 850–1200, push 300–500,
+largeur 100–240 ; un raccourci `kind: "geyser"` (écart 285–500) attend le souffle puis atterrit
+sur le pad `land` ; le chaînage des sols signale un « SAUT DE GEYSER » au-dessus de 200 px s'il
+y a un évent. Un pad de raccourci geyser peut être une planche `oneWay` `ledge: true` (évent
+perché au-dessus d'une combe, sans boucher le chemin sûr).
+
+Raccourci `kind: "geyser"` : l'IA de référence (`setAutopilot(true, { shortcut: true })`)
+marche jusqu'à l'évent, attend si un essai de 280 images (dir 0) incrémente le compteur de
+geysers et retombe sur la cible, puis est poussée. L'IA sûre ne marche pas sur un évent isolé
+au-dessus d'une combe (trou physique avant le pad).
+
+Recette (N°22) : geyser d'apprentissage sur sol plein, geyser à viser dans un ravin, **Chœur
+des Bouquetins** (trois geysers enchaînés, phases décalées), puis la **Voie des Souffleurs**
+(raccourci sur trois évents perchés — le raccourci **exploite** le geyser ; chemin sûr dans
+la combe, étagères et fossés injumpables). Palette `thermes`. Étiquette « **Bien engagé** »
+(échelle §8 ; pressé 98 %, à la lisière facile de N°12 / N°20 à 93–95 %, ±5).
+
 ## 4. Thèmes
 
 Le décor est **100 % procédural** (dégradé de ciel, crêtes, sapins, sol, ronces) : un thème
@@ -452,13 +490,18 @@ dans la brume du crépuscule, ciel violet et cuivre ; les amanites rouges ressor
 `melezes` (niv. 21, mélézin d'automne en plein après-midi, ciel bleu franc, mélèzes dorés ; clé facultative
 `melezeGrove: true` — revue 9/11 : rangée dense de mélèzes sur deux plans avec troncs visibles, menu densifié ;
 n'existe que dans `melezes`, aucun autre niveau ne change).
+`thermes` (niv. 22, sources thermales des Pyrénées en fin de matinée, ciel voilé de soufre, ochre et
+dépôts minéraux ; clés facultatives `water`/`waterHi` (gave turquoise au fond des ravins),
+`pool`/`poolHi`/`sulfur`/`steam` (couleurs des geysers §3j). Ces clés n'existent que dans `thermes` :
+aucun autre niveau ne change).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
 mobiles comprises), `water` + `waterHi` (gave visible au fond des ravins, avec reflets animés ; la
 chute reste mortelle sous y = 700), `fireflies: true` (lucioles à positions déterministes au-dessus
 des trous, des points d'appel et des trajets des bacs), `melezeGrove: true` (futaie dense à troncs,
-palette `melezes` seulement). **Un niveau de nuit doit avoir `rim`.**
+palette `melezes` seulement), `pool`/`poolHi`/`sulfur`/`steam` (bassins et jets des geysers,
+palette `thermes` seulement). **Un niveau de nuit doit avoir `rim`.**
 
 ## 5. Physique (extraite du code, `assets/game.js`)
 
@@ -548,6 +591,9 @@ chute, un humain peut passer.
    lave, §3i, 2/11, raccourci « Ligne des Braises ») → **le N°21 DOIT être classique** (avec un raccourci risqué,
    étape 3c). N°21 classique (Mélézin des Écureuils Distraits, 9/11, raccourci « Plongeons de l'Écureuil », vires
    en descente) → **le N°22 DOIT être à mécaniques**.
+   N°22 à mécaniques (Sources des Bouquetins Ébouillantés, geysers, §3j, 15/11, raccourci
+   « Voie des Souffleurs ») → **le N°23 DOIT être classique** (avec un raccourci risqué,
+   étape 3c, modèle distinct des plongeons descendants du N°21 et de la Voie des Souffleurs).
 3c. **Raccourci risqué pour les classiques** (revue du 27/10, règle à appliquer à **tous les futurs
    niveaux classiques**, N°17, 19, 21…) : sur un classique, le pilote auto ne ralentit jamais (temps ≈
    distance / 352 px/s) et un humain attentif le suit à 3 % près, donc l'or (plancher auto × 1,03) tombe
@@ -585,8 +631,10 @@ chute, un humain peut passer.
    * **Ne pas réutiliser le même modèle de raccourci deux niveaux de suite** (revue 2/11) : N°17
      Sauts de Chamois / N°18 Séracs Suspendus / N°19 Sauts du Mouflon enchaînaient le même schéma
      « colonnes / failles / ressaut ». Le N°20 remplace ce clone (Orgues Basaltiques) par la **Ligne
-     des Braises** (raccourci sur croûtes de lave qui exploite la mécanique v9). À chaque nouveau
-     niveau à raccourci, choisir un modèle distinct du précédent.
+     des Braises** (raccourci sur croûtes de lave qui exploite la mécanique v9). Le N°21
+     « Plongeons de l'Écureuil » plonge de vire en vire en descente. Le N°22 « Voie des
+     Souffleurs » enchaîne des lancers de geyser sur des évents perchés (`kind: "geyser"`).
+     À chaque nouveau niveau à raccourci, choisir un modèle distinct du précédent.
    **À faire pour les classiques existants** (non modifiés le 27/10, or attentif trop généreux) :
    * **N°11 Névé des Marmottes** (or 73 % attentif) : remplacer les ponts de neige (passerelles au-dessus
      de la grande crevasse, après les Dents de la Marmotte) par 3 séracs-rochers séparés de criques de neige
@@ -834,6 +882,11 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
   `crumbTrap` / `drawCrumb`, liste `crumbs`, état `e.cr` (par coureur, remis à zéro après une chute),
   branches dans la boucle et `simRunner`. Niveaux sans croûte : inchangés (temps autopilote des N°1–19
   identiques au dixième).
+* **v10 (15/11)** : geysers (`geyser`, champ `geysers` du niveau, §3j) — `geyState` / `geyLaunch` /
+  `geyserShortOK`, liste `geysers`, état `e.geyLock` / `e.geyFly` (remis à zéro après une chute),
+  branches dans la boucle et `simRunner`, dessin `drawGeyser`, `getState().geysers`, raccourci
+  `kind: "geyser"`. Niveaux sans geyser : inchangés (N°1–21 : mêmes palettes, mêmes temps `auto`
+  attendus ; le rendu et la physique sont gardés par `geysers.length` et des clés facultatives).
 * `assets/routes-x3PbsDEU.css` : URLs des polices relatives. `custom.css` : liste de niveaux
   défilante, badge, bouton ↓, médailles (disques CSS, sans emoji).
 * Médailles (revue du 20/10) : `medalTargets` / `medalOf` / `medalNext` dans `assets/game.js` lisent
@@ -842,7 +895,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–21)
+## 8. Courbe de difficulté (niveaux 1–22)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -867,6 +920,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
 | 19 | Le Canyon des Mouflons Rigolards | Canyon | 1300 m | 19 (dont colonnes des Cheminées, 3 creux des Sauts) | 6 | — (classique ; passage clé : les **Cheminées de fée**, plongeons 150/130 px ; **Sauts du Mouflon**, 3 raccourcis risqués ; 2 panneaux) | 1 / 0.93 / 0.86 | 38,3 s (chemin sûr) ; 36,7 s par les raccourcis |
 | 20 | La Coulée des Salamandres Pressées | Bien engagé | 1600 m | 26 croûtes (Gué, escalier, plongeons, Ligne des Braises ×6, pont) | 3 | **26 croûtes de lave** (mécanique v9) ; **Gué des Salamandres** (revue 3/11 : 300 px / 0,7 s) ; **Ligne des Braises**, 6 raccourcis sur croûtes 200 px ; 3 panneaux | 1 / 0.93 / 0.86 | 47,3 s (chemin sûr) ; 45,2 s par les raccourcis |
 | 21 | Le Mélézin des Écureuils Distraits | Haute futaie | 1330 m | 23 (dont 7 trous des Souches, 3 ravines des Plongeons) | 5 | — (classique ; passage clé : les **Souches de l'Écureuil**, 6 souches de 110 → 80 px, trous de 160 px ; **Plongeons de l'Écureuil**, 3 raccourcis risqués en descente ; 2 panneaux) | 1 / 0.93 / 0.86 | 39,2 s (chemin sûr) ; 37,6 s par les raccourcis |
+| 22 | Les Sources des Bouquetins Ébouillantés | Bien engagé | 1520 m | 8 geysers (apprentissage, ravin, Chœur ×3, Voie des Souffleurs ×3) | 4 | **8 geysers** (mécanique v10) ; **Chœur des Bouquetins** (3 jets enchaînés) ; **Voie des Souffleurs**, 4 raccourcis (1 saut + 3 `kind: "geyser"`) ; 4 panneaux | 1 / 0.93 / 0.86 | 48,7 s (chemin sûr) ; 47,2 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -895,6 +949,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 19 | Le Canyon des Mouflons Rigolards | 38,3 s *(raccourcis : 36,7 s)* | 38,0 s *(exige les raccourcis)* | 41,1 s | 45,9 s | 40 % / 88 % / 95 % | 8 % / 18 % / 33 % |
 | 20 | La Coulée des Salamandres Pressées | 47,3 s *(raccourcis : 45,2 s)* | 47,2 s *(exige la Ligne des Braises)* | 51 s | 59,2 s | 33 % / 80 % / 100 % | 3 % / 8 % / 33 % |
 | 21 | Le Mélézin des Écureuils Distraits | 39,2 s *(raccourcis : 37,6 s)* | 38,8 s *(exige les Plongeons)* | 42 s | 45,2 s | 45 % / 90 % / 98 % | 5 % / 23 % / 40 % |
+| 22 | Les Sources des Bouquetins Ébouillantés | 48,7 s *(raccourcis : 47,2 s)* | 48,6 s *(exige la Voie des Souffleurs)* | 52,5 s | 56,4 s | 10 % / 65 % / 93 % | 8 % / 38 % / 48 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -1151,6 +1206,25 @@ avec 38,3 s / sans 39,8 s. Médailles **38,8 / 42 / 45,2 s** (attentif 45 / 90 /
 pressé au-dessus de 30–35 % : plancher argent + 0,5 s / milieu or–bronze, ⚠ de l'outil). N°1–20 inchangés (seuls
 un bloc `LEVELS.push` et une palette ajoutés). **Prochain niveau (N°22) : à mécaniques.**
 
+**N°22 (15/11, à mécaniques, branche `niveau-pret-22`, publication lundi 16/11)** :
+**Les Sources des Bouquetins Ébouillantés**, étiquette « **Bien engagé** » (échelle §8 ; pressé
+**98 %** / 1,50, à la lisière facile de N°12 / N°20 à 93–95 %, ±5 — légèrement plus facile que
+le N°20 en taux pressé, malgré un sentier plus long), 1520 m, nouvelle palette `thermes`,
+mécanique v10 : les **geysers** (§3j). Passage clé : le **Chœur des Bouquetins** (trois jets
+enchaînés, phases décalées). Raccourci « **Voie des Souffleurs** » (modèle distinct des
+Plongeons descendants du N°21) : un saut d'approche puis trois lancers sur des évents perchés
+(`kind: "geyser"`, push 480) au-dessus d'une combe (étagères 230 px / fossés 270 px injumpables,
+rocher au 1er fossé). Pilote auto 48,7 s, 47,2 s par les raccourcis, rivaux 0 chute. 40 essais :
+attentif **100 % / 0,13** (moy. 51,2 s) ; pressé **98 % / 1,50** (moy. 61,0 s) ; raccourci tenté
+20/40 (sauts 15/25 attentif, 9/22 pressé). Médailles **48,6 / 52,5 / 56,4 s** (attentif 10 / 65 /
+93 % ; pressé 8 / 38 / 48 %). Or attentif 10 % sous la fenêtre 30–50 % et bronze pressé 48 %
+au-dessus de 30–35 % : planchers d'écart (§6 étape 5b, autoShort × 1,03 = 48,62 s arrondi à 48,6
+pour rester strictement sous auto 48,7 s) — `acceptedMedalWarnings`. check-levels : 0 erreur,
+14 avertissements connus (N°10, 12–15), aucun nouveau non justifié. N°1–21 inchangés (palette
+et physique gardées par des clés facultatives / `geysers.length` ; captures de régression
+N°1, 19, 21). **Prochain niveau (N°23) : classique**, avec un raccourci risqué (modèle distinct
+des Plongeons du N°21 et de la Voie des Souffleurs).
+
 **Revue Boss Bot 9/11 (N°21, non publiée — branche `revue-09-11`)** :
 1. **Point chaud x≈9800** : montée après les Plongeons 60→**35 px** (`y` 370→395) **et** ronce 9900→**10050**.
    Chutes pressées zone 9600–10200 : **22 → 8**. Pressé 83 % → trop haut après adoucissement → récupération
@@ -1260,6 +1334,7 @@ recul si immobile — §7)**, **40 essais** par niveau et par profil (graines 1�
 | 18 | Le Glacier des Choucas Voltigeurs | Technique | 100 % | 0,07 | 38,2 s | 83 % | 2,70 | 48,3 s |
 | 19 | Le Canyon des Mouflons Rigolards | Canyon | 100 % | 0,13 | 39,2 s | 88 % | 2,60 | 51,8 s |
 | 20 | La Coulée des Salamandres Pressées | Bien engagé | 100 % | 0,03 | 48,9 s | 93 % | 2,70 | 66,3 s |
+| 22 | Les Sources des Bouquetins Ébouillantés | Bien engagé | 100 % | 0,13 | 51,2 s | 98 % | 1,50 | 61,0 s |
 
 Ces chiffres **remplacent** ceux des tableaux ci-dessus (19/10, 21/10), mesurés avec l'ancien pilote
 (fenêtre tronquée, visée au milieu) : l'attentif est presque parfait partout (0,0–0,6 chute) et le

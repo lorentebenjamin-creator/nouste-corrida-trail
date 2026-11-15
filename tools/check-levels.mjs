@@ -48,6 +48,15 @@ function bounceReach(speed, bounce, up = 0) {
   }
   return [x, 300, -top];
 }
+// v10 (LEVELS.md §3j) : lancer d'un geyser (vy = −boost, vx = push maintenu, pas de frein aérien).
+function geyserReach(push, boost, up = 0) {
+  let vx = push, vy = -boost, x = 0, yy = 0, top = 0; const dt = 1 / 60;
+  for (let f = 0; f < 300; f++) {
+    let gr = vy < 0 ? 2100 : 4700; if (Math.abs(vy) < 110) gr = 1200; vy = Math.min(1080, vy + gr * dt);
+    x += vx * dt; yy += vy * dt; top = Math.min(top, yy); if (vy > 0 && yy >= -up) return [x, f + 1, -top];
+  }
+  return [x, 300, -top];
+}
 let errors = 0, warnings = 0;
 const err = (l, m) => { errors++; console.log(`ERREUR  [${l}] ${m}`); };
 // Avertissements acceptés : champ `acceptedWarnings: [{ match: "début du message", reason: "pourquoi" }]`
@@ -114,6 +123,26 @@ LEVELS.forEach((L, idx) => {
           err(tag, `${nm} (zipDrop) : zipX1, from < to, land, landY numériques requis`);
         continue;
       }
+      // v10 : raccourci kind "geyser" — le souffle, pas un saut, franchit un ravin trop large pour un saut.
+      if (q?.kind === "geyser") {
+        if (!q || ![q.from, q.to, q.y, q.land, q.landY].every((x) => typeof x === "number" && isFinite(x)) || !(q.from < q.to && q.to < q.land))
+          { err(tag, `${nm} (geyser) : from < to < land et y, landY numériques requis`); continue; }
+        const pad = L.solids.find((sd) => !sd.move && (sd.kind === "ground" || sd.kind === "plank") && sd.y === q.y && sd.x === q.from && sd.x + sd.w === q.to);
+        if (!pad) err(tag, `${nm} (geyser) : pas de sol de dessus y=${q.y} de ${q.from} à ${q.to}`);
+        const land = L.solids.find((sd) => !sd.move && (sd.kind === "ground" || sd.kind === "plank") && sd.y === q.landY && sd.x === q.land);
+        if (!land) err(tag, `${nm} (geyser) : pas de sol de dessus y=${q.landY} commençant en ${q.land}`);
+        const gy = (L.geysers || []).find((g) => g.x < q.to && g.x + g.w > q.from && Math.abs(g.y - q.y) < 24);
+        if (!gy) { err(tag, `${nm} (geyser) : aucun geyser sur le pad de départ`); continue; }
+        const gap = q.land - q.to, up = q.y - q.landY;
+        if (gap <= 285) warn(tag, `${nm} (geyser) : écart ${gap} px encore sautable (≤ 285) — le souffle n'est pas indispensable`);
+        if (gap > 500) err(tag, `${nm} (geyser) : écart ${gap} px trop long (≤ 500)`);
+        const [rP, fP, apex] = geyserReach(gy.push, gy.boost, up);
+        const need = gap + 30; // depuis le bord, plus ~30 px de corps en retrait
+        if (up > apex - 40) err(tag, `${nm} (geyser) : montée ${up} px, apex du souffle ≈ ${Math.round(apex)} px, marge < 40`);
+        if (need > rP - 20) err(tag, `${nm} (geyser) : le souffle n'atteint pas l'arrivée (besoin ${need} px, portée ≈ ${Math.round(rP)} px)`);
+        info(tag, `${nm}: SOUFFLE DE GEYSER (écart ${gap} px, montée ${up} ; portée ≈ ${Math.round(rP)} px, ${fP} images) — valider avec tools/playtest.mjs --human`);
+        continue;
+      }
       if (!q || ![q.from, q.to, q.y, q.land, q.landY].every((x) => typeof x === "number" && isFinite(x)) || !(q.from < q.to && q.to < q.land)) { err(tag, `${nm} : from < to < land et y, landY numériques requis`); continue; }
       // Revue 2/11 : un pad de raccourci peut être un sol `ground` OU une croûte de lave (`plank`+`crumb`)
       // — la Ligne des Braises du N°20 exploite la croûte elle-même comme appui du raccourci.
@@ -129,6 +158,7 @@ LEVELS.forEach((L, idx) => {
   {
     const ENGAGEMENT_LABELS = ["Technique", "Engagé", "Bien engagé", "Très engagé", "Extrême"];
     const hasMech = !!(L.ziplines?.length || L.jets?.length || L.gusts?.length || L.rockfalls?.length || L.patrols?.length || L.thermals?.length
+      || L.geysers?.length
       || L.solids?.some((sd) => sd.move || sd.sink || sd.bounce || sd.crumb));
     if (hasMech && !ENGAGEMENT_LABELS.includes(L.difficulty))
       err(tag, `étiquette « ${L.difficulty} » hors de l'échelle d'engagement (Technique, Engagé, Bien engagé, Très engagé, Extrême) — obligatoire pour un niveau à mécaniques (LEVELS.md §8)`);
@@ -145,7 +175,7 @@ LEVELS.forEach((L, idx) => {
   else L.rivals.forEach((r, i) => { if (!(r.speed > 0.5 && r.speed <= 1.05)) err(tag, `rivals[${i}].speed hors bornes (0.5–1.05)`); });
   if (L.width > LIMITS.maxWidth) err(tag, `width ${L.width} > ${LIMITS.maxWidth}`);
   for (const k of ["solids", "hazards", "coins", "checkpoints"]) if (!Array.isArray(L[k])) err(tag, `${k} doit être un tableau`);
-  for (const k of ["rockfalls", "patrols", "jets", "gusts", "thermals", "ziplines"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
+  for (const k of ["rockfalls", "patrols", "jets", "gusts", "thermals", "ziplines", "geysers"]) if (L[k] != null && !Array.isArray(L[k])) err(tag, `${k} doit être un tableau (ou absent)`);
   if (errors > errorsBefore) return;
 
   const movers = L.solids.filter(s => s.move);
@@ -246,6 +276,29 @@ LEVELS.forEach((L, idx) => {
       if (fP > 75) warn(tag, `${w}: vol de rebond de ${fP} images (> 75 : l'IA voit mal la fin)`);
       info(tag, `${w}: REBOND D'AMANITE (écart ${gap} px, montée ${up} ; portée depuis le chapeau ≈ ${Math.round(rP)} px joueur / ${Math.round(rS)} px rival ${sMin}, apex ${Math.round(apex)} px, ${fP} images) — valider avec tools/playtest.mjs --human`);
       continue;
+    }
+    // Saut de geyser (v10, §3j) : ravin trop large / trop haut pour un saut, franchi par le souffle.
+    {
+      const gys = L.geysers || [];
+      const gyOn = gys.find((g) => g.x < a.x + a.w && g.x + g.w > a.x + a.w - 80 && Math.abs(g.y - a.y) < 24);
+      const gyPit = gys.find((g) => g.x >= a.x + a.w - 40 && g.x + g.w <= b.x + 40);
+      const gy = gyOn || gyPit;
+      if (gy && (gap > LIMITS.softGap || up > LIMITS.maxUp)) {
+        const takeX = gyOn ? Math.min(a.x + a.w, gy.x + gy.w) - 30 : gy.x + gy.w / 2;
+        const [rP, fP, apex] = geyserReach(gy.push, gy.boost, up);
+        const need = b.x - takeX;
+        if (up > apex - 40) err(tag, `${w}: souffle trop bas (montée ${up} px, apex ≈ ${Math.round(apex)} px, marge < 40)`);
+        else if (need > rP + 30 - 20) err(tag, `${w}: saut de geyser ${gap} px trop long (portée depuis l'évent ≈ ${Math.round(rP)} px, il faut ${Math.round(need)} px)`);
+        const rNorm = jumpReach(1, Math.max(0, up)) + 30;
+        if (gap < rNorm && up <= LIMITS.maxUp) warn(tag, `${w}: saut de geyser de ${gap} px franchissable sans lui (portée normale ≈ ${Math.round(rNorm)} px)`);
+        if (gyOn && a.w < 150) warn(tag, `${w}: plateforme d'attente ${a.w} px < 150 avant le geyser`);
+        if (gyPit) {
+          const wait = L.solids.some((sd) => !sd.move && sd.kind === "ground" && sd.x + sd.w <= (gy.x + 2) && sd.x + sd.w >= gy.x - 200 && Math.abs(sd.y - a.y) < 8 && sd.w >= 150);
+          if (!wait && a.w < 150) warn(tag, `${w}: pas d'aire d'attente sûre (≥ 150 px) avant le geyser du ravin`);
+        }
+        info(tag, `${w}: SAUT DE GEYSER (écart ${gap} px, montée ${up} ; portée ≈ ${Math.round(rP)} px, apex ${Math.round(apex)} px, ${fP} images) — valider avec tools/playtest.mjs --human`);
+        continue;
+      }
     }
     if (up > LIMITS.maxUp) err(tag, `${w}: montée ${up} px > ${LIMITS.maxUp}`);
     if (gap > LIMITS.maxGap) err(tag, `${w}: écart ${gap} px > ${LIMITS.maxGap}`);
@@ -534,6 +587,31 @@ LEVELS.forEach((L, idx) => {
     if (!(L.signs || []).some((sn) => sn.x <= q.from && sn.x >= q.from - 1200 && /corniche|lâche/i.test(sn.text || "")))
       warn(tag, `${tagz}: pas de panneau (texte « corniche » / « lâche ») dans les 1200 px avant`);
   }
+  // Sources jaillissantes (v10, LEVELS.md §3j)
+  const gys = (L.geysers || []).slice().sort((a, b) => a.x - b.x);
+  gys.forEach((gy, gi) => {
+    const tagg = `geyser @${gy.x}`, off = gy.period * (1 - gy.on), onT = gy.period * gy.on;
+    if (!(gy.w >= 100 && gy.w <= 240)) err(tag, `${tagg}: largeur ${gy.w} hors 100–240`);
+    if (!(gy.y >= 200 && gy.y <= 600)) err(tag, `${tagg}: hauteur y=${gy.y} hors [200, 600]`);
+    if (!(gy.period >= 3 && gy.period <= 6)) err(tag, `${tagg}: period ${gy.period} hors 3–6 s`);
+    if (!(gy.on >= 0.18 && gy.on <= 0.4)) err(tag, `${tagg}: on ${gy.on} hors 0,18–0,4`);
+    if (onT < 0.7) err(tag, `${tagg}: éruption ${onT.toFixed(2)} s < 0,7 s (trop courte pour s'y lancer)`);
+    if (off < 1.8) err(tag, `${tagg}: repos ${off.toFixed(2)} s < 1,8 s`);
+    if (!(gy.warn >= 0.6 && gy.warn <= off - 0.4)) err(tag, `${tagg}: warn ${gy.warn} s hors [0,6 ; repos − 0,4]`);
+    if (!(gy.boost >= 850 && gy.boost <= 1200)) err(tag, `${tagg}: boost ${gy.boost} hors 850–1200`);
+    if (!(gy.push >= 300 && gy.push <= 500)) err(tag, `${tagg}: push ${gy.push} hors 300–500`);
+    if (gy.x < L.spawnX + 600) err(tag, `${tagg}: trop près du départ`);
+    if (gi && gy.x < gys[gi - 1].x + gys[gi - 1].w) err(tag, `${tagg}: chevauche le geyser @${gys[gi - 1].x}`);
+    for (const cp of L.checkpoints) if (cp.x + 60 > gy.x - 120 && cp.x < gy.x + gy.w + 60) err(tag, `${tagg}: trop près du fanion @${cp.x}`);
+    const onSolid = L.solids.some((sd) => !sd.move && (sd.kind === "ground" || sd.kind === "plank") && Math.abs(sd.y - gy.y) < 8 && sd.x < gy.x + gy.w && sd.x + sd.w > gy.x);
+    if (onSolid && L.hazards.some((hz) => hz.x < gy.x + gy.w && hz.x + hz.w > gy.x && Math.abs(hz.y + hz.h - gy.y) < 8))
+      err(tag, `${tagg}: pas de ronce sur l'évent`);
+    if (movers.some((m) => { const e = env(m); return e.x2 > gy.x - 300 && e.x1 < gy.x + gy.w + 300; }) || (L.jets || []).some((jt) => jt.x + jt.w > gy.x - 300 && jt.x < gy.x + gy.w + 300) || (L.gusts || []).some((gu) => gu.x2 > gy.x - 300 && gu.x1 < gy.x + gy.w + 300) || (L.thermals || []).some((tm) => tm.x2 > gy.x - 300 && tm.x1 < gy.x + gy.w + 300) || (L.ziplines || []).some((zl) => zl.x2 > gy.x - 300 && zl.x1 < gy.x + gy.w + 300) || L.solids.some((sd) => (sd.sink || sd.bounce || sd.crumb) && sd.x < gy.x + gy.w + 300 && sd.x + sd.w > gy.x - 300))
+      warn(tag, `${tagg}: autre mécanique à moins de 300 px (combinaison peu lisible)`);
+    if (gi === 0 && !(L.signs || []).some((sn) => sn.x <= gy.x && sn.x >= gy.x - 1500 && /geyser|souffle/i.test(sn.text || "")))
+      warn(tag, `${tagg}: première source sans panneau (texte « geyser » ou « souffle ») dans les 1500 px avant`);
+  });
+  if (gys.length) info(tag, `${gys.length} geyser(s) : à valider avec tools/playtest.mjs --human`);
   // Panneaux de sentier (facultatifs, décor) : posés sur un sol, texte court
   if (L.signs != null && !Array.isArray(L.signs)) err(tag, `signs doit être un tableau (ou absent)`);
   for (const sn of L.signs || []) {
@@ -557,7 +635,7 @@ LEVELS.forEach((L, idx) => {
   const cids = new Set(L.coins.map(c => c.id));
   if (cids.size !== L.coins.length) err(tag, `ids de balises en double (utiliser un seul v(id) par niveau)`);
   for (const c of L.coins) if (c.x < 0 || c.x > L.width || c.y < 0 || c.y > 760) warn(tag, `balise hors monde @${c.x},${c.y}`);
-  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.thermals || []).length && `${L.thermals.length} ascendance(s)`, L.solids.some((sd) => sd.bounce) && `${L.solids.filter((sd) => sd.bounce).length} amanite(s)`, (L.ziplines || []).length && `${L.ziplines.length} tyrolienne(s)`, crs.length && `${crs.length} croûte(s) de lave`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
+  const extra = [movers.length && `${movers.length} passerelle(s) mobile(s)`, (L.rockfalls || []).length && `${L.rockfalls.length} chute(s) de pierres`, (L.patrols || []).length && `${L.patrols.length} patou(s)`, (L.jets || []).length && `${L.jets.length} jet(s) de cascade`, (L.gusts || []).length && `${L.gusts.length} rafale(s) de vent`, L.solids.some((sd) => sd.sink) && `${L.solids.filter((sd) => sd.sink).length} motte(s) plongeante(s)`, (L.thermals || []).length && `${L.thermals.length} ascendance(s)`, L.solids.some((sd) => sd.bounce) && `${L.solids.filter((sd) => sd.bounce).length} amanite(s)`, (L.ziplines || []).length && `${L.ziplines.length} tyrolienne(s)`, crs.length && `${crs.length} croûte(s) de lave`, (L.geysers || []).length && `${L.geysers.length} geyser(s)`, (L.signs || []).length && `${L.signs.length} panneau(x)`].filter(Boolean).join(", ");
   for (const a of accepting) if (!a.used) warn(tag, `acceptedWarnings obsolète : "${a.match}" ne correspond plus à aucun avertissement (le retirer)`);
   accepting = [];
   console.log(`ok      [${tag}] ${L.name} — ${L.difficulty} — ${Math.round(L.finishX / 10)} m — ${L.coins.length} balises, ${L.checkpoints.length} fanions${extra ? ", " + extra : ""}`);

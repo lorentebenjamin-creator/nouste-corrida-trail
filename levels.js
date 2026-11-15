@@ -163,6 +163,23 @@ export const tyro = (x1, y1, x2, y2, grab = 8, speed = 480, accel = 900) => ({ x
 //   de 0,11 s compris). Plots orange aux deux bouts. À mettre dans `solids` (LEVELS.md §3i).
 export const croute = (x, y, w, delay = 0.6, regrow = 3) => ({ x, y, w, h: 22, oneWay: true, kind: "plank", crumb: { delay, regrow } });
 
+
+// ---- Mécanique v10 ---------------------------------------------------------
+// geyser(x, w, y, period=4.4, on=0.24, phase=0, warn=0.8, boost=1000, push=420) :
+//   SOURCE JAILLISSANTE (geyser) — un évent de largeur `w` au niveau `y` (bassin minéral).
+//   Cycle de `period` s : il ÉRUCTE pendant la fraction `on` du cycle (décalé par `phase`),
+//   puis se repose. Pendant les `warn` s qui précèdent, le bassin gonfle, la vapeur s'épaissit
+//   et un panneau « souffle » clignote en haut de l'écran. Dès qu'un coureur est dans la colonne
+//   (pieds à moins de 90 px au-dessus de l'évent) pendant l'éruption, le souffle le LANCE une
+//   fois vers le haut (vy = −boost, apex ≈ 230 px avec 1000) et vers l'avant (vx au moins `push`) :
+//   on atteint une corniche trop haute pour un saut normal, ou un ravin trop large. Chaque
+//   éruption ne lance qu'une fois (verrou par cycle). Un évent peut reposer sur un sol (on
+//   attend dessus) ou au-dessus du vide (il faut sauter dans le jet). À mettre dans le tableau
+//   `geysers` du niveau (LEVELS.md §3j).
+export const geyser = (x, w, y, period = 4.4, on = 0.24, phase = 0, warn = 0.8, boost = 1000, push = 420) => ({
+  x, w, y, period, on, phase, warn, boost, push,
+});
+
 // ---- Palettes supplémentaires -----------------------------------------
 // Thèmes intégrés au bundle : "forest", "ridge", "col".
 // On peut en ajouter ici (toutes les clés sont obligatoires) : le décor est
@@ -421,7 +438,26 @@ export const THEMES = {
     fog: "#1f2a30",
     melezeGrove: true,
   },
+  thermes: {
+    // Niveau 22 : sources thermales des Pyrénées en fin de matinée (ciel voilé de soufre,
+    // ochre et dépôts minéraux, eau turquoise des bassins). Clés facultatives `water`/`waterHi`
+    // (gave turquoise au fond des ravins), `pool`/`poolHi`/`sulfur`/`steam` (couleurs des geysers).
+    // Ces clés n'existent que dans `thermes` : aucun autre niveau ne change.
+    skyTop: "#3a6288", skyMid: "#d4b878", skyBot: "#f3ddb0",
+    ridge: "#6b4a38", ridge2: "#a87858",
+    pine: "#6a6a3a", pine2: "#9a8a48",
+    dirt: "#c48a52", dirtDark: "#8a5a30",
+    grass: "#c8b060", grassDark: "#8a7840",
+    wood: "#8a5a38", woodDark: "#5a3820",
+    rock: "#d0c4a8", rockDark: "#8a7a68",
+    thorn: "#4a2e1c", leaf: "#e8d060", berry: "#d05838",
+    fog: "#2a2418",
+    water: "#2a8a88", waterHi: "#8ad8d0",
+    pool: "#2f9a94", poolHi: "#b4ece6",
+    sulfur: "#e8d878", steam: "#f6f2ea",
+  },
 };
+
 
 // =====================================================================
 //  NIVEAUX (l'ordre = l'ordre du jeu ; le dernier est le "Niveau du jour")
@@ -2205,6 +2241,148 @@ LEVELS.push((() => {
       { match: "ground@4700→ground@4990: écart 200 px", reason: "Revue 9/11 : même trou des Souches (200 px) ; pilote auto et rivaux 0 chute." },
       { match: "ground@4990→ground@5270: écart 200 px", reason: "Revue 9/11 : Souches de l'Écureuil, trous 200 px (récupération difficulté) ; pilote auto et rivaux 0 chute." },
       { match: "ronce @10050: seulement 170 px avant le bord", reason: "Revue 9/11 : ronce reculée de 9900 à 10050 pour sortir de la réception du trou après les Plongeons (point chaud pressé) ; 170 px de sol restant suffisent (pilote auto 0 chute, rivaux 0)." },
+    ],
+  };
+})());
+
+// ---------------------------------------------------------------------
+// NIVEAU 22 — Les Sources des Bouquetins Ébouillantés (brouillon, à publier le 16/11)
+// Niveau à MÉCANIQUES (règle d'alternance, après le N°21 classique) — nouveauté : les SOURCES
+// JAILLISSANTES (mécanique v10, helper geyser(), LEVELS.md §3j). Un geyser érupte en cycle :
+// le souffle lance le coureur plus haut et plus loin qu'un saut. Recette : un geyser d'apprentissage
+// (attente sur l'évent, corniche +140 px), un geyser au-dessus du vide (il faut sauter dans le jet),
+// le CHŒUR DES BOUQUETINS (trois geysers enchaînés, phases décalées), puis la VOIE DES SOUFFLEURS,
+// raccourci risqué d'un modèle distinct des Plongeons de l'Écureuil (N°21) : le raccourci EXPLOITE
+// le geyser (kind: "geyser") pour franchir des ravins trop larges pour un saut, pendant que le
+// chemin sûr descend dans la combe et remonte par trois ressauts. Nouvelle palette `thermes`.
+// Le N°23 DEVRA être classique (avec un raccourci risqué, modèle distinct de la Voie des Souffleurs).
+// ---------------------------------------------------------------------
+LEVELS.push((() => {
+  const id = "sources-bouquetins", c = v(id);
+  // Mise en jambes
+  c.line(160, 400, 370, 3); c.arc(720, 940, 330, 3, 40); c.arc(1380, 1580, 270, 3, 40);
+  c.line(1700, 2000, 310, 2); c.arc(2180, 2420, 270, 3, 40);
+  // coins loin des panneaux (planche 164 px, texte à y≈328–376)
+  c.line(2760, 3050, 370, 3);
+  // Trajectoire du premier geyser (apprentissage, corniche +140)
+  c.arc(3300, 3550, 200, 4, 90);
+  c.line(3600, 3900, 230, 3); c.arc(4050, 4170, 250, 3, 40);
+  c.line(4720, 4860, 370, 3);
+  // Trajectoire du geyser à viser (saut dans le jet)
+  c.arc(5520, 6040, 250, 4, 100);
+  c.line(6100, 6500, 370, 3); c.arc(6600, 6720, 270, 3, 40);
+  c.line(7680, 7960, 370, 3);
+  // Trajectoire du Chœur des Bouquetins
+  c.arc(8180, 8460, 230, 4, 90); c.arc(8620, 8900, 170, 4, 90); c.arc(9060, 9380, 110, 4, 90);
+  c.line(9440, 9800, 230, 3); c.arc(9860, 9980, 250, 3, 40);
+  c.line(10600, 11000, 370, 3); c.arc(11300, 11440, 330, 3, 40);
+  c.line(11450, 11490, 370, 2); c.line(11820, 12100, 370, 3);
+  // Trajectoire de la Voie des Souffleurs : saut montant (80 px, +80) sur la dalle, puis 3 souffles
+  c.arc(12240, 12320, 270, 3, 70);
+  c.arc(12560, 12860, 180, 4, 90); c.arc(13100, 13400, 180, 4, 90); c.arc(13640, 13940, 180, 4, 90);
+  c.line(14200, 14600, 370, 3); c.line(14800, 15100, 370, 3);
+  // Dalle oneWay hors chaîne de marche (la combe passe dessous) ; l'évent est sur les 100 derniers px.
+  const vent = (x, w, y) => ({ x, y, w, h: 18, oneWay: true, kind: "ground", ledge: true });
+  return {
+    id, name: "Les Sources des Bouquetins Ébouillantés",
+    blurb: "Les geysers des thermes coiffent les bouquetins. Attends le souffle : il t'envoie plus haut et plus loin qu'un saut.",
+    difficulty: "Bien engagé", theme: "thermes",
+    width: 15680, floor: 440, spawnX: 60,
+    solids: [
+      // Départ sur l'ocre des thermes, mise en jambes classique
+      p(0, 820, 440),
+      p(940, 520, 440), h(1150, 440),
+      p(1580, 720, 380), g(1880, 380),
+      // Aire d'attente du premier geyser (≥ 150 px, ici tout le palier)
+      p(2420, 880, 440),
+      // Passage d'apprentissage : on attend sur l'évent, le souffle envoie sur une corniche +140 px
+      // (trop haute pour un saut, apex 137) et 250 px plus loin (saut normal ≈ 147 px à +140).
+      p(3550, 500, 300),
+      p(4170, 400, 360),
+      p(4690, 830, 440),
+      // Geyser au-dessus du vide : il faut sauter DANS le jet pendant l'éruption (520 px de ravin).
+      p(6040, 560, 440),
+      p(6720, 420, 380),
+      // Passage clé — le CHŒUR DES BOUQUETINS : trois geysers enchaînés, phases décalées.
+      p(7260, 920, 440),
+      p(8460, 160, 360),
+      p(8900, 160, 300),
+      p(9380, 480, 300),
+      p(9980, 400, 370),
+      p(10500, 800, 440), h(10840, 440),
+      // Approche longue (un seul sol jusqu'à 12240) : un saut anticipé retombe encore sur le palier,
+      // le chemin sûr se laisse tomber au bord, le raccourci saute 80 px / +80 sur la dalle à 360.
+      p(11440, 800, 440),
+      vent(12320, 240, 360),
+      vent(12860, 240, 360),
+      vent(13400, 240, 360),
+      // Combe 650 / tablettes 560 : fossés de 270 px (plus longs qu'un saut, reach 252)
+      // entre des tablettes de 230 px (plus larges que la portée à +90, ≈ 217) : on ne peut
+      // ni sauter de tablette en tablette ni passer par-dessus une tablette.
+      p(12240, 160, 650),
+      p(12400, 230, 550),
+      p(12630, 270, 650), h(12750, 650),
+      p(12900, 230, 550),
+      p(13130, 270, 650),
+      p(13400, 230, 550),
+      p(13630, 270, 650),
+      p(13900, 20, 560),
+      p(13920, 20, 470),
+      p(13940, 1740, 440),
+    ],
+    hazards: [
+      _(500, 70, 440),
+      _(5200, 64, 440),
+      _(11000, 64, 440),
+      _(14700, 70, 440),
+    ],
+    signs: [
+      panneau(2600, 440, "Geyser : attends|le souffle"),
+      panneau(5000, 440, "Souffle : saute|dans le jet"),
+      panneau(7520, 440, "Chœur : enchaîne|les souffles"),
+      panneau(11620, 440, "Raccourci risqué :|voie des souffleurs"),
+    ],
+    geysers: [
+      // Apprentissage : évent posé sur le palier, lent, on a le temps de lire
+      geyser(3140, 160, 440, 4.8, 0.28, 0.15, 0.9, 1000, 420),
+      // Au-dessus du vide : il faut sauter dans la colonne pendant l'éruption
+      geyser(5620, 140, 500, 4.6, 0.26, 0.30, 0.85, 1000, 420),
+      // Chœur des Bouquetins (phases en vague : chacun ≈ 1,3 s après le précédent)
+      geyser(8020, 160, 440, 4.4, 0.24, 0.00, 0.8, 1000, 420),
+      geyser(8460, 160, 360, 4.4, 0.24, 0.70, 0.8, 1000, 420),
+      geyser(8900, 160, 300, 4.4, 0.24, 0.40, 0.8, 1000, 420),
+      // Voie des Souffleurs : évent sur les 100 derniers px de chaque dalle de 320, poussée 480.
+      // Phases calées sur l'arrivée auto au 1er évent (~42,85 s) puis toutes les ≈ 2,0 s
+      // (vol 0,75 s + course sur la dalle suivante jusqu'à l'évent).
+      geyser(12460, 100, 360, 4.4, 0.28, 0.216, 0.8, 1000, 480),
+      geyser(13000, 100, 360, 4.4, 0.28, 0.927, 0.8, 1000, 480),
+      geyser(13540, 100, 360, 4.4, 0.28, 0.591, 0.8, 1000, 480),
+    ],
+    // Raccourcis risqués : saut de 90 px sur la 1re dalle, puis 3 souffles de 300 px.
+    shortcuts: [
+      { name: "Voie des Souffleurs 1a", from: 11440, to: 12240, y: 440, land: 12320, landY: 360 },
+      { name: "Voie des Souffleurs 1b", kind: "geyser", from: 12320, to: 12560, y: 360, land: 12860, landY: 360 },
+      { name: "Voie des Souffleurs 2", kind: "geyser", from: 12860, to: 13100, y: 360, land: 13400, landY: 360 },
+      { name: "Voie des Souffleurs 3", kind: "geyser", from: 13400, to: 13640, y: 360, land: 13940, landY: 440 },
+    ],
+    coins: c.list,
+    checkpoints: [y(id, 2440, 440, 1), y(id, 4710, 440, 2), y(id, 7280, 440, 3), y(id, 10520, 440, 4), y(id, 14120, 440, 5)],
+    finishX: 15200,
+    rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
+    medals: { auto: 48.7, autoShort: 47.2, gold: 48.6, silver: 52.5, bronze: 56.4 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 10 %, argent 65 %, bronze 93 % ; pressés : or 8 %, argent 38 %, bronze 48 %)
+    acceptedMedalWarnings: [
+      { match: "or hors de la fenêtre 30–50 %", reason: "Plancher autoShort × 1,03 (47,2 × 1,03 = 48,62 s) arrondi à 48,6 s, juste sous auto 48,7 s (l'or doit rester strictement sous auto). Les temps attentifs sont trop groupés derrière ce plancher." },
+      { match: "bronze pressé hors de la fenêtre 30–35 %", reason: "Planchers argent ≥ or × 1,08 et milieu or–bronze forcent le bronze à 56,4 s ; 48 % des pressés y passent. Les écarts minimum l'emportent (LEVELS.md §6 étape 5b)." },
+    ],
+    acceptedWarnings: [
+      { match: "medals : or 48.6 s à moins de 3 % au-dessus du pilote auto par les raccourcis 47.2 s", reason: "Plancher autoShort × 1,03 = 48,62 s, arrondi à 48,6 s pour rester strictement sous auto 48,7 s (l'or exige le raccourci)." },
+      { match: "rock @12750: seulement 150 px avant le bord", reason: "Rocher voulu au milieu du 1er fossé de 270 px (chemin sûr) pour un peu de temps ; le raccourci vole au-dessus. Pilote auto et rivaux 0 chute." },
+      { match: "ground@12240→ground@12400: marche montante sans trou (100 px)", reason: "1re tablette de la combe sous la Voie des Souffleurs (230 px à 550, montée 100 px, non sautable) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@12630→ground@12900: marche montante sans trou (100 px)", reason: "2e tablette de la combe sous la Voie des Souffleurs, après un fossé de 270 px — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@13130→ground@13400: marche montante sans trou (100 px)", reason: "3e tablette de la combe sous la Voie des Souffleurs, après un fossé de 270 px — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@13630→ground@13900: marche montante sans trou (90 px)", reason: "Remontée de 90 px vers la sortie de la combe, après un fossé de 270 px." },
+      { match: "ground@13900→ground@13920: marche montante sans trou (90 px)", reason: "Avant-dernière marche de sortie de la combe (90 px)." },
+      { match: "ground@13920→ground@13940: marche montante sans trou (30 px)", reason: "Sortie de 30 px de la combe vers le sol d'arrivée ; le raccourci évite aussi celle-ci." },
     ],
   };
 })());

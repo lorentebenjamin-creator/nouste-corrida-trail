@@ -589,6 +589,9 @@ function R(e, t) {
       (e.zip = null), // v8
       (e.zipCool = 0),
       (e.cr = null), // v9 : croûtes intactes après une chute
+      (e.geyLock = null), // v10
+      (e.geyFly = !1),
+      (e.geyPush = 0),
       (e.alive = !0),
       (e.grounded = !0),
       (e.invuln = e.you ? 0.9 : 0.45),
@@ -799,7 +802,10 @@ function R(e, t) {
         i = e.you ? (n.right ? 1 : 0) - !!r : (e.aiDir ?? 1),
         a = i * k * e.speed * (i > 0 ? gustSlow(e, _) : 1), // v4 : rafale de vent de face
         o = e.grounded ? M : ae;
-      if (i !== 0) {
+      if (e.geyFly && !e.grounded) {
+        e.vx = Math.max(e.vx, e.geyPush || 0);
+        e.facing = 1;
+      } else if (i !== 0) {
         let n = a - e.vx,
           r = o * t;
         ((e.vx += Math.sign(n) * Math.min(Math.abs(n), r)),
@@ -842,6 +848,8 @@ function R(e, t) {
           jetTouch(e, _),
           crumbs.length && (crNow = _), // v9
           Re(e, t),
+          e.grounded && (e.geyFly = !1),
+          geysers.length && geyLaunch(e, _),
           ziplines.length && zipGrab(e, zp)),
       e.grounded
         ? Math.abs(e.vx) < 28
@@ -936,6 +944,7 @@ function R(e, t) {
     bouncers = [],
     ziplines = [],
     crumbs = [],
+    geysers = [],
     crNow = 0,
     shortcuts = [],
     autoShort = !1,
@@ -1201,6 +1210,44 @@ function R(e, t) {
     ((_ = t0w), (crNow = now));
     return !ok;
   }
+  // v10 — Sources jaillissantes (levels.js `geyser()`, LEVELS.md §3j) : évent en cycle déterministe.
+  // Pendant l'éruption, un coureur dont les pieds sont dans la colonne et à moins de 90 px au-dessus
+  // de l'évent est LANCÉ une fois (vy = −boost, vx au moins `push`). Verrou par cycle (`geyLock`) :
+  // on n'est pas recollé au jet. `geyFly` maintient la poussée avant jusqu'à la réception (pas de
+  // frein aérien). Niveaux sans geyser : aucune de ces fonctions n'est appelée (comportement inchangé).
+  function geyState(gy, time) {
+    let t = ((((time / gy.period + (gy.phase || 0)) % 1) + 1) % 1) * gy.period,
+      onT = gy.on * gy.period,
+      cyc = Math.floor((time / gy.period + (gy.phase || 0) + 1e-9));
+    if (t < onT) return { on: !0, k: t / onT, warn: 0, since: t, cycle: cyc };
+    let toOn = gy.period - t;
+    return { on: !1, k: 0, warn: toOn < gy.warn ? 1 - toOn / gy.warn : 0, since: -1, cycle: cyc };
+  }
+  function geyLaunch(e, time) {
+    if (!geysers.length || e.zip) return !1;
+    let cx = e.x + e.w * 0.5, feet = e.y + e.h;
+    for (let gy of geysers) {
+      if (cx < gy.x || cx > gy.x + gy.w) continue;
+      if (feet < gy.y - 90 || feet > gy.y + 16) continue;
+      let st = geyState(gy, time);
+      if (!st.on) continue;
+      let lock = gy.gi + `:` + st.cycle;
+      if (e.geyLock === lock) continue;
+      ((e.geyLock = lock),
+        (e.vy = -gy.boost),
+        (e.vx = Math.max(e.vx, gy.push)),
+        (e.geyPush = gy.push),
+        (e.geyFly = !0),
+        (e.grounded = !1),
+        (e.coyote = 0),
+        (e.cut = !0),
+        (e.squash = -0.65),
+        (e.geysered = (e.geysered || 0) + 1));
+      e.sim || ((gy.whoosh = _), e.you && (r.burst(0.7, 0.04, 0.45), r.burst(0.25, 0.05, 1.4)));
+      return !0;
+    }
+    return !1;
+  }
   function dynHit(e, time) {
     for (let fl of falls) {
       let st = fallState(fl, time);
@@ -1228,6 +1275,8 @@ function R(e, t) {
     ziplines = s.ziplines || [];
     crumbs = s.solids.filter((sd) => sd.crumb);
     crumbs.forEach((cb, i) => ((cb.ci = i), (cb.ph = 0)));
+    geysers = s.geysers || [];
+    geysers.forEach((gy, i) => ((gy.gi = i), (gy.wasOn = !1), (gy.whoosh = -9)));
     for (let zl of ziplines) {
       zl.zing = -9;
       let gr = (px) => s.solids.find((sd) => !sd.move && sd.kind === `ground` && px >= sd.x && px <= sd.x + sd.w);
@@ -1298,6 +1347,11 @@ function R(e, t) {
       (on && !gu.wasOn && o !== `count` && gu.x1 < v + b * 1.1 && gu.x2 > v - b * 0.1 && (r.burst(0.9, 0.04, 0.35), r.burst(0.6, 0.02, 1.1)),
         (gu.wasOn = on));
     }
+    for (let gy of geysers) {
+      let on = geyState(gy, _).on;
+      (on && !gy.wasOn && o !== `count` && gy.x < v + b * 1.1 && gy.x + gy.w > v - b * 0.1 && (r.burst(0.55, 0.04, 0.4), r.burst(0.22, 0.03, 1.2)),
+        (gy.wasOn = on));
+    }
   }
   // --- IA : simulation exacte de la même physique ---------------------
   function simRunner(e, dir, jumpAt, maxF, stopOnLand) {
@@ -1326,7 +1380,9 @@ function R(e, t) {
         acc = c.grounded ? M : ae;
       ziplines.length && (c.zipCool = Math.max(0, (c.zipCool || 0) - dt));
       if (c.zip); // v8 : sur la tyrolienne, pas de commande
-      else if (dd !== 0) {
+      else if (c.geyFly && !c.grounded) {
+        c.vx = Math.max(c.vx, c.geyPush || 0);
+      } else if (dd !== 0) {
         let dv = dd * k * c.speed * (dd > 0 ? gustSlow(c, _ + fr * dt) : 1) - c.vx;
         c.vx += Math.sign(dv) * Math.min(Math.abs(dv), acc * dt);
       } else {
@@ -1350,6 +1406,9 @@ function R(e, t) {
       else {
         let zp = c.y;
         (fallStep(c, dt, _ + fr * dt), jetPush(c, _ + fr * dt) && (jetted = !0), crumbs.length && (crNow = _ + fr * dt), Re(c, dt));
+        c.grounded && (c.geyFly = !1);
+        // v10 : le souffle relance le vol (≈ 0,9 s) : on prolonge l'horizon des simulations de sûreté
+        geysers.length && geyLaunch(c, _ + fr * dt) && (maxF += 55);
         // v8 : tyrolienne attrapée : l'horizon des simulations de sûreté couvre la glisse
         ziplines.length && zipGrab(c, zp) && stopOnLand && (maxF += zipRemain(c) + 30);
       }
@@ -1373,6 +1432,11 @@ function R(e, t) {
   }
   function shortcutAt(e) {
     return shortcuts.find((q) => q.kind !== `zipDrop` && e.x + e.w > q.from && e.x < q.to + 40 && Math.abs(e.y + e.h - q.y) < 8) || null;
+  }
+  // Attendre le souffle jusqu'à 4,7 s : atterrit-on sur le pad d'arrivée du raccourci `q` ?
+  function geyserShortOK(e, q) {
+    let rs = simRunner(e, 0, -1, 280, !0);
+    return rs.safe && (rs.st.geysered || 0) > (e.geysered || 0) && rs.x + e.w > q.land && Math.abs(rs.st.y + rs.st.h - q.landY) < 14;
   }
   // Lâcher maintenant : retombe-t-on sur la corniche du zipDrop `q` ?
   function zipDropJump(e, q) {
@@ -1402,7 +1466,15 @@ function R(e, t) {
     let sc = can && shortcuts.length ? shortcutAt(e) : null; // (au sol ou pendant le « coyote » après le bord)
     if (sc) {
       e.plan = null;
-      if (e.short) for (let dl of [6, 3, 0]) if (shortcutJump(e, sc, dl)) return (dl > 0 && (e.plan = _ + dl / 60), { dir: 1, jump: dl === 0 });
+      if (e.short) {
+        // v10 : raccourci kind "geyser" — on avance jusqu'à l'évent (portée suffisante), puis on attend le souffle.
+        if (sc.kind === `geyser`) {
+          if (geyserShortOK(e, sc)) return { dir: 0, jump: !1 };
+          if (e.x + e.w < sc.to - 8 && simRunner(e, 1, -1, 10, !0).safe) return { dir: 1, jump: !1 };
+          if (simRunner(e, 0, -1, 40, !1).safe) return { dir: 0, jump: !1 };
+        }
+        for (let dl of [6, 3, 0]) if (shortcutJump(e, sc, dl)) return (dl > 0 && (e.plan = _ + dl / 60), { dir: 1, jump: dl === 0 });
+      }
       return { dir: 1, jump: !1 };
     }
     // Saut déjà planifié (cibles mobiles) : on s'y tient tant qu'il reste sûr.
@@ -1717,6 +1789,7 @@ function R(e, t) {
     for (let sg of s.signs || []) drawSign(sg, th);
     for (let gu of gusts) drawGust(gu, th);
     for (let tm of thermals) drawThermal(tm, th);
+    for (let gy of geysers) drawGeyser(gy, th);
     for (let dg of dogs) {
       let rc = dogRect(dg, _),
         st = Math.sin(_ * 16) * 4;
@@ -2321,8 +2394,124 @@ function R(e, t) {
       }
     }
   }
+  // v10 — Source jaillissante : bassin minéral, vapeur d'annonce, colonne de souffle, chevrons d'approche.
+  // Couleurs facultatives de palette (`pool`/`poolHi`/`sulfur`/`steam`) — défauts turquoise / soufre.
+  function drawGeySign(cx, a, flash) {
+    let ty = y + 74;
+    if (flash && Math.sin(_ * (9 + a * 16)) < -0.25) return;
+    ((n.globalAlpha = a), (n.fillStyle = `#e8d878`), n.beginPath(), n.arc(cx, ty, 18, 0, Math.PI * 2), n.fill(),
+      (n.strokeStyle = `#3a2a18`), (n.lineWidth = 2.5), n.stroke(),
+      (n.strokeStyle = `#1d4a4a`), (n.lineWidth = 2.2), n.beginPath(),
+      n.moveTo(cx, ty + 8), n.quadraticCurveTo(cx - 7, ty - 2, cx, ty - 12),
+      n.moveTo(cx, ty + 8), n.quadraticCurveTo(cx + 7, ty - 2, cx, ty - 12), n.stroke(),
+      (n.fillStyle = `#1d4a4a`), n.beginPath(), n.moveTo(cx - 5, ty - 10), n.lineTo(cx, ty - 16), n.lineTo(cx + 5, ty - 10), n.fill(),
+      (n.globalAlpha = 1));
+  }
+  function drawGeyser(gy, th) {
+    let st = geyState(gy, _),
+      pool = th.pool || `#2f9a94`,
+      poolHi = th.poolHi || `#b4ece6`,
+      sulfur = th.sulfur || `#e8d878`,
+      steam = th.steam || `#f6f2ea`,
+      x = gy.x, w = gy.w, yy = gy.y, cx = x + w / 2,
+      near = d && d.x + d.w > x - 620 && d.x < x + w + 80;
+    // cuvette de pierre / dépôt minéral
+    ((n.fillStyle = th.rockDark || `#8a7a68`), n.beginPath(),
+      n.moveTo(x - 10, yy + 10), n.lineTo(x + 8, yy - 6), n.lineTo(x + w - 8, yy - 6), n.lineTo(x + w + 10, yy + 10),
+      n.lineTo(x + w - 6, yy + 16), n.lineTo(x + 6, yy + 16), n.closePath(), n.fill(),
+      (n.fillStyle = th.rock || `#d0c4a8`), n.beginPath(),
+      n.moveTo(x - 6, yy + 8), n.lineTo(x + 10, yy - 4), n.lineTo(x + w - 10, yy - 4), n.lineTo(x + w + 6, yy + 8),
+      n.lineTo(x + w - 8, yy + 12), n.lineTo(x + 8, yy + 12), n.closePath(), n.fill());
+    // bassin
+    let swell = st.on ? 3 : st.warn * 5;
+    ((n.fillStyle = pool), n.beginPath(), n.ellipse(cx, yy + 4, w * 0.42, 7 + swell * 0.4, 0, 0, Math.PI * 2), n.fill(),
+      (n.fillStyle = poolHi), (n.globalAlpha = 0.7), n.beginPath(), n.ellipse(cx - 4, yy + 2, w * 0.22, 3.5, 0, 0, Math.PI * 2), n.fill(),
+      (n.globalAlpha = 1));
+    // plots de soufre aux deux bouts
+    ((n.fillStyle = sulfur), n.fillRect(x - 3, yy - 10, 7, 14), n.fillRect(x + w - 4, yy - 10, 7, 14),
+      (n.fillStyle = `#3a2a18`), n.fillRect(x - 1, yy - 12, 3, 4), n.fillRect(x + w - 2, yy - 12, 3, 4));
+    // vapeur (repos légère, annonce dense, éruption : colonne)
+    let colH = 40 + gy.boost * 0.22;
+    if (st.on) {
+      let a = Math.min(1, 0.35 + st.k * 4);
+      n.save();
+      n.globalAlpha = 0.55 * a;
+      let grd = n.createLinearGradient(cx, yy, cx, yy - colH);
+      grd.addColorStop(0, poolHi);
+      grd.addColorStop(0.35, `rgba(230,250,250,0.9)`);
+      grd.addColorStop(1, `rgba(255,255,255,0)`);
+      n.fillStyle = grd;
+      let wob = Math.sin(_ * 14) * 4;
+      n.beginPath();
+      n.moveTo(x + 8, yy);
+      n.quadraticCurveTo(cx - 18 + wob, yy - colH * 0.45, cx - 10 + wob, yy - colH);
+      n.lineTo(cx + 10 + wob, yy - colH);
+      n.quadraticCurveTo(cx + 18 + wob, yy - colH * 0.45, x + w - 8, yy);
+      n.closePath();
+      n.fill();
+      n.globalAlpha = 0.8 * a;
+      n.fillStyle = `#ffffff`;
+      for (let q = 0; q < 7; q++) {
+        let ph = (_ * 2.8 + q * 0.37) % 1, px = cx + Math.sin(q * 1.7 + _ * 5) * (w * 0.28), py = yy - ph * colH;
+        n.beginPath(); n.arc(px, py, 3 + ph * 5, 0, Math.PI * 2); n.fill();
+      }
+      n.restore();
+      // chevrons jaunes au-dessus du jet (lisibilité : ça pousse en haut et en avant)
+      if (near) {
+        n.strokeStyle = sulfur;
+        n.lineWidth = 3;
+        n.globalAlpha = 0.55 + 0.45 * Math.sin(_ * 10);
+        let cy = yy - 36 - (Math.sin(_ * 8) * 6);
+        for (let k2 = 0; k2 < 2; k2++) {
+          n.beginPath();
+          n.moveTo(cx - 12 + k2 * 8, cy - k2 * 14 + 8);
+          n.lineTo(cx + 4 + k2 * 8, cy - k2 * 14);
+          n.lineTo(cx - 12 + k2 * 8, cy - k2 * 14 - 8);
+          n.stroke();
+        }
+        n.globalAlpha = 1;
+      }
+      drawGeySign(cx, 1, !1);
+    } else {
+      // filet / bulles / vapeur d'annonce
+      n.fillStyle = steam;
+      let nv = st.warn > 0 ? 8 : 4;
+      for (let q = 0; q < nv; q++) {
+        let ph = (_ * (0.7 + st.warn) + q * 0.23) % 1,
+          px = cx + Math.sin(q * 2.1 + _ ) * (8 + st.warn * 10),
+          py = yy - 8 - ph * (28 + st.warn * 50),
+          rad = 3 + ph * (5 + st.warn * 6);
+        n.globalAlpha = (st.warn > 0 ? 0.45 : 0.22) * (1 - ph);
+        n.beginPath(); n.arc(px, py, rad, 0, Math.PI * 2); n.fill();
+      }
+      n.globalAlpha = 1;
+      if (st.warn > 0) {
+        // bulles dans le bassin
+        n.fillStyle = poolHi;
+        for (let q = 0; q < 5; q++) {
+          let ph = (_ * 1.8 + q / 5) % 1;
+          n.globalAlpha = 0.6;
+          n.beginPath();
+          n.arc(x + 16 + ((q * 29) % (w - 32)), yy + 3 - ph * 8, 2 + ph * 2, 0, Math.PI * 2);
+          n.fill();
+        }
+        n.globalAlpha = 1;
+        drawGeySign(cx, 0.55 + 0.45 * st.warn, !0);
+      }
+    }
+    // chevrons d'approche au repos, quand le joueur arrive (sauf pendant l'éruption déjà dessinés)
+    if (!st.on && near && d && !d.finished) {
+      n.strokeStyle = sulfur;
+      n.lineWidth = 3;
+      n.globalAlpha = 0.4 + 0.4 * Math.sin(_ * 8);
+      let cy = yy - 28;
+      n.beginPath(); n.moveTo(cx - 10, cy + 8); n.lineTo(cx, cy - 2); n.lineTo(cx + 10, cy + 8); n.stroke();
+      n.globalAlpha = 1;
+    }
+  }
   // Panneau « bulles » (rond brun, trois bulles et une vague) en haut de l'écran : la motte va plonger.
   function drawSinkSign(cx, a) {
+
     let ty = y + 74;
     ((n.globalAlpha = a), (n.fillStyle = `#e7d9a8`), n.beginPath(), n.arc(cx, ty, 18, 0, Math.PI * 2), n.fill(),
       (n.strokeStyle = `#3a2a18`), (n.lineWidth = 2.5), n.stroke(),
@@ -2885,6 +3074,7 @@ function R(e, t) {
         bounces: d?.bounced ?? 0, // rebonds sur les amanites (v7)
         zips: d?.zips ?? 0, // tyroliennes attrapées (v8)
         crusts: d?.crusts ?? 0, // croûtes de lave foulées (v9)
+        geysers: d?.geysered ?? 0, // lancers par un geyser (v10)
         onZip: !!d?.zip,
         deathXs: d?.deathXs ?? [],
       }),
