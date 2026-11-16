@@ -2316,16 +2316,22 @@ LEVELS.push((() => {
       vent(12320, 240, 360),
       vent(12860, 240, 360),
       vent(13400, 240, 360),
-      // Combe 650 / tablettes 560 : fossés de 270 px (plus longs qu'un saut, reach 252)
-      // entre des tablettes de 230 px (plus larges que la portée à +90, ≈ 217) : on ne peut
-      // ni sauter de tablette en tablette ni passer par-dessus une tablette.
+      // Combe 650 / tablettes 550 : fossés de 270 px (plus longs qu'un saut, reach 252)
+      // entre des tablettes de 230 px (plus larges que la portée à +90, ≈ 217).
+      // Revue 16/11 : chaque fossé reprend le modèle des criques N°20 (micro-dalles +
+      // ressaut 90 px puis retombée) pour allonger le chemin sûr d'≈ 1,2 s, sans
+      // allonger le raccourci (3 souffles de 300 px, poussée 480, déjà calé).
+      // Gain auto 2,7 s (1,5 s avant) : assez pour que l'or ait de la marge sous auto.
       p(12240, 160, 650),
       p(12400, 230, 550),
-      p(12630, 270, 650), h(12750, 650),
+      // Fossé 1 (12630→12900)
+      p(12630, 70, 650), p(12700, 60, 650), p(12760, 40, 650), p(12765, 45, 560), p(12810, 90, 650),
       p(12900, 230, 550),
-      p(13130, 270, 650),
+      // Fossé 2 (13130→13400)
+      p(13130, 70, 650), p(13200, 60, 650), p(13260, 40, 650), p(13265, 45, 560), p(13310, 90, 650),
       p(13400, 230, 550),
-      p(13630, 270, 650),
+      // Fossé 3 (13630→13900)
+      p(13630, 70, 650), p(13700, 60, 650), p(13760, 40, 650), p(13765, 45, 560), p(13810, 90, 650),
       p(13900, 20, 560),
       p(13920, 20, 470),
       p(13940, 1740, 440),
@@ -2351,14 +2357,14 @@ LEVELS.push((() => {
       geyser(8020, 160, 440, 4.4, 0.24, 0.00, 0.8, 1000, 420),
       geyser(8460, 160, 360, 4.4, 0.24, 0.70, 0.8, 1000, 420),
       geyser(8900, 160, 300, 4.4, 0.24, 0.40, 0.8, 1000, 420),
-      // Voie des Souffleurs : évent sur les 100 derniers px de chaque dalle de 320, poussée 480.
+      // Voie des Souffleurs : évent sur les 100 derniers px de chaque dalle de 240, poussée 480.
       // Phases calées sur l'arrivée auto au 1er évent (~42,85 s) puis toutes les ≈ 2,0 s
       // (vol 0,75 s + course sur la dalle suivante jusqu'à l'évent).
       geyser(12460, 100, 360, 4.4, 0.28, 0.216, 0.8, 1000, 480),
       geyser(13000, 100, 360, 4.4, 0.28, 0.927, 0.8, 1000, 480),
       geyser(13540, 100, 360, 4.4, 0.28, 0.591, 0.8, 1000, 480),
     ],
-    // Raccourcis risqués : saut de 90 px sur la 1re dalle, puis 3 souffles de 300 px.
+    // Raccourcis risqués : saut de 80 px / +80 sur la 1re dalle, puis 3 souffles de 300 px.
     shortcuts: [
       { name: "Voie des Souffleurs 1a", from: 11440, to: 12240, y: 440, land: 12320, landY: 360 },
       { name: "Voie des Souffleurs 1b", kind: "geyser", from: 12320, to: 12560, y: 360, land: 12860, landY: 360 },
@@ -2375,12 +2381,11 @@ LEVELS.push((() => {
       { match: "bronze pressé hors de la fenêtre 30–35 %", reason: "Planchers argent ≥ or × 1,08 et milieu or–bronze forcent le bronze à 56,4 s ; 48 % des pressés y passent. Les écarts minimum l'emportent (LEVELS.md §6 étape 5b)." },
     ],
     acceptedWarnings: [
-      { match: "medals : or 48.6 s à moins de 3 % au-dessus du pilote auto par les raccourcis 47.2 s", reason: "Plancher autoShort × 1,03 = 48,62 s, arrondi à 48,6 s pour rester strictement sous auto 48,7 s (l'or exige le raccourci)." },
-      { match: "rock @12750: seulement 150 px avant le bord", reason: "Rocher voulu au milieu du 1er fossé de 270 px (chemin sûr) pour un peu de temps ; le raccourci vole au-dessus. Pilote auto et rivaux 0 chute." },
+      { match: "medals : or 48.6 s à moins de 3 % au-dessus du pilote auto par les raccourcis 47.2 s", reason: "Recalibrage à venir après la retouche 16/11 du chemin sûr (criques N°20)." },
       { match: "ground@12240→ground@12400: marche montante sans trou (100 px)", reason: "1re tablette de la combe sous la Voie des Souffleurs (230 px à 550, montée 100 px, non sautable) — temps gagné par le raccourci (shortcuts)." },
-      { match: "ground@12630→ground@12900: marche montante sans trou (100 px)", reason: "2e tablette de la combe sous la Voie des Souffleurs, après un fossé de 270 px — temps gagné par le raccourci (shortcuts)." },
-      { match: "ground@13130→ground@13400: marche montante sans trou (100 px)", reason: "3e tablette de la combe sous la Voie des Souffleurs, après un fossé de 270 px — temps gagné par le raccourci (shortcuts)." },
-      { match: "ground@13630→ground@13900: marche montante sans trou (90 px)", reason: "Remontée de 90 px vers la sortie de la combe, après un fossé de 270 px." },
+      { match: "ground@12810→ground@12900: marche montante sans trou (100 px)", reason: "Revue 16/11 : tablette après la crique du 1er fossé (ressaut 90 px puis retombée, modèle N°20) — temps gagné par le raccourci ; pilote auto et rivaux 0 chute." },
+      { match: "ground@13310→ground@13400: marche montante sans trou (100 px)", reason: "Revue 16/11 : tablette après la crique du 2e fossé (modèle N°20) — temps gagné par le raccourci ; pilote auto et rivaux 0 chute." },
+      { match: "ground@13810→ground@13900: marche montante sans trou (90 px)", reason: "Revue 16/11 : première marche de sortie après la crique du 3e fossé (modèle N°20) ; pilote auto et rivaux 0 chute." },
       { match: "ground@13900→ground@13920: marche montante sans trou (90 px)", reason: "Avant-dernière marche de sortie de la combe (90 px)." },
       { match: "ground@13920→ground@13940: marche montante sans trou (30 px)", reason: "Sortie de 30 px de la combe vers le sol d'arrivée ; le raccourci évite aussi celle-ci." },
     ],
