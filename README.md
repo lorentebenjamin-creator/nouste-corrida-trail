@@ -135,11 +135,17 @@ par profil (pilote du 23/10) :
 | 19 | 38,0 s *(exige les raccourcis)* | 41,1 s | 45,9 s | 40 % / 88 % / 95 % | 8 % / 18 % / 33 % |
 | 20 | 47,2 s *(exige la Ligne des Braises)* | 51 s | 59,2 s | 33 % / 80 % / 100 % | 3 % / 8 % / 33 % |
 | 21 | 39 s *(exige les Plongeons)* | 42,5 s | 46,3 s | 35 % / 73 % / 88 % | 0 % / 10 % / 33 % |
+| 22 | 48,6 s *(exige la Voie des Souffleurs)* | 52,5 s | 56,4 s | 10 % / 65 % / 93 % | 8 % / 38 % / 48 % |
 
 Le plancher auto × 1,03 l'emporte sur la fenêtre 30–50 % : sur les niveaux sans attente (temps
 attentifs groupés à moins de 3 % du pilote auto), l'or est atteint par 65–100 % des essais attentifs
-(N°4 et 9 : ≈ 100 %). Seuls N°6, 8, 10 et 13 (53 %) sont dans la fenêtre ou tout près. Détails et
-tableau avant/après : LEVELS.md §8.
+(N°4 et 9 : ≈ 100 %). Seuls N°6, 8, 10 et 13 (53 %) sont dans la fenêtre ou tout près. **N°22** : l'or
+reste à 10 % des essais attentifs, hors fenêtre, parce que le plancher autoShort × 1,03 (47,2 × 1,03 =
+48,62 s) arrondi à 48,6 s est juste sous auto 48,7 s (l'or doit rester strictement sous auto, pour
+exiger le raccourci) ; les temps attentifs sont trop groupés derrière ce plancher. Le bronze pressé
+reste à 48 %, hors fenêtre 30–35 %, parce que les écarts minimum (argent ≥ or × 1,08, argent ≤ milieu
+or–bronze) forcent le bronze à 56,4 s et priment sur cette fenêtre. Les deux écarts sont notés dans
+`acceptedMedalWarnings`. Détails et tableau avant/après : LEVELS.md §8.
 
 ## Source de référence
 
