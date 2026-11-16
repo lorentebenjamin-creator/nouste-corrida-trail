@@ -2277,11 +2277,11 @@ LEVELS.push((() => {
   c.line(9440, 9800, 230, 3); c.arc(9860, 9980, 250, 3, 40);
   c.line(10600, 11000, 370, 3); c.arc(11300, 11440, 330, 3, 40);
   c.line(11450, 11490, 370, 2); c.line(11820, 12100, 370, 3);
-  // Trajectoire de la Voie des Souffleurs : saut montant (80 px, +80) sur la dalle, puis 3 souffles
-  c.arc(12240, 12320, 270, 3, 70);
-  c.arc(12560, 12860, 180, 4, 90); c.arc(13100, 13400, 180, 4, 90); c.arc(13640, 13940, 180, 4, 90);
+  // Trajectoire de la Voie des Souffleurs : petit saut (+20) sur la longue 1re dalle, puis 3 souffles
+  c.arc(12120, 12260, 300, 3, 40);
+  c.arc(12560, 12860, 180, 4, 90); c.arc(13100, 13430, 180, 4, 90); c.arc(13670, 13965, 180, 4, 90);
   c.line(14200, 14600, 370, 3); c.line(14800, 15100, 370, 3);
-  // Dalle oneWay hors chaîne de marche (la combe passe dessous) ; l'évent est sur les 100 derniers px.
+  // Dalle oneWay hors chaîne de marche (la combe passe dessous) ; évent de 130 px vers le bout de la dalle.
   const vent = (x, w, y) => ({ x, y, w, h: 18, oneWay: true, kind: "ground", ledge: true });
   return {
     id, name: "Les Sources des Bouquetins Ébouillantés",
@@ -2310,19 +2310,22 @@ LEVELS.push((() => {
       p(9380, 480, 300),
       p(9980, 400, 370),
       p(10500, 800, 440), h(10840, 440),
-      // Approche longue (un seul sol jusqu'à 12240) : un saut anticipé retombe encore sur le palier,
-      // le chemin sûr se laisse tomber au bord, le raccourci saute 80 px / +80 sur la dalle à 360.
-      p(11440, 800, 440),
-      vent(12320, 240, 360),
+      // Approche longue (un seul sol jusqu'à 12100) : le chemin sûr se laisse tomber au bord ;
+      // le raccourci saute sur la 1re dalle (+20 px, fente de 10 px). Revue Boss 16/11 : l'ancien
+      // saut 80 px / +80 vers une dalle courte ratait ≈ 2 fois sur 5 chez l'humain attentif (saut
+      // anticipé qui retombe juste avant le bord) ; dalle de 450 px : tout saut des 280 derniers px
+      // s'y pose. Le risque du raccourci reste dans les trois souffles.
+      p(11440, 660, 440),
+      vent(12110, 450, 420),
       vent(12860, 240, 360),
-      vent(13400, 240, 360),
+      vent(13430, 240, 360),
       // Combe 650 / tablettes 550 : fossés de 270 px (plus longs qu'un saut, reach 252)
       // entre des tablettes de 230 px (plus larges que la portée à +90, ≈ 217).
       // Revue 16/11 : chaque fossé reprend le modèle des criques N°20 (micro-dalles +
       // ressaut 90 px puis retombée) pour allonger le chemin sûr d'≈ 1,2 s, sans
       // allonger le raccourci (3 souffles de 300 px, poussée 480, déjà calé).
       // Gain auto 2,7 s (1,5 s avant) : assez pour que l'or ait de la marge sous auto.
-      p(12240, 160, 650),
+      p(12100, 300, 650),
       p(12400, 230, 550),
       // Fossé 1 (12630→12900)
       p(12630, 70, 650), p(12700, 60, 650), p(12760, 40, 650), p(12765, 45, 560), p(12810, 90, 650),
@@ -2330,11 +2333,12 @@ LEVELS.push((() => {
       // Fossé 2 (13130→13400)
       p(13130, 70, 650), p(13200, 60, 650), p(13260, 40, 650), p(13265, 45, 560), p(13310, 90, 650),
       p(13400, 230, 550),
-      // Fossé 3 (13630→13900)
-      p(13630, 70, 650), p(13700, 60, 650), p(13760, 40, 650), p(13765, 45, 560), p(13810, 90, 650),
-      p(13900, 20, 560),
-      p(13920, 20, 470),
-      p(13940, 1740, 440),
+      // Fossé 3 (13630→13900). Revue Boss 16/11 : sortie de combe sans marches accolées —
+      // retombée à 600, puis deux marches (90 et 70 px) séparées par des fentes de 25 px
+      // (plus étroites que le coureur, 30 px) jusqu'au sol d'arrivée à 13965.
+      p(13630, 70, 650), p(13700, 60, 650), p(13760, 40, 650), p(13765, 45, 560), p(13810, 60, 600),
+      p(13895, 45, 510),
+      p(13965, 1715, 440),
     ],
     hazards: [
       _(500, 70, 440),
@@ -2353,40 +2357,41 @@ LEVELS.push((() => {
       geyser(3140, 160, 440, 4.8, 0.28, 0.15, 0.9, 1000, 420),
       // Au-dessus du vide : il faut sauter dans la colonne pendant l'éruption
       geyser(5620, 140, 500, 4.6, 0.26, 0.30, 0.85, 1000, 420),
-      // Chœur des Bouquetins (phases en vague : chacun ≈ 1,3 s après le précédent)
+      // Chœur des Bouquetins (phases en vague). Revue Boss 16/11 : décalage raccourci
+      // 1,32 → 1,10 s (phases 0,70 → 0,75 et 0,40 → 0,50) : moins d'attente sur les évents,
+      // le coureur pressé qui arrive en retard se fait cueillir ou déborde l'évent.
       geyser(8020, 160, 440, 4.4, 0.24, 0.00, 0.8, 1000, 420),
-      geyser(8460, 160, 360, 4.4, 0.24, 0.70, 0.8, 1000, 420),
-      geyser(8900, 160, 300, 4.4, 0.24, 0.40, 0.8, 1000, 420),
-      // Voie des Souffleurs : évent sur les 100 derniers px de chaque dalle de 240, poussée 480.
-      // Phases calées sur l'arrivée auto au 1er évent (~42,85 s) puis toutes les ≈ 2,0 s
-      // (vol 0,75 s + course sur la dalle suivante jusqu'à l'évent).
-      geyser(12460, 100, 360, 4.4, 0.28, 0.216, 0.8, 1000, 480),
-      geyser(13000, 100, 360, 4.4, 0.28, 0.927, 0.8, 1000, 480),
-      geyser(13540, 100, 360, 4.4, 0.28, 0.591, 0.8, 1000, 480),
+      geyser(8460, 160, 360, 4.4, 0.24, 0.75, 0.8, 1000, 420),
+      geyser(8900, 160, 300, 4.4, 0.24, 0.50, 0.8, 1000, 420),
+      // Voie des Souffleurs : phases calées sur l'arrivée auto au 1er évent (~42,85 s) puis toutes
+      // les ≈ 2,0 s (vol 0,75 s + course sur la dalle suivante jusqu'à l'évent).
+      // Revue Boss 16/11 (lancers plus tolérants) : évents 100 → 130 px, souffle 0,28 → 0,34 du
+      // cycle (1,23 → 1,50 s), poussée 480 → 500 ; 2e évent avancé de 30 px et 3e dalle reculée
+      // de 30 px (13430) pour laisser 30 px de dalle après l'évent : un coureur qui freine tard
+      // reste dans la colonne au lieu de glisser hors de l'évent puis de tomber dans la combe.
+      geyser(12430, 130, 420, 4.4, 0.34, 0.216, 0.8, 1000, 500),
+      geyser(12940, 130, 360, 4.4, 0.34, 0.927, 0.8, 1000, 500),
+      geyser(13510, 130, 360, 4.4, 0.34, 0.591, 0.8, 1000, 500),
     ],
-    // Raccourcis risqués : saut de 80 px / +80 sur la 1re dalle, puis 3 souffles de 300 px.
+    // Raccourcis risqués : petit saut sur la 1re dalle, puis 3 souffles (300 / 330 / 295 px).
     shortcuts: [
-      { name: "Voie des Souffleurs 1a", from: 11440, to: 12240, y: 440, land: 12320, landY: 360 },
-      { name: "Voie des Souffleurs 1b", kind: "geyser", from: 12320, to: 12560, y: 360, land: 12860, landY: 360 },
-      { name: "Voie des Souffleurs 2", kind: "geyser", from: 12860, to: 13100, y: 360, land: 13400, landY: 360 },
-      { name: "Voie des Souffleurs 3", kind: "geyser", from: 13400, to: 13640, y: 360, land: 13940, landY: 440 },
+      { name: "Voie des Souffleurs 1a", from: 11440, to: 12100, y: 440, land: 12110, landY: 420 },
+      { name: "Voie des Souffleurs 1b", kind: "geyser", from: 12110, to: 12560, y: 420, land: 12860, landY: 360 },
+      { name: "Voie des Souffleurs 2", kind: "geyser", from: 12860, to: 13100, y: 360, land: 13430, landY: 360 },
+      { name: "Voie des Souffleurs 3", kind: "geyser", from: 13430, to: 13670, y: 360, land: 13965, landY: 440 },
     ],
     coins: c.list,
     checkpoints: [y(id, 2440, 440, 1), y(id, 4710, 440, 2), y(id, 7280, 440, 3), y(id, 10520, 440, 4), y(id, 14120, 440, 5)],
     finishX: 15200,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 49.9, autoShort: 47.2, gold: 48.7, silver: 52.6, bronze: 56.5 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 13 %, argent 65 %, bronze 93 % ; pressés : or 3 %, argent 33 %, bronze 45 %)
+    medals: { auto: 49.8, autoShort: 47.2, gold: 49.2, silver: 53.2, bronze: 57.2 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 33 %, argent 70 %, bronze 88 % ; pressés : or 8 %, argent 30 %, bronze 38 %)
     acceptedMedalWarnings: [
-      { match: "or hors de la fenêtre 30–50 %", reason: "Plancher autoShort × 1,03 (47,2 × 1,03 = 48,62 s) arrondi à 48,7 s. Après la retouche 16/11, l'or a 1,2 s de marge sous auto 49,9 s (plafond 49,8 s), mais seuls 13 % des attentifs passent sous 48,7 s (médiane avec raccourci 51,2 s, sans 50,8 s). Le 40e centile (~51 s) dépasserait auto, donc l'or ne rentre pas dans 30–50 % tant que le chemin sûr n'est pas encore plus long (auto ≳ 51 s) ou que le raccourci n'est pas plus rapide pour l'humain." },
-      { match: "bronze pressé hors de la fenêtre 30–35 %", reason: "Planchers argent ≥ or × 1,08 et milieu or–bronze forcent le bronze à 56,5 s ; 45 % des pressés y passent. Les écarts minimum l'emportent (LEVELS.md §6 étape 5b)." },
+      { match: "bronze pressé hors de la fenêtre 30–35 %", reason: "Planchers argent ≥ or × 1,08 et milieu or–bronze forcent le bronze à 57,2 s ; 38 % des pressés y passent (revue Boss 16/11). Les écarts minimum l'emportent (LEVELS.md §6 étape 5b)." },
     ],
     acceptedWarnings: [
-      { match: "ground@12240→ground@12400: marche montante sans trou (100 px)", reason: "1re tablette de la combe sous la Voie des Souffleurs (230 px à 550, montée 100 px, non sautable) — temps gagné par le raccourci (shortcuts)." },
+      { match: "ground@12100→ground@12400: marche montante sans trou (100 px)", reason: "1re tablette de la combe sous la Voie des Souffleurs (230 px à 550, montée 100 px, non sautable ; revue Boss 16/11 : bord de la combe avancé de 12240 à 12100 pour allonger la 1re dalle) — temps gagné par le raccourci (shortcuts)." },
       { match: "ground@12810→ground@12900: marche montante sans trou (100 px)", reason: "Revue 16/11 : tablette après la crique du 1er fossé (ressaut 90 px puis retombée, modèle N°20) — temps gagné par le raccourci ; pilote auto et rivaux 0 chute." },
       { match: "ground@13310→ground@13400: marche montante sans trou (100 px)", reason: "Revue 16/11 : tablette après la crique du 2e fossé (modèle N°20) — temps gagné par le raccourci ; pilote auto et rivaux 0 chute." },
-      { match: "ground@13810→ground@13900: marche montante sans trou (90 px)", reason: "Revue 16/11 : première marche de sortie après la crique du 3e fossé (modèle N°20) ; pilote auto et rivaux 0 chute." },
-      { match: "ground@13900→ground@13920: marche montante sans trou (90 px)", reason: "Avant-dernière marche de sortie de la combe (90 px)." },
-      { match: "ground@13920→ground@13940: marche montante sans trou (30 px)", reason: "Sortie de 30 px de la combe vers le sol d'arrivée ; le raccourci évite aussi celle-ci." },
     ],
   };
 })());

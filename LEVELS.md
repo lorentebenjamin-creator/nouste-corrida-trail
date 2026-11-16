@@ -460,7 +460,7 @@ Recette (N°22) : geyser d'apprentissage sur sol plein, geyser à viser dans un 
 des Bouquetins** (trois geysers enchaînés, phases décalées), puis la **Voie des Souffleurs**
 (raccourci sur trois évents perchés — le raccourci **exploite** le geyser ; chemin sûr dans
 la combe, étagères et fossés injumpables). Palette `thermes`. Étiquette « **Bien engagé** »
-(échelle §8 ; pressé 98 %, à la lisière facile de N°12 / N°20 à 93–95 %, ±5).
+(échelle §8 ; pressé 95 % / 1,98 après la revue Boss 16/11, dans la plage de N°12 / N°20 à 93–95 %).
 
 ## 4. Thèmes
 
@@ -1224,6 +1224,27 @@ pour rester strictement sous auto 48,7 s) — `acceptedMedalWarnings`. check-lev
 et physique gardées par des clés facultatives / `geysers.length` ; captures de régression
 N°1, 19, 21). **Prochain niveau (N°23) : classique**, avec un raccourci risqué (modèle distinct
 des Plongeons du N°21 et de la Voie des Souffleurs).
+
+**Revue Boss Bot 16/11 (N°22, branche `revue-22-boss`, à publier après accord d'Othool)** :
+1. **Or accessible** : l'or exige la Voie des Souffleurs ; avant, 2 sauts d'approche sur 5 ratés
+   chez l'attentif (saut 80 px / +80 vers une dalle courte : le pilote vise tôt dans la fenêtre et
+   retombe juste avant le bord) et des glissades hors de l'évent (évent collé au bout de la dalle).
+   Bord de combe 12240 → **12100**, 1re dalle **450 px à +20** (fente 10 px) ; évents 100 → **130 px**,
+   souffle 0,28 → **0,34** du cycle, poussée 480 → **500** ; 2e évent avancé de 30 px, 3e dalle
+   reculée à **13430** (30 px de dalle après l'évent). Lancers attentifs réussis **15/25 → 54/63**
+   (86 %), pressés 9/22 → 36/56. Gain auto 2,7 → **2,6 s** (auto **49,8**, autoShort **47,2**).
+2. **Chœur plus serré** : décalage de phase 1,32 → **1,10 s** (phases 0,70 / 0,40 → **0,75 / 0,50**).
+   Pressé **98 % / 1,48 → 95 % / 1,98** (points chauds x≈8400/8900/9400) ; attentif 100 % / 0,13 →
+   **100 % / 0,28**. (0,76 / 0,52 donnait 83 % pressé, 0,73 / 0,46 100 % : réglage très sensible.)
+   Effet de bord utile : l'attentif perd moins souvent un cycle complet (4,4 s) au 3e jet.
+3. **Sortie de combe** : les 3 marches accolées 90/90/30 px (deux de 20 px de large) sont
+   remplacées par une retombée à 600 puis deux marches (90 et 70 px) séparées par des fentes de
+   25 px (moins larges que le coureur, 30 px), sol d'arrivée à **13965** ; les 3 avertissements
+   « rivaux bloqués » disparaissent (acceptedWarnings retirés).
+Médailles recalibrées **49,2 / 53,2 / 57,2 s** (attentif or **33 %** / argent 70 / bronze 88 % ;
+pressé 8 / 30 / 38 %). L'or entre dans la fenêtre 30–50 % : entrée « or hors fenêtre » retirée
+d'`acceptedMedalWarnings` ; seul reste le bronze pressé (38 %, planchers d'écart §6 étape 5b).
+check-levels 0 erreur / 14 avertissements connus ; playtest all OK ; e2e OK. Autres niveaux inchangés.
 
 **Revue Boss Bot 9/11 (N°21, non publiée — branche `revue-09-11`)** :
 1. **Point chaud x≈9800** : montée après les Plongeons 60→**35 px** (`y` 370→395) **et** ronce 9900→**10050**.
