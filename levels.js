@@ -2375,13 +2375,12 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2440, 440, 1), y(id, 4710, 440, 2), y(id, 7280, 440, 3), y(id, 10520, 440, 4), y(id, 14120, 440, 5)],
     finishX: 15200,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 48.7, autoShort: 47.2, gold: 48.6, silver: 52.5, bronze: 56.4 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 10 %, argent 65 %, bronze 93 % ; pressés : or 8 %, argent 38 %, bronze 48 %)
+    medals: { auto: 49.9, autoShort: 47.2, gold: 48.7, silver: 52.6, bronze: 56.5 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 13 %, argent 65 %, bronze 93 % ; pressés : or 3 %, argent 33 %, bronze 45 %)
     acceptedMedalWarnings: [
-      { match: "or hors de la fenêtre 30–50 %", reason: "Plancher autoShort × 1,03 (47,2 × 1,03 = 48,62 s) arrondi à 48,6 s, juste sous auto 48,7 s (l'or doit rester strictement sous auto). Les temps attentifs sont trop groupés derrière ce plancher." },
-      { match: "bronze pressé hors de la fenêtre 30–35 %", reason: "Planchers argent ≥ or × 1,08 et milieu or–bronze forcent le bronze à 56,4 s ; 48 % des pressés y passent. Les écarts minimum l'emportent (LEVELS.md §6 étape 5b)." },
+      { match: "or hors de la fenêtre 30–50 %", reason: "Plancher autoShort × 1,03 (47,2 × 1,03 = 48,62 s) arrondi à 48,7 s. Après la retouche 16/11, l'or a 1,2 s de marge sous auto 49,9 s (plafond 49,8 s), mais seuls 13 % des attentifs passent sous 48,7 s (médiane avec raccourci 51,2 s, sans 50,8 s). Le 40e centile (~51 s) dépasserait auto, donc l'or ne rentre pas dans 30–50 % tant que le chemin sûr n'est pas encore plus long (auto ≳ 51 s) ou que le raccourci n'est pas plus rapide pour l'humain." },
+      { match: "bronze pressé hors de la fenêtre 30–35 %", reason: "Planchers argent ≥ or × 1,08 et milieu or–bronze forcent le bronze à 56,5 s ; 45 % des pressés y passent. Les écarts minimum l'emportent (LEVELS.md §6 étape 5b)." },
     ],
     acceptedWarnings: [
-      { match: "medals : or 48.6 s à moins de 3 % au-dessus du pilote auto par les raccourcis 47.2 s", reason: "Recalibrage à venir après la retouche 16/11 du chemin sûr (criques N°20)." },
       { match: "ground@12240→ground@12400: marche montante sans trou (100 px)", reason: "1re tablette de la combe sous la Voie des Souffleurs (230 px à 550, montée 100 px, non sautable) — temps gagné par le raccourci (shortcuts)." },
       { match: "ground@12810→ground@12900: marche montante sans trou (100 px)", reason: "Revue 16/11 : tablette après la crique du 1er fossé (ressaut 90 px puis retombée, modèle N°20) — temps gagné par le raccourci ; pilote auto et rivaux 0 chute." },
       { match: "ground@13310→ground@13400: marche montante sans trou (100 px)", reason: "Revue 16/11 : tablette après la crique du 2e fossé (modèle N°20) — temps gagné par le raccourci ; pilote auto et rivaux 0 chute." },
