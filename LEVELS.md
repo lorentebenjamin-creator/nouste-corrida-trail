@@ -494,6 +494,9 @@ n'existe que dans `melezes`, aucun autre niveau ne change).
 dépôts minéraux ; clés facultatives `water`/`waterHi` (gave turquoise au fond des ravins),
 `pool`/`poolHi`/`sulfur`/`steam` (couleurs des geysers §3j). Ces clés n'existent que dans `thermes` :
 aucun autre niveau ne change).
+`nuages` (niv. 23, balcon d'estive au lever du soleil au-dessus d'une mer de nuages : ciel indigo → rose → or,
+sommets violets, `ridge2` blanc rosé = la mer de nuages au loin, herbe rase dorée, `fog` violet sombre pour
+que les ravins restent lisibles — un `fog` clair faisait passer les trous pour des blocs ; aucune clé facultative).
 
 Clés **facultatives** (décor seul, aucun effet de jeu ; utilisées par `nuit`, à mettre sur toute
 palette sombre) : `rim` (couleur du liseré clair sur le dessus et les bords des sols et passerelles,
@@ -594,6 +597,8 @@ chute, un humain peut passer.
    N°22 à mécaniques (Sources des Bouquetins Ébouillantés, geysers, §3j, 15/11, raccourci
    « Voie des Souffleurs ») → **le N°23 DOIT être classique** (avec un raccourci risqué,
    étape 3c, modèle distinct des plongeons descendants du N°21 et de la Voie des Souffleurs).
+   N°23 classique (Belvédère des Brebis Somnambules, 23/11, raccourci « Sauts du Bélier », rocs en
+   **montée**) → **le N°24 DOIT être à mécaniques**.
 3c. **Raccourci risqué pour les classiques** (revue du 27/10, règle à appliquer à **tous les futurs
    niveaux classiques**, N°17, 19, 21…) : sur un classique, le pilote auto ne ralentit jamais (temps ≈
    distance / 352 px/s) et un humain attentif le suit à 3 % près, donc l'or (plancher auto × 1,03) tombe
@@ -634,6 +639,8 @@ chute, un humain peut passer.
      des Braises** (raccourci sur croûtes de lave qui exploite la mécanique v9). Le N°21
      « Plongeons de l'Écureuil » plonge de vire en vire en descente. Le N°22 « Voie des
      Souffleurs » enchaîne des lancers de geyser sur des évents perchés (`kind: "geyser"`).
+     Le N°23 « Sauts du Bélier » saute de roc en roc **en montée** (+30 px, 260 px bord à bord ;
+     chemin sûr : creux, marche, ressaut de 90 px).
      À chaque nouveau niveau à raccourci, choisir un modèle distinct du précédent.
    **À faire pour les classiques existants** (non modifiés le 27/10, or attentif trop généreux) :
    * **N°11 Névé des Marmottes** (or 73 % attentif) : remplacer les ponts de neige (passerelles au-dessus
@@ -895,7 +902,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
   `finishTime` (temps d'arrivée exact du joueur), utilisé par `tools/playtest.mjs` et `tools/medals.mjs`.
 * Supprimés : `extensions.js` de grok.com, manifeste `/__grok/…`.
 
-## 8. Courbe de difficulté (niveaux 1–22)
+## 8. Courbe de difficulté (niveaux 1–23)
 
 | N° | Niveau | Étiquette | Longueur | Ravins | Ronces | Mécaniques v2 | Rivaux (vitesse) | Pilote auto |
 |---|---|---|---|---|---|---|---|---|
@@ -921,6 +928,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
 | 20 | La Coulée des Salamandres Pressées | Bien engagé | 1600 m | 26 croûtes (Gué, escalier, plongeons, Ligne des Braises ×6, pont) | 3 | **26 croûtes de lave** (mécanique v9) ; **Gué des Salamandres** (revue 3/11 : 300 px / 0,7 s) ; **Ligne des Braises**, 6 raccourcis sur croûtes 200 px ; 3 panneaux | 1 / 0.93 / 0.86 | 47,3 s (chemin sûr) ; 45,2 s par les raccourcis |
 | 21 | Le Mélézin des Écureuils Distraits | Haute futaie | 1330 m | 23 (dont 7 trous des Souches, 3 ravines des Plongeons) | 5 | — (classique ; passage clé : les **Souches de l'Écureuil**, 6 souches de 110 → 80 px, trous de 160 px ; **Plongeons de l'Écureuil**, 3 raccourcis risqués en descente ; 2 panneaux) | 1 / 0.93 / 0.86 | 39,2 s (chemin sûr) ; 37,6 s par les raccourcis |
 | 22 | Les Sources des Bouquetins Ébouillantés | Bien engagé | 1520 m | 8 geysers (apprentissage, ravin, Chœur ×3, Voie des Souffleurs ×3) | 4 | **8 geysers** (mécanique v10) ; **Chœur des Bouquetins** (3 jets enchaînés) ; **Voie des Souffleurs**, 4 raccourcis (1 saut + 3 `kind: "geyser"`) ; 4 panneaux | 1 / 0.93 / 0.86 | 48,7 s (chemin sûr) ; 47,2 s par les raccourcis |
+| 23 | Le Belvédère des Brebis Somnambules | Mer de nuages | 1340 m | 24 (dont 7 trous de l'Escalier, 3 ruisseaux des Sauts) | 5 | — (classique ; passage clé : l'**Escalier des Nuages**, 6 marches qui montent de 40 px, 130 → 90 px, trous de 195 px ; **Sauts du Bélier**, 3 raccourcis risqués en montée ; 2 panneaux) | 1 / 0.93 / 0.86 | 39,6 s (chemin sûr) ; 37,9 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -950,6 +958,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 20 | La Coulée des Salamandres Pressées | 47,3 s *(raccourcis : 45,2 s)* | 47,2 s *(exige la Ligne des Braises)* | 51 s | 59,2 s | 33 % / 80 % / 100 % | 3 % / 8 % / 33 % |
 | 21 | Le Mélézin des Écureuils Distraits | 39,2 s *(raccourcis : 37,6 s)* | 38,8 s *(exige les Plongeons)* | 42 s | 45,2 s | 45 % / 90 % / 98 % | 5 % / 23 % / 40 % |
 | 22 | Les Sources des Bouquetins Ébouillantés | 48,7 s *(raccourcis : 47,2 s)* | 48,6 s *(exige la Voie des Souffleurs)* | 52,5 s | 56,4 s | 10 % / 65 % / 93 % | 8 % / 38 % / 48 % |
+| 23 | Le Belvédère des Brebis Somnambules | 39,6 s *(raccourcis : 37,9 s)* | 39,4 s *(exige les Sauts du Bélier)* | 42,7 s | 55,7 s | 38 % / 78 % / 100 % | 3 % / 8 % / 33 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -1258,6 +1267,26 @@ check-levels 0 erreur / 14 avertissements connus ; playtest all OK ; e2e OK. Aut
    N°1–20 non recalibrés.
 3. **Ambiance** : clé facultative `melezeGrove` sur palette `melezes` — futaie dense en espace écran sur
    deux plans avec troncs + menu densifié ; branche de rendu des autres palettes inchangée (N°1–20).
+
+**N°23 (23/11, classique, routine du lundi)** : **Le Belvédère des Brebis Somnambules** (`belvedere-brebis`),
+étiquette de caractère « **Mer de nuages** », 1340 m, nouvelle palette `nuages`. Passage clé : l'**Escalier des
+Nuages**, six marches de rocher qui **montent** au-dessus du vide (+40 px chacune, 440 → 200), de plus en plus
+étroites (130 → 90 px), trous de 195 px (130 px pour la 1re), puis le Belvédère (sommet à 200, fanion 2) ;
+panneau « Escalier des nuages / monte sans t'arrêter ». Mise au point (pressé, 40 essais) : trous de 130 px →
+0 chute dans l'escalier (98 % / 1,8 au total, on monte trop facilement, même avec des marches de 75 px) ;
+160 px → 95 % / 2,0 ; 180 px → 88 % / 2,55 ; **195 px → 85 % / 3,35** (retenu ; 160 px vers le Belvédère seul :
+3,08). Les avertissements « écart 195 » / « montée 40 avec écart 195 » sont acceptés (`acceptedWarnings`) :
+rivaux 0 chute (Inès 0.86 comprise). Raccourci « **Sauts du Bélier** » (×3) : modèle distinct des Plongeons
+descendants (N°21) et des geysers (N°22) — trois rocs qui **montent** de 30 px (380 → 350 → 320 → 290), saut de
+roc en roc en montée, **260 px** bord à bord (255 px : sauts attentifs réussis 94 %, trop) ; chemin sûr par le
+creux (dalle, ruisseau 70 px, marche, ressaut de 90 px). Pilote auto **39,6 s**, **37,9 s** par les raccourcis,
+rivaux 0 chute. 40 essais : attentif **100 % / 0,25** ; pressé **85 % / 3,35** (N°21 : 80 % / 3,20 après revue :
+règle des classiques respectée à ±5 points, chutes ≥) ; points chauds pressés x≈3800, 4400, 4100 (l'Escalier).
+Raccourci : sauts réussis 46/52 attentif (88 %), 26/41 pressé (63 %) ; médianes attentives avec 38,9 s / sans
+40,4 s. Médailles **39,4 / 42,7 / 55,7 s** (attentif 38 / 78 / 100 % ; pressé 3 / 8 / 33 %), sans ⚠.
+check-levels : 0 erreur, 14 avertissements connus (N°10, 12–15), aucun nouveau non justifié. N°1–22
+inchangés (un bloc `LEVELS.push` et une palette ajoutés). `tools/e2e.mjs` : 1 échec **préexistant** (« N : N°4
+démarre », identique sur `aedda4b` sans le N°23). **Prochain niveau (N°24) : à mécaniques.**
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
