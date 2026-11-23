@@ -133,21 +133,22 @@ par profil (pilote du 23/10) :
 | 15 | 33,5 s *(exige les raccourcis)* | 36,2 s | 38,9 s | 40 % / 95 % / 98 % | 10 % / 20 % / 28 % |
 | 16 | 35,1 s *(exige les raccourcis)* | 38,1 s | 41,1 s | 23 % / 55 % / 85 % | 10 % / 28 % / 35 % |
 | 17 | 36,4 s *(exige les raccourcis)* | 39,4 s | 48,8 s | 33 % / 78 % / 98 % | 8 % / 13 % / 33 % |
-| 18 | 37,1 s *(exige les raccourcis)* | 40,1 s | 43,1 s | 43 % / 93 % / 98 % | 10 % / 23 % / 35 % |
+| 18 | 37,5 s *(exige Corniche + Séracs)* | 40,5 s | 43,5 s | 40 % / 93 % / 95 % | 13 % / 30 % / 33 % |
 | 19 | 38,0 s *(exige les raccourcis)* | 41,1 s | 45,9 s | 40 % / 88 % / 95 % | 8 % / 18 % / 33 % |
 | 20 | 47,2 s *(exige la Ligne des Braises)* | 51 s | 59,2 s | 33 % / 80 % / 100 % | 3 % / 8 % / 33 % |
 | 21 | 39 s *(exige les Plongeons)* | 42,5 s | 46,3 s | 35 % / 73 % / 88 % | 0 % / 10 % / 33 % |
-| 22 | 48,7 s *(exige la Voie des Souffleurs)* | 52,6 s | 56,5 s | 13 % / 65 % / 93 % | 3 % / 33 % / 45 % |
+| 22 | 49,2 s *(exige la Voie des Souffleurs)* | 53,2 s | 57,2 s | 33 % / 70 % / 88 % | 8 % / 30 % / 38 % |
 | 23 | 39,4 s *(exige les Sauts du Bélier)* | 42,7 s | 55,7 s | 38 % / 78 % / 100 % | 3 % / 8 % / 33 % |
 
 Le plancher auto × 1,03 l'emporte sur la fenêtre 30–50 % : sur les niveaux sans attente (temps
 attentifs groupés à moins de 3 % du pilote auto), l'or est atteint par 65–100 % des essais attentifs
-(N°4 et 9 : ≈ 100 %). Seuls N°6, 8, 10 et 13 (53 %) sont dans la fenêtre ou tout près. **N°22** (retouche 16/11) : le chemin sûr de la combe reprend les criques du N°20,
-le gain auto passe de 1,5 s à 2,7 s (auto 49,9 s, autoShort 47,2 s). L'or, à 48,7 s, a désormais 1,2 s
-de marge sous auto, mais reste à 13 % des essais attentifs : le 40e centile (~51 s) dépasserait auto
-(l'or doit rester strictement sous auto). Le bronze pressé reste à 45 %, hors fenêtre 30–35 %, parce
-que les écarts minimum forcent le bronze à 56,5 s et priment sur cette fenêtre. Les deux écarts sont
-notés dans `acceptedMedalWarnings`. Détails et tableau avant/après : LEVELS.md §8.
+(N°4 et 9 : ≈ 100 %). Seuls N°6, 8, 10 et 13 (53 %) sont dans la fenêtre ou tout près parmi les
+niveaux sans raccourci. **N°22** (retouches du 16/11) : le chemin sûr de la combe reprend les criques
+du N°20, puis la revue Boss a rendu les lancers de la Voie des Souffleurs plus tolérants et resserré
+le Chœur. Auto **49,8 s**, autoShort **47,2 s** (gain 2,6 s). L'or, à **49,2 s**, est atteint par
+**33 %** des essais attentifs (dans la fenêtre 30–50 %). Le bronze pressé reste à **38 %**, hors
+fenêtre 30–35 %, parce que les écarts minimum forcent le bronze à **57,2 s** et priment sur cette
+fenêtre ; seul cet écart reste dans `acceptedMedalWarnings`. Détails : LEVELS.md §8.
 
 ## Source de référence
 

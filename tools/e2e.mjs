@@ -103,8 +103,13 @@ ok(/Record/.test(await pg.locator('.level', { hasText: 'Sous-bois' }).innerText(
   await finishWithAuto(); await pg.evaluate(() => document.activeElement?.blur());
   await pg.keyboard.press('Enter'); await pg.waitForTimeout(150);
   s = await st(pg); ok(s.level === lv[2].id && s.mode === 'count', 'Entrée : N°3 démarre');
-  await finishWithAuto(); await pg.keyboard.press('KeyN'); await pg.waitForTimeout(150);
-  s = await st(pg); ok(s.level === lv[3].id, 'N : N°4 démarre');
+  await finishWithAuto();
+  // Attendre que l'écran d'arrivée (et son écouteur Entrée/N) soit monté :
+  // un KeyN immédiat est perdu (course avec le useEffect), d'où l'échec « N : N°4 démarre ».
+  await pg.locator('.sheet .next-level').waitFor({ state: 'visible' });
+  await pg.keyboard.press('KeyN');
+  await waitMode(pg, 'count', 3000).catch(() => {});
+  s = await st(pg); ok(s.level === lv[3].id && s.mode === 'count', 'N : N°4 démarre');
   await open(pg, lv.at(-1).name); await finishWithAuto();
   ok(!(await pg.locator('.sheet .next-level').count()) && /Dernier niveau/.test(await pg.locator('.sheet').innerText()), 'dernier niveau : pas de bouton, message « Dernier niveau »');
   await pg.keyboard.press('KeyN'); await pg.waitForTimeout(150);
