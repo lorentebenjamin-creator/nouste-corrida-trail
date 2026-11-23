@@ -2414,13 +2414,14 @@ LEVELS.push((() => {
 // NIVEAU 23 — Le Belvédère des Brebis Somnambules (routine du lundi 23/11)
 // Niveau CLASSIQUE (règle d'alternance, après le N°22 à mécaniques) — nouveauté : l'ESCALIER DES
 // NUAGES, six marches de rocher qui MONTENT au-dessus du vide (+40 px chacune, 440 → 200), de plus
-// en plus étroites (130 → 90 px), trous de 195 px (130 px pour la 1re) : jamais une montée aussi longue de saut en
-// saut (le N°6 montait par des passerelles et un ascenseur, les N°13/19/21 descendaient). Raccourci
+// en plus étroites (140 → 90 px, palier de repos au milieu), trous variés de 120 à 185 px (revue Boss 23/11 ; 195 px
+// partout à la création) : jamais une montée aussi longue de saut en saut (le N°6 montait par des passerelles et un ascenseur, les N°13/19/21 descendaient). Raccourci
 // risqué « SAUTS DU BÉLIER » (LEVELS.md §6 étape 3c), modèle distinct des Plongeons descendants du
 // N°21 et des lancers de geyser du N°22 : trois rocs qui MONTENT de 30 px (380 → 350 → 320 → 290) ;
 // on saute de roc en roc vers le haut (260 px bord à bord, en montée) ; le chemin sûr redescend
 // dans chaque creux et remonte par une marche puis un ressaut de 90 px sans élan.
 // Nouvelle palette `nuages` (lever de soleil sur une mer de nuages). Aucune mécanique.
+// Revue Boss 23/11 : petit défi de seconde moitié, le PAS DES BREBIS ENDORMIES (x≈12000–12725).
 // ---------------------------------------------------------------------
 LEVELS.push((() => {
   const id = "belvedere-brebis", c = v(id);
@@ -2430,9 +2431,9 @@ LEVELS.push((() => {
   c.arc(1940, 2120, 210, 3, 40); c.line(2380, 2520, 250, 2); c.arc(2560, 2740, 250, 3, 40);
   c.line(2800, 2960, 370, 3);
   // Escalier des Nuages : un arc par marche, sur la trajectoire montante
-  c.arc(3330, 3510, 330, 3, 40); c.arc(3590, 3835, 290, 3, 40); c.arc(3905, 4150, 250, 3, 40);
-  c.arc(4210, 4455, 210, 3, 40); c.arc(4505, 4750, 170, 3, 40); c.arc(4795, 5040, 130, 3, 40);
-  c.arc(5080, 5325, 90, 3, 40);
+  c.arc(3320, 3500, 330, 3, 40); c.arc(3600, 3795, 290, 3, 40); c.arc(3885, 4080, 250, 3, 40);
+  c.line(4100, 4230, 250, 2); c.arc(4250, 4455, 210, 3, 40); c.arc(4500, 4740, 170, 3, 40); c.arc(4780, 5020, 130, 3, 40);
+  c.arc(5060, 5280, 90, 3, 40);
   // Le Belvédère puis la descente
   c.line(5425, 5600, 130, 3); c.arc(5720, 5900, 150, 3, 40); c.arc(6010, 6190, 210, 3, 40);
   c.arc(6290, 6470, 270, 3, 40); c.arc(6570, 6750, 310, 3, 40); c.line(6800, 7100, 370, 3);
@@ -2444,7 +2445,9 @@ LEVELS.push((() => {
   c.arc(9660, 9830, 230, 3, 40); c.line(9900, 10200, 310, 3); c.arc(10300, 10460, 250, 3, 40);
   c.line(10500, 10600, 250, 2); c.arc(10910, 11080, 220, 3, 40); c.line(11100, 11400, 330, 3);
   c.arc(11450, 11620, 300, 3, 40);
-  c.line(11800, 12200, 370, 4); c.arc(12450, 12600, 310, 3, 40); c.line(13000, 13300, 370, 3);
+  c.line(11800, 11950, 370, 3);
+  // Pas des Brebis Endormies (revue Boss 23/11) : arcs au-dessus des deux trous
+  c.arc(11990, 12195, 320, 3, 40); c.arc(12265, 12470, 320, 3, 40); c.arc(12540, 12745, 320, 3, 40); c.line(13000, 13300, 370, 3);
   return {
     id, name: "Le Belvédère des Brebis Somnambules",
     blurb: "Au lever du soleil, grimpe l'escalier de rochers au-dessus de la mer de nuages : les brebis y dorment debout, toi tu cours.",
@@ -2458,19 +2461,22 @@ LEVELS.push((() => {
       p(2100, 480, 320), g(2210, 320),
       p(2720, 640, 440),
       // Passage clé : l'ESCALIER DES NUAGES — six marches de rocher qui MONTENT au-dessus du vide
-      // (+40 px chacune, 440 → 200), de plus en plus étroites (130 → 90 px), trous de 195 px (130 px
-      // pour la 1re ; la règle « montée 40 → écart ≤ 130 » est dépassée exprès : acceptedWarnings).
-      // On monte d'un seul élan, saut complet ; sur 90 px on ne tient que 0,26 s à pleine vitesse.
-      // Mise au point : trous de 130 px (marches 160 → 90) → 0 chute pressée dans l'escalier (on monte
-      // trop facilement) ; 160 px → 95 % / 2,0 ; 180 px → 88 % / 2,55 ; 195 px → 85 % / 3,35 (≥ N°21).
-      p(3490, 130, 400),
-      p(3815, 120, 360),
-      p(4130, 110, 320),
+      // (+40 px chacune, 440 → 200), de plus en plus étroites (140 → 90 px, la 3e élargie en PALIER DE
+      // REPOS de 205 px). Revue Boss 23/11 : trous VARIÉS 120 (1re) / 155 / 165 / 170 / 185 / 185, puis 170
+      // à plat vers le Belvédère, au lieu de 195 partout (la règle « montée 40 → écart ≤ 130 » est
+      // dépassée exprès : acceptedWarnings). Avant : pressé 85 % / 3,35 chutes, presque toutes ici
+      // (points chauds x≈3800/4100/4400) et bronze 55,7 s = 1,41 × auto. Après : 93 % / 2,52, dont 1,07
+      // dans l'escalier ; le reste est réparti (Pas des Brebis Endormies en fin de sentier).
+      // Mise au point (pressé, 40 essais) : 130/170/170/170/195/195/195 → 3,05 ; 155/165/170/195/195/170 →
+      // 3,00 ; 185/185 sur les deux dernières marches → 2,70 ; 1re marche avancée (trou 120) → 2,52.
+      p(3480, 140, 400),
+      p(3775, 120, 360),
+      p(4060, 205, 320),   // palier de repos (revue Boss 23/11)
       p(4435, 100, 280),
-      p(4730, 95, 240),
-      p(5020, 90, 200),
+      p(4720, 95, 240),
+      p(5000, 90, 200),
       // Le Belvédère (sommet, au-dessus des nuages)
-      p(5305, 435, 200),
+      p(5260, 480, 200),
       // Descente vers l'estive : trois vires étroites qui dégringolent sous le belvédère
       p(5880, 150, 290),
       p(6170, 140, 350),
@@ -2493,7 +2499,12 @@ LEVELS.push((() => {
       p(9810, 500, 380),
       p(10440, 480, 320),
       p(11060, 400, 400),
-      p(11600, 2200, 440), h(12500, 440),
+      p(11600, 400, 440), h(11700, 440),
+      // Le PAS DES BREBIS ENDORMIES (revue Boss 23/11, petit défi de seconde moitié) : deux rocs
+      // étroits (100 px) à plat au-dessus du vide, trous de 175 px — saut complet, sans montée.
+      p(12175, 100, 440),
+      p(12450, 100, 440),
+      p(12725, 1075, 440),
     ],
     hazards: [
       _(440, 64, 440),
@@ -2515,20 +2526,21 @@ LEVELS.push((() => {
     checkpoints: [y(id, 2740, 440, 1), y(id, 5325, 200, 2), y(id, 7290, 440, 3), y(id, 9830, 380, 4), y(id, 11620, 440, 5)],
     finishX: 13400,
     rivals: [{ speed: 1.0 }, { speed: 0.93 }, { speed: 0.86 }],
-    medals: { auto: 39.6, autoShort: 37.9, gold: 39.4, silver: 42.7, bronze: 55.7 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 38 %, argent 78 %, bronze 100 % ; pressés : or 3 %, argent 8 %, bronze 33 %)
+    medals: { auto: 39.6, autoShort: 37.9, gold: 39.1, silver: 42.3, bronze: 45.5 }, // tools/medals.mjs --calibrate (40 essais attentifs : or 40 %, argent 85 %, bronze 93 % ; pressés : or 3 %, argent 13 %, bronze 33 %)
     // Avertissements de check-levels examinés et acceptés (LEVELS.md §6b) :
     acceptedWarnings: [
-      { match: "ground@3490→ground@3815: écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@3490→ground@3815: montée 40 px avec écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@3815→ground@4130: écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@3815→ground@4130: montée 40 px avec écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@4130→ground@4435: écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@4130→ground@4435: montée 40 px avec écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@4435→ground@4730: écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@4435→ground@4730: montée 40 px avec écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@4730→ground@5020: écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@4730→ground@5020: montée 40 px avec écart 195 px", reason: "Escalier des Nuages (passage clé) : trou de 195 px en montée de 40 px voulu — c'est la difficulté du sentier (pressé 85 % / 3,35 chutes, ≥ N°21) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,25 (40 essais)." },
-      { match: "ground@5020→ground@5305: écart 195 px", reason: "Dernier trou de l'Escalier des Nuages, vers le Belvédère (à plat) : 195 px comme les autres marches (avec 160 px, pressé 3,08 chutes < N°21) ; rivaux 0 chute." },
+      { match: "ground@3480→ground@3775: montée 40 px avec écart 155 px", reason: "Escalier des Nuages (passage clé, revue Boss 23/11) : trous variés en montée de 40 px (155 / 165 / 170 / 185 / 185, puis 170 à plat vers le Belvédère) au lieu de 195 partout — difficulté voulue mais moins concentrée (pressé 93 % / 2,52 chutes, dont 1,07 dans l'escalier, contre 3,35 avant) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,15 (40 essais)." },
+      { match: "ground@3775→ground@4060: montée 40 px avec écart 165 px", reason: "Escalier des Nuages (passage clé, revue Boss 23/11) : trous variés en montée de 40 px (155 / 165 / 170 / 185 / 185, puis 170 à plat vers le Belvédère) au lieu de 195 partout — difficulté voulue mais moins concentrée (pressé 93 % / 2,52 chutes, dont 1,07 dans l'escalier, contre 3,35 avant) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,15 (40 essais)." },
+      { match: "ground@4060→ground@4435: écart 170 px", reason: "Escalier des Nuages (passage clé, revue Boss 23/11) : trous variés en montée de 40 px (155 / 165 / 170 / 185 / 185, puis 170 à plat vers le Belvédère) au lieu de 195 partout — difficulté voulue mais moins concentrée (pressé 93 % / 2,52 chutes, dont 1,07 dans l'escalier, contre 3,35 avant) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,15 (40 essais)." },
+      { match: "ground@4060→ground@4435: montée 40 px avec écart 170 px", reason: "Escalier des Nuages (passage clé, revue Boss 23/11) : trous variés en montée de 40 px (155 / 165 / 170 / 185 / 185, puis 170 à plat vers le Belvédère) au lieu de 195 partout — difficulté voulue mais moins concentrée (pressé 93 % / 2,52 chutes, dont 1,07 dans l'escalier, contre 3,35 avant) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,15 (40 essais)." },
+      { match: "ground@4435→ground@4720: écart 185 px", reason: "Escalier des Nuages (passage clé, revue Boss 23/11) : trous variés en montée de 40 px (155 / 165 / 170 / 185 / 185, puis 170 à plat vers le Belvédère) au lieu de 195 partout — difficulté voulue mais moins concentrée (pressé 93 % / 2,52 chutes, dont 1,07 dans l'escalier, contre 3,35 avant) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,15 (40 essais)." },
+      { match: "ground@4435→ground@4720: montée 40 px avec écart 185 px", reason: "Escalier des Nuages (passage clé, revue Boss 23/11) : trous variés en montée de 40 px (155 / 165 / 170 / 185 / 185, puis 170 à plat vers le Belvédère) au lieu de 195 partout — difficulté voulue mais moins concentrée (pressé 93 % / 2,52 chutes, dont 1,07 dans l'escalier, contre 3,35 avant) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,15 (40 essais)." },
+      { match: "ground@4720→ground@5000: écart 185 px", reason: "Escalier des Nuages (passage clé, revue Boss 23/11) : trous variés en montée de 40 px (155 / 165 / 170 / 185 / 185, puis 170 à plat vers le Belvédère) au lieu de 195 partout — difficulté voulue mais moins concentrée (pressé 93 % / 2,52 chutes, dont 1,07 dans l'escalier, contre 3,35 avant) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,15 (40 essais)." },
+      { match: "ground@4720→ground@5000: montée 40 px avec écart 185 px", reason: "Escalier des Nuages (passage clé, revue Boss 23/11) : trous variés en montée de 40 px (155 / 165 / 170 / 185 / 185, puis 170 à plat vers le Belvédère) au lieu de 195 partout — difficulté voulue mais moins concentrée (pressé 93 % / 2,52 chutes, dont 1,07 dans l'escalier, contre 3,35 avant) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,15 (40 essais)." },
+      { match: "ground@5000→ground@5260: écart 170 px", reason: "Escalier des Nuages (passage clé, revue Boss 23/11) : trous variés en montée de 40 px (155 / 165 / 170 / 185 / 185, puis 170 à plat vers le Belvédère) au lieu de 195 partout — difficulté voulue mais moins concentrée (pressé 93 % / 2,52 chutes, dont 1,07 dans l'escalier, contre 3,35 avant) ; pilote auto et rivaux 0 chute, attentif 100 % / 0,15 (40 essais)." },
+      { match: "ground@11600→ground@12175: écart 175 px", reason: "Pas des Brebis Endormies (revue Boss 23/11, petit défi de seconde moitié) : deux rocs de 100 px à plat, trous de 175 px (saut complet, sans montée) ; pilote auto et rivaux 0 chute ; pressé ≈ 0,2 chute par essai ici." },
+      { match: "ground@12175→ground@12450: écart 175 px", reason: "Pas des Brebis Endormies (revue Boss 23/11, petit défi de seconde moitié) : deux rocs de 100 px à plat, trous de 175 px (saut complet, sans montée) ; pilote auto et rivaux 0 chute ; pressé ≈ 0,2 chute par essai ici." },
+      { match: "ground@12450→ground@12725: écart 175 px", reason: "Pas des Brebis Endormies (revue Boss 23/11, petit défi de seconde moitié) : deux rocs de 100 px à plat, trous de 175 px (saut complet, sans montée) ; pilote auto et rivaux 0 chute ; pressé ≈ 0,2 chute par essai ici." },
       { match: "ground@8375→ground@8420: marche montante sans trou (90 px)", reason: "Marche voulue du chemin sûr des Sauts du Bélier (ressaut sur place) — c'est le temps que fait gagner le raccourci (shortcuts) ; pilote auto et rivaux 0 chute au playtest." },
       { match: "ground@8785→ground@8830: marche montante sans trou (90 px)", reason: "Marche voulue du chemin sûr des Sauts du Bélier (ressaut sur place) — c'est le temps que fait gagner le raccourci (shortcuts) ; pilote auto et rivaux 0 chute au playtest." },
       { match: "ground@9195→ground@9240: marche montante sans trou (90 px)", reason: "Marche voulue du chemin sûr des Sauts du Bélier (ressaut sur place) — c'est le temps que fait gagner le raccourci (shortcuts) ; pilote auto et rivaux 0 chute au playtest." },

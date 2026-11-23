@@ -35,7 +35,7 @@ de son auteur, pour pouvoir l'héberger soi-même et ajouter des sentiers.
 | 20 | La Coulée des Salamandres Pressées | Bien engagé | 1600 m | mécanique inédite : les **croûtes de lave** — dalles qui se fissurent et s'effondrent `delay` s après que tu t'y poses (chacun la sienne) ; annoncées par un panneau « Croûte de lave : ne t'arrête pas ! » relevé au-dessus du peloton, veines jaunes, tremblement, braises et **chevrons d'approche** ; passage clé : le **Gué des Salamandres** (quatre croûtes 300 px / 0,7 s, revue 3/11) ; puis la **Ligne des Braises** : chemin sûr par six fossés lents, ou **raccourci risqué** de croûte en croûte (200 px) — l'or l'exige (≥ 1,5 s de gain attentif) ; nouvelle palette **volcan** |
 | 21 | Le Mélézin des Écureuils Distraits | Haute futaie | 1330 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) dans un **mélézin d'automne** (palette `melezes` + `melezeGrove`, revue 9/11) ; passage clé : les **Souches de l'Écureuil**, six souches **110→80 px**, trous **200 px**, dents de scie **40 px** (revue 9/11), panneau « Souches étroites : ne t'arrête pas » ; puis les **Plongeons de l'Écureuil** : chemin sûr par trois ravines (dalle, ruisseau, ressaut), ou **raccourci risqué** en plongeant de vire en vire **en descente** (280 px, −40 px à chaque fois) — l'or l'exige |
 | 22 | Les Sources des Bouquetins Ébouillantés | Bien engagé | 1520 m | mécanique inédite : les **geysers** — attends le souffle, il t'envoie plus haut et plus loin qu'un saut (apogée ≈ 231 px, portée ≈ 378–432 px) ; annoncés par un panneau « Geyser : attends le souffle », un bassin turquoise, de la vapeur puis le jet ; passage clé : le **Chœur des Bouquetins** (trois jets enchaînés, phases décalées) ; puis la **Voie des Souffleurs** : chemin sûr par la combe (étagères et fossés), ou **raccourci risqué** de geyser en geyser sur des évents perchés — l'or l'exige ; nouvelle palette **thermes** |
-| 23 | Le Belvédère des Brebis Somnambules *(niveau du jour)* | Mer de nuages | 1340 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur un **balcon d'estive au lever du soleil, au-dessus d'une mer de nuages** (nouvelle palette `nuages`) ; passage clé : l'**Escalier des Nuages**, six marches de rocher qui **montent** au-dessus du vide (+40 px chacune, de 440 à 200), de plus en plus étroites (130 → 90 px), trous de 195 px — première longue montée de saut en saut (panneau « Escalier des nuages / monte sans t'arrêter ») ; raccourci risqué « **Sauts du Bélier** » (×3) : trois rocs qui **montent** de 30 px, saut de roc en roc en montée (260 px bord à bord) — modèle distinct des Plongeons descendants du N°21 et des geysers du N°22 ; le chemin sûr redescend dans chaque creux et remonte par un ressaut de 90 px ; l'or exige les raccourcis |
+| 23 | Le Belvédère des Brebis Somnambules *(niveau du jour)* | Mer de nuages | 1340 m | sentier **classique** (règle d'alternance, modèle N°4, aucune mécanique) sur un **balcon d'estive au lever du soleil, au-dessus d'une mer de nuages** (nouvelle palette `nuages`) ; passage clé : l'**Escalier des Nuages**, six marches de rocher qui **montent** au-dessus du vide (+40 px chacune, de 440 à 200), de plus en plus étroites (140 → 90 px) avec un palier de repos au milieu, trous variés de 120 à 185 px (revue Boss 23/11 ; 195 px partout à la création) — première longue montée de saut en saut (panneau « Escalier des nuages / monte sans t'arrêter ») ; raccourci risqué « **Sauts du Bélier** » (×3) : trois rocs qui **montent** de 30 px, saut de roc en roc en montée (260 px bord à bord) — modèle distinct des Plongeons descendants du N°21 et des geysers du N°22 ; le chemin sûr redescend dans chaque creux et remonte par un ressaut de 90 px ; l'or exige les raccourcis ; petit défi de fin de sentier, le **Pas des Brebis Endormies** (deux rocs de 100 px à plat, trous de 175 px) |
 
 Règle : **chaque nouveau sentier apporte au moins une nouveauté** (une mécanique inédite ou un
 passage clé jamais vu) et la colonne ci-dessus dit laquelle (voir LEVELS.md §6).
@@ -74,7 +74,7 @@ ceux des revues précédentes (20/22 oct., fenêtre tronquée), **ne pas les com
 | 20 | 100 % / 0,03 | 93 % / 2,70 |
 | 21 | 100 % / 0,10 | 83 % / 2,45 |
 | 22 | 100 % / 0,13 | 98 % / 1,50 |
-| 23 | 100 % / 0,25 | 85 % / 3,35 |
+| 23 | 100 % / 0,15 | 93 % / 2,52 |
 
 Détails et méthode : LEVELS.md §8. N°12 (mottes plongeantes) : pressé 95 % / 2,45 sur 40 essais
 (graines 1–40), 85 % / 2,60 sur 40 autres (graines 41–80) soit 90 % / 2,53 sur 80 ; N°10 : 95 % / 1,98
@@ -138,7 +138,7 @@ par profil (pilote du 23/10) :
 | 20 | 47,2 s *(exige la Ligne des Braises)* | 51 s | 59,2 s | 33 % / 80 % / 100 % | 3 % / 8 % / 33 % |
 | 21 | 39 s *(exige les Plongeons)* | 42,5 s | 46,3 s | 35 % / 73 % / 88 % | 0 % / 10 % / 33 % |
 | 22 | 49,2 s *(exige la Voie des Souffleurs)* | 53,2 s | 57,2 s | 33 % / 70 % / 88 % | 8 % / 30 % / 38 % |
-| 23 | 39,4 s *(exige les Sauts du Bélier)* | 42,7 s | 55,7 s | 38 % / 78 % / 100 % | 3 % / 8 % / 33 % |
+| 23 | 39,1 s *(exige les Sauts du Bélier)* | 42,3 s | 45,5 s | 40 % / 85 % / 93 % | 3 % / 13 % / 33 % |
 
 Le plancher auto × 1,03 l'emporte sur la fenêtre 30–50 % : sur les niveaux sans attente (temps
 attentifs groupés à moins de 3 % du pilote auto), l'or est atteint par 65–100 % des essais attentifs

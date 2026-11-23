@@ -928,7 +928,7 @@ reste, à traiter au prochain passage sur ce sentier (ou via `acceptedWarnings` 
 | 20 | La Coulée des Salamandres Pressées | Bien engagé | 1600 m | 26 croûtes (Gué, escalier, plongeons, Ligne des Braises ×6, pont) | 3 | **26 croûtes de lave** (mécanique v9) ; **Gué des Salamandres** (revue 3/11 : 300 px / 0,7 s) ; **Ligne des Braises**, 6 raccourcis sur croûtes 200 px ; 3 panneaux | 1 / 0.93 / 0.86 | 47,3 s (chemin sûr) ; 45,2 s par les raccourcis |
 | 21 | Le Mélézin des Écureuils Distraits | Haute futaie | 1330 m | 23 (dont 7 trous des Souches, 3 ravines des Plongeons) | 5 | — (classique ; passage clé : les **Souches de l'Écureuil**, 6 souches de 110 → 80 px, trous de 160 px ; **Plongeons de l'Écureuil**, 3 raccourcis risqués en descente ; 2 panneaux) | 1 / 0.93 / 0.86 | 39,3 s (chemin sûr) ; 37,8 s par les raccourcis |
 | 22 | Les Sources des Bouquetins Ébouillantés | Bien engagé | 1520 m | 8 geysers (apprentissage, ravin, Chœur ×3, Voie des Souffleurs ×3) | 4 | **8 geysers** (mécanique v10) ; **Chœur des Bouquetins** (3 jets enchaînés) ; **Voie des Souffleurs**, 4 raccourcis (1 saut + 3 `kind: "geyser"`) ; 4 panneaux | 1 / 0.93 / 0.86 | 49,8 s (chemin sûr) ; 47,2 s par les raccourcis |
-| 23 | Le Belvédère des Brebis Somnambules | Mer de nuages | 1340 m | 24 (dont 7 trous de l'Escalier, 3 ruisseaux des Sauts) | 5 | — (classique ; passage clé : l'**Escalier des Nuages**, 6 marches qui montent de 40 px, 130 → 90 px, trous de 195 px ; **Sauts du Bélier**, 3 raccourcis risqués en montée ; 2 panneaux) | 1 / 0.93 / 0.86 | 39,6 s (chemin sûr) ; 37,9 s par les raccourcis |
+| 23 | Le Belvédère des Brebis Somnambules | Mer de nuages | 1340 m | 27 (dont 7 trous de l'Escalier, 3 ruisseaux des Sauts, 3 du Pas des Brebis) | 5 | — (classique ; passage clé : l'**Escalier des Nuages**, 6 marches qui montent de 40 px, 140 → 90 px avec palier de repos, trous variés 120–185 px (revue Boss 23/11) ; **Sauts du Bélier**, 3 raccourcis risqués en montée ; **Pas des Brebis Endormies**, 2 rocs de 100 px, trous de 175 px ; 2 panneaux) | 1 / 0.93 / 0.86 | 39,6 s (chemin sûr) ; 37,9 s par les raccourcis |
 
 Médailles **calibrées le 21/10** (N°11 : le 22/10 ; argent des N°4, 5, 6, 7, 9 recalibré le 22/10 ; N°1–4, 9, 12 : le 23/10, règle argent ≥ or × 1,08)
 (`tools/medals.mjs --calibrate --trials 40`, §6 étape 5b) ; pourcentages ci-dessous sur 20 essais
@@ -958,7 +958,7 @@ par profil (essais ratés comptés sans médaille), sauf N°4, 5, 6, 7, 9 et 11 
 | 20 | La Coulée des Salamandres Pressées | 47,3 s *(raccourcis : 45,2 s)* | 47,2 s *(exige la Ligne des Braises)* | 51 s | 59,2 s | 33 % / 80 % / 100 % | 3 % / 8 % / 33 % |
 | 21 | Le Mélézin des Écureuils Distraits | 39,3 s *(raccourcis : 37,8 s)* | 39 s *(exige les Plongeons)* | 42,5 s | 46,3 s | 35 % / 73 % / 88 % | 0 % / 10 % / 33 % |
 | 22 | Les Sources des Bouquetins Ébouillantés | 49,8 s *(raccourcis : 47,2 s)* | 49,2 s *(exige la Voie des Souffleurs)* | 53,2 s | 57,2 s | 33 % / 70 % / 88 % | 8 % / 30 % / 38 % |
-| 23 | Le Belvédère des Brebis Somnambules | 39,6 s *(raccourcis : 37,9 s)* | 39,4 s *(exige les Sauts du Bélier)* | 42,7 s | 55,7 s | 38 % / 78 % / 100 % | 3 % / 8 % / 33 % |
+| 23 | Le Belvédère des Brebis Somnambules | 39,6 s *(raccourcis : 37,9 s)* | 39,1 s *(exige les Sauts du Bélier)* | 42,3 s | 45,5 s | 40 % / 85 % / 93 % | 3 % / 13 % / 33 % |
 
 **Tableau à jour au 24/10** (40 essais par profil pour tous les niveaux, pilote du 23/10). Recalibrage
 du 24/10 (règle **or ≥ auto × 1,03**, cible or attentif 30–50 %) : N°1–7, 9, 11, 12, 13. Les N°8 et 10
@@ -1287,6 +1287,26 @@ Raccourci : sauts réussis 46/52 attentif (88 %), 26/41 pressé (63 %) ; médian
 check-levels : 0 erreur, 14 avertissements connus (N°10, 12–15), aucun nouveau non justifié. N°1–22
 inchangés (un bloc `LEVELS.push` et une palette ajoutés). `tools/e2e.mjs` : 1 échec **préexistant** (« N : N°4
 démarre », identique sur `aedda4b` sans le N°23). **Prochain niveau (N°24) : à mécaniques.**
+
+**Revue Boss Bot 23/11 (N°23, branche `revue-23-boss`)** : toute la difficulté était concentrée dans
+l'Escalier des Nuages (pressé 85 % / 3,35 chutes, points chauds x≈3800 / 4400 / 4100 ; attentif 0,25), d'où un
+bronze à **55,7 s = 1,41 × auto** (N°21 : 1,18) et 13 s entre argent et bronze. Retouches :
+1. **Escalier** (identité gardée : six marches qui montent de 40 px au-dessus du vide jusqu'au Belvédère) :
+   trous **variés** 120 (1re, marche avancée de 3490 à 3480 et élargie à 140 px) / 155 / 165 / 170 / **185 / 185**
+   (les deux dernières marches) puis 170 à plat vers le Belvédère (avancé de 5305 à 5260), au lieu de 195 partout ;
+   3e marche élargie en **palier de repos** (205 px). Mise au point (pressé, 40 essais) : 130/170/170/170/195/195/195
+   → 3,05 ; 155/165/170/195/195/170 → 3,00 ; 185/185 → 2,70 ; 1re marche avancée → **2,52**. Avec 195 px sur les
+   deux dernières marches comme proposé, la cible ≈ 2,5 n'était pas atteinte : 185 px retenus.
+2. **Petit défi de seconde moitié** : le **Pas des Brebis Endormies** (x≈12000–12725, après le fanion 5) —
+   deux rocs de 100 px à plat au-dessus du vide, trous de 175 px (185 px essayés : 2,63 chutes, défi plus dur
+   sans gain ; 175 retenus) ; rocher de la dernière ligne droite déplacé de 12500 à 11700.
+3. **Résultats** (40 essais) : pilote auto 39,6 s, 37,9 s par les raccourcis (inchangés), rivaux 0 chute ;
+   attentif **100 % / 0,15** ; pressé **93 % / 2,52** (dont 1,07 dans l'escalier, 0,78 en seconde moitié ;
+   points chauds x≈3500 / 900 / 3700, plus de pic dominant). La réussite pressée monte à 93 % (cible ≈ 85 %
+   manquée de 8 points) : les chutes sont réparties sur plus d'essais, moins d'essais dépassent 5 chutes.
+   Médailles recalibrées **39,4 / 42,7 / 55,7 → 39,1 / 42,3 / 45,5 s** (bronze **1,15 × auto**, écart argent→bronze
+   3,2 s) ; attentif 40 / 85 / 93 % ; pressé 3 / 13 / 33 %, sans ⚠. Avertissements « écart / montée 40 avec
+   écart » du nouvel escalier et du Pas des Brebis acceptés (`acceptedWarnings`). N°1–22 inchangés.
 
 ### Pilote « humain » (`tools/playtest.mjs --human`)
 
